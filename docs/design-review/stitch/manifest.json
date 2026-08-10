@@ -1,0 +1,92 @@
+[
+  {
+    "file": "HOME-01-desktop",
+    "title": "首页总览 (桌面最终版)",
+    "sid": "5579c875f5054f68800326176a6b00ee",
+    "width": "2560",
+    "height": "2222",
+    "htmlSize": 29655,
+    "pngSize": 74019
+  },
+  {
+    "file": "HOME-01-desktop-v1",
+    "title": "首页总览 (桌面端 v1)",
+    "sid": "f1316b3ee6bf4cd89eee834cdf93a6e4",
+    "width": "2560",
+    "height": "2222",
+    "htmlSize": 29523,
+    "pngSize": 73725
+  },
+  {
+    "file": "PORT-02-desktop",
+    "title": "标的/持仓详情",
+    "sid": "0c926919c88041bd80219180ef42e14a",
+    "width": "2560",
+    "height": "2048",
+    "htmlSize": 22377,
+    "pngSize": 51257
+  },
+  {
+    "file": "TX-01-desktop",
+    "title": "交易流水",
+    "sid": "d66c3da645db4f43a89e3f39f4b3f246",
+    "width": "2560",
+    "height": "2048",
+    "htmlSize": 24995,
+    "pngSize": 56616
+  },
+  {
+    "file": "ACC-01-desktop",
+    "title": "账户与对账",
+    "sid": "327a2aa2e5ef4afeae3c4eac1f6f3239",
+    "width": "2560",
+    "height": "2552",
+    "htmlSize": 27300,
+    "pngSize": 73158
+  },
+  {
+    "file": "CHAT-01-desktop",
+    "title": "助手对话",
+    "sid": "f91104e1759e4cbe990de22531464a0c",
+    "width": "2560",
+    "height": "2048",
+    "htmlSize": 28255,
+    "pngSize": 61501
+  },
+  {
+    "file": "LIB-01-desktop",
+    "title": "研究与报告库",
+    "sid": "17ff49322fcc4366a3526cbbd7d271b6",
+    "width": "2560",
+    "height": "2450",
+    "htmlSize": 27324,
+    "pngSize": 91788
+  },
+  {
+    "file": "REP-01-desktop",
+    "title": "开市前报告",
+    "sid": "abf554c475134d59b970b1ea949a99fd",
+    "width": "2560",
+    "height": "3246",
+    "htmlSize": 26214,
+    "pngSize": 57142
+  },
+  {
+    "file": "DATA-01-desktop",
+    "title": "数据状态中心",
+    "sid": "84f4756168124e21a6ade3cc3f8a9fee",
+    "width": "2560",
+    "height": "2622",
+    "htmlSize": 27813,
+    "pngSize": 73208
+  },
+  {
+    "file": "SET-01-desktop",
+    "title": "风险与投资约束",
+    "sid": "793fb028092b48ad89292de627de5723",
+    "width": "2560",
+    "height": "2256",
+    "htmlSize": 22521,
+    "pngSize": 69430
+  }
+]

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WWS Adviser 研究与报告库</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..700&amp;family=Noto+Sans+SC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#d2daf0",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#e9edff",
+                    "on-background": "#141b2c",
+                    "outline": "#747685",
+                    "secondary-fixed-dim": "#c2c6d3",
+                    "on-tertiary-fixed-variant": "#444749",
+                    "risk-critical": "#C11574",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f9f9ff",
+                    "on-primary-fixed-variant": "#0038b6",
+                    "on-surface-variant": "#444654",
+                    "inverse-surface": "#293041",
+                    "canvas": "#F5F7FA",
+                    "surface": "#FFFFFF",
+                    "on-surface": "#141b2c",
+                    "primary-container": "#3157d5",
+                    "on-secondary-fixed": "#171c25",
+                    "surface-tint": "#2c53d1",
+                    "border-default": "#E4E7EC",
+                    "inverse-primary": "#b7c4ff",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-container": "#606365",
+                    "tertiary-fixed": "#e0e3e5",
+                    "surface-container-low": "#f1f3ff",
+                    "market-up": "#D92D20",
+                    "on-primary-fixed": "#001452",
+                    "primary": "#063cbc",
+                    "secondary-container": "#dee2ef",
+                    "secondary": "#5a5e69",
+                    "on-secondary-container": "#60646f",
+                    "tertiary": "#484b4d",
+                    "on-secondary-fixed-variant": "#424751",
+                    "surface-container-high": "#e0e8ff",
+                    "risk-warning": "#DC6803",
+                    "on-tertiary-fixed": "#191c1e",
+                    "surface-container-highest": "#dbe2f9",
+                    "primary-fixed": "#dde1ff",
+                    "on-primary-container": "#d8ddff",
+                    "error": "#ba1a1a",
+                    "background": "#f9f9ff",
+                    "primary-fixed-dim": "#b7c4ff",
+                    "tertiary-fixed-dim": "#c4c7c9",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-container": "#dde0e1",
+                    "on-error-container": "#93000a",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "market-down": "#079455",
+                    "surface-variant": "#dbe2f9",
+                    "secondary-fixed": "#dee2ef",
+                    "inverse-on-surface": "#edf0ff",
+                    "outline-variant": "#c4c5d6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter-mobile": "12px",
+                    "space-sm": "8px",
+                    "space-md": "12px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "space-2xl": "32px",
+                    "space-xs": "4px",
+                    "space-xl": "24px",
+                    "space-lg": "16px"
+            },
+            "fontFamily": {
+                    "caption": ["Inter", "Noto Sans SC"],
+                    "micro-badge": ["Inter", "Noto Sans SC"],
+                    "body-md": ["Inter", "Noto Sans SC"],
+                    "headline-h2": ["Inter", "Noto Sans SC"],
+                    "display-lg": ["Inter", "Noto Sans SC"],
+                    "label-sm": ["Inter", "Noto Sans SC"],
+                    "headline-h1": ["Inter", "Noto Sans SC"],
+                    "body-lg": ["Inter", "Noto Sans SC"],
+                    "headline-h3": ["Inter", "Noto Sans SC"]
+            },
+            "fontSize": {
+                    "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                    "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                    "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', 'Noto Sans SC', sans-serif; background-color: #F5F7FA; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c4c5d6; border-radius: 2px; }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-full w-[224px] fixed left-0 top-0 bg-surface-container-low border-r border-border-default flex flex-col py-space-xl z-20">
+<div class="px-space-lg mb-space-2xl">
+<h1 class="font-headline-h3 text-headline-h3 text-primary tracking-tight">WWS Adviser</h1>
+<p class="font-label-sm text-label-sm font-semibold text-secondary">Terminal v2.4</p>
+</div>
+<nav class="flex-1 space-y-unit">
+<a class="flex items-center px-space-lg py-space-md text-on-secondary-fixed-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined mr-space-md">home</span>
+<span class="font-label-sm text-label-sm font-semibold">首页</span>
+</a>
+<a class="flex items-center px-space-lg py-space-md text-on-secondary-fixed-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined mr-space-md">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm font-semibold">持仓</span>
+</a>
+<a class="flex items-center px-space-lg py-space-md text-on-secondary-fixed-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined mr-space-md">smart_toy</span>
+<span class="font-label-sm text-label-sm font-semibold">助手</span>
+</a>
+<a class="flex items-center px-space-lg py-space-md text-primary font-bold border-r-2 border-primary bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined mr-space-md">analytics</span>
+<span class="font-label-sm text-label-sm font-semibold">研究</span>
+</a>
+<a class="flex items-center px-space-lg py-space-md text-on-secondary-fixed-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined mr-space-md">settings</span>
+<span class="font-label-sm text-label-sm font-semibold">设置</span>
+</a>
+</nav>
+<div class="px-space-lg mt-auto">
+<div class="p-space-md rounded-lg bg-surface-container-highest/50 border border-outline-variant/30">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<span class="w-2 h-2 rounded-full bg-market-down animate-pulse"></span>
+<span class="font-micro-badge text-micro-badge text-secondary">系统状态: 极佳</span>
+</div>
+<p class="font-caption text-caption text-secondary">API 延迟: 14ms</p>
+</div>
+</div>
+</aside>
+<!-- TopNavBar (Shared Component) -->
+<header class="h-[64px] fixed top-0 right-0 left-[224px] bg-surface border-b border-border-default flex justify-between items-center px-space-xl z-10">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-1.5 bg-surface-container-low border border-border-default rounded-lg font-body-md text-body-md focus:outline-none focus:border-primary transition-all" placeholder="搜索报告、研报关键字或任务..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-space-xl">
+<button class="relative p-2 hover:bg-surface-container-low rounded-full transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-market-up rounded-full border border-surface"></span>
+</button>
+<div class="flex items-center gap-space-md pl-space-xl border-l border-border-default">
+<div class="text-right">
+<p class="font-label-sm text-label-sm font-bold text-on-surface">分析师 (ID: 9527)</p>
+<p class="font-caption text-caption text-secondary">高级研究员</p>
+</div>
+<img class="w-10 h-10 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a corporate financial analyst in a light grey suit, positioned against a minimalist architectural background. High-key lighting emphasizes clarity and institutional trust, adhering to a professional modern aesthetic with clean lines and a focused expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU6tG8yFYsZFqsYY-cx9kmCAl6rwT134pUhuUFi8U4Xrc8_0qJNhu4YhU6ktJDSb-QxSXZ77YFL2Pe1GUhhYxts_wsvNpwH7DOxjAyOGdcBub0qljLqVyBWcSShrOPkhon0h9FOl2lYEHEl0Fq1kXqH8Ob55ve1fAtBK-Z5M1uHD7MAewtsPG3Dxed0yJmBSQ10xaaBsztPbRvNZ_nLcC6mIrbu1nJJb_2LQnUKeG6L5fhRxZ-cEnXx9hcsnQCla7XzAfrJ_4VBxAJ"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[224px] pt-[64px] min-h-screen bg-canvas">
+<div class="max-w-[1400px] mx-auto p-space-xl grid grid-cols-12 gap-space-xl">
+<!-- Left Sidebar: Classification & Filters -->
+<aside class="col-span-3 space-y-space-xl">
+<!-- Classification Card -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<h2 class="font-headline-h3 text-headline-h3 mb-space-lg flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary">folder_open</span>
+                        报告分类
+                    </h2>
+<ul class="space-y-unit">
+<li>
+<button class="w-full flex items-center justify-between p-space-md rounded-lg bg-primary-container text-on-primary-container font-label-sm text-label-sm">
+<span>全部报告</span>
+<span class="bg-primary/20 px-2 py-0.5 rounded-full text-[11px]">1,284</span>
+</button>
+</li>
+<li>
+<button class="w-full flex items-center justify-between p-space-md rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-all font-label-sm text-label-sm">
+<span>开市前研报 (Morning Call)</span>
+<span class="text-outline text-[11px]">24</span>
+</button>
+</li>
+<li>
+<button class="w-full flex items-center justify-between p-space-md rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-all font-label-sm text-label-sm">
+<span>收市后回顾</span>
+<span class="text-outline text-[11px]">32</span>
+</button>
+</li>
+<li>
+<button class="w-full flex items-center justify-between p-space-md rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-all font-label-sm text-label-sm">
+<span>公司深度覆盖</span>
+<span class="text-outline text-[11px]">456</span>
+</button>
+</li>
+<li>
+<button class="w-full flex items-center justify-between p-space-md rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-all font-label-sm text-label-sm">
+<span>行业景气追踪</span>
+<span class="text-outline text-[11px]">772</span>
+</button>
+</li>
+</ul>
+</div>
+<!-- Filters Card -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<h2 class="font-headline-h3 text-headline-h3 mb-space-lg flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary">filter_list</span>
+                        高级筛选
+                    </h2>
+<div class="space-y-space-lg">
+<div>
+<label class="font-caption text-caption text-secondary block mb-space-sm">时间范围</label>
+<select class="w-full p-2.5 bg-surface-container-low border border-border-default rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary">
+<option>近 7 天</option>
+<option>近 30 天</option>
+<option>近 3 个月</option>
+<option>自定义...</option>
+</select>
+</div>
+<div>
+<label class="font-caption text-caption text-secondary block mb-space-sm">风险评级</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1 rounded-full border border-border-default font-micro-badge text-micro-badge hover:bg-surface-container-low">低风险</button>
+<button class="px-3 py-1 rounded-full border border-primary bg-primary/5 text-primary font-micro-badge text-micro-badge">中等风险</button>
+<button class="px-3 py-1 rounded-full border border-border-default font-micro-badge text-micro-badge hover:bg-surface-container-low">高风险</button>
+</div>
+</div>
+<div class="pt-space-md border-t border-border-default">
+<button class="w-full py-2 bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-all shadow-sm">应用筛选</button>
+<button class="w-full py-2 mt-2 text-primary font-label-sm text-label-sm hover:bg-primary/5 rounded-lg transition-all">重置全部</button>
+</div>
+</div>
+</div>
+<!-- Research Tasks Progress -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<h2 class="font-headline-h3 text-headline-h3 mb-space-lg flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary">data_thresholding</span>
+                        研究任务进度
+                    </h2>
+<div class="space-y-space-md">
+<div class="space-y-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">Q3 半导体行业报告</span>
+<span class="text-primary">85%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<div class="space-y-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">英伟达盈利模型更新</span>
+<span class="text-market-down">100%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-market-down rounded-full" style="width: 100%"></div>
+</div>
+</div>
+<div class="space-y-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">宏观经济数据爬取任务</span>
+<span class="text-risk-warning">42%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-risk-warning rounded-full" style="width: 42%"></div>
+</div>
+</div>
+<button class="w-full mt-space-md py-2 border border-dashed border-outline rounded-lg text-outline font-label-sm text-label-sm hover:border-primary hover:text-primary transition-all">
+                            + 开启新研究任务
+                        </button>
+</div>
+</div>
+</aside>
+<!-- Main Content: Report List -->
+<section class="col-span-9 space-y-space-lg">
+<!-- Header Stats -->
+<div class="grid grid-cols-3 gap-space-lg mb-space-xl">
+<div class="bg-surface p-space-lg rounded-xl border border-border-default">
+<p class="font-caption text-caption text-secondary">今日新增报告</p>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-display-lg text-display-lg text-primary">12</span>
+<span class="text-market-down font-label-sm text-label-sm flex items-center">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> 20%
+                            </span>
+</div>
+</div>
+<div class="bg-surface p-space-lg rounded-xl border border-border-default">
+<p class="font-caption text-caption text-secondary">已读/收藏</p>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-display-lg text-display-lg text-on-surface">45 / 8</span>
+<span class="font-label-sm text-label-sm text-secondary">本周</span>
+</div>
+</div>
+<div class="bg-surface p-space-lg rounded-xl border border-border-default">
+<p class="font-caption text-caption text-secondary">待处理任务</p>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-display-lg text-display-lg text-risk-warning">3</span>
+<span class="font-label-sm text-label-sm text-secondary">急需更新</span>
+</div>
+</div>
+</div>
+<!-- List Controls -->
+<div class="flex justify-between items-center bg-surface-container-low/50 p-space-sm rounded-lg">
+<div class="flex gap-space-md">
+<button class="px-4 py-2 bg-surface text-primary border border-primary rounded-lg font-label-sm text-label-sm">时间倒序</button>
+<button class="px-4 py-2 text-secondary font-label-sm text-label-sm hover:text-on-surface">相关度优先</button>
+</div>
+<div class="flex items-center gap-space-sm text-secondary font-caption text-caption">
+<span>显示 1 - 10 / 1,284 条结果</span>
+<div class="flex gap-1 ml-space-md">
+<button class="p-1 hover:bg-surface-container rounded"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+<button class="p-1 hover:bg-surface-container rounded"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+</div>
+</div>
+</div>
+<!-- Report List (Professional Cards) -->
+<div class="space-y-space-md">
+<!-- Report Item 1 -->
+<article class="bg-surface border border-border-default rounded-xl p-space-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-space-md">
+<div class="space-y-1">
+<div class="flex items-center gap-space-md">
+<span class="bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded font-micro-badge text-micro-badge">开市前研报</span>
+<span class="text-outline font-caption text-caption">生成于: 2023-10-24 08:30 (CST)</span>
+</div>
+<h3 class="font-headline-h2 text-headline-h2 text-on-surface group-hover:text-primary transition-colors">今日市场展望：美联储官员鹰派言论与美债收益率波动的影响</h3>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_add</span>
+</button>
+</div>
+<div class="bg-surface-container-low p-space-lg rounded-lg border-l-4 border-primary">
+<h4 class="font-label-sm text-label-sm text-primary mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified</span> 核心结论摘要
+                            </h4>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                                预计今日 A 股将继续震荡筑底。主要关注 10 年期美债收益率突破 5% 关口对全球流动性的持续抽水效应。建议防御为主，重点关注具备高股息特征的大型金融及公用事业板块，同时警惕成长股在流动性收缩下的估值回调风险。
+                            </p>
+</div>
+<div class="mt-space-lg flex items-center justify-between">
+<div class="flex gap-space-lg">
+<div class="flex items-center gap-1 text-secondary font-caption text-caption">
+<span class="material-symbols-outlined text-[16px]">visibility</span> 1.2k 阅读
+                                </div>
+<div class="flex items-center gap-1 text-secondary font-caption text-caption">
+<span class="material-symbols-outlined text-[16px]">download</span> 248 下载
+                                </div>
+</div>
+<div class="flex gap-space-sm">
+<span class="bg-surface-container px-3 py-1 rounded text-secondary font-micro-badge text-micro-badge">#宏观经济</span>
+<span class="bg-surface-container px-3 py-1 rounded text-secondary font-micro-badge text-micro-badge">#美联储</span>
+</div>
+</div>
+</article>
+<!-- Report Item 2 -->
+<article class="bg-surface border border-border-default rounded-xl p-space-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-space-md">
+<div class="space-y-1">
+<div class="flex items-center gap-space-md">
+<span class="bg-surface-container-high text-on-secondary-container px-2 py-0.5 rounded font-micro-badge text-micro-badge">公司深度覆盖</span>
+<span class="text-outline font-caption text-caption">生成于: 2023-10-23 16:45 (CST)</span>
+</div>
+<h3 class="font-headline-h2 text-headline-h2 text-on-surface group-hover:text-primary transition-colors">特斯拉 (TSLA.O) Q3 财报深度解析：利润率承压下的自动驾驶远景博弈</h3>
+</div>
+<button class="text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</button>
+</div>
+<div class="bg-surface-container-low p-space-lg rounded-lg border-l-4 border-risk-warning">
+<h4 class="font-label-sm text-label-sm text-risk-warning mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">analytics</span> 核心结论摘要
+                            </h4>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                                尽管营收保持增长，但降价促销导致毛利率降至 17.9% 的历史低位。短期内，市场将焦点转向 FSD V12 的推出进程。我们下调其 2024 年盈利预测 5%，维持“持有”评级，目标价调至 $215。风险点：AI 业务落地不及预期，中国市场竞争加剧。
+                            </p>
+</div>
+<div class="mt-space-lg flex items-center justify-between">
+<div class="flex gap-space-lg">
+<div class="flex items-center gap-1 text-secondary font-caption text-caption">
+<span class="material-symbols-outlined text-[16px]">visibility</span> 5.8k 阅读
+                                </div>
+<div class="flex items-center gap-1 text-secondary font-caption text-caption">
+<span class="material-symbols-outlined text-[16px]">download</span> 1.5k 下载
+                                </div>
+</div>
+<div class="flex gap-space-sm">
+<span class="bg-surface-container px-3 py-1 rounded text-secondary font-micro-badge text-micro-badge">#新能源汽车</span>
+<span class="bg-surface-container px-3 py-1 rounded text-secondary font-micro-badge text-micro-badge">#美股</span>
+</div>
+</div>
+</article>
+<!-- Report Item 3 -->
+<article class="bg-surface border border-border-default rounded-xl p-space-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-space-md">
+<div class="space-y-1">
+<div class="flex items-center gap-space-md">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-micro-badge text-micro-badge">行业景气追踪</span>
+<span class="text-outline font-caption text-caption">生成于: 2023-10-22 10:00 (CST)</span>
+</div>
+<h3 class="font-headline-h2 text-headline-h2 text-on-surface group-hover:text-primary transition-colors">2023-24 全球半导体设备供需展望：国产替代下的增量机会</h3>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_add</span>
+</button>
+</div>
+<div class="bg-surface-container-low p-space-lg rounded-lg border-l-4 border-market-down">
+<h4 class="font-label-sm text-label-sm text-market-down mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> 核心结论摘要
+                            </h4>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                                半导体周期底部信号明确。随着先进制程扩产恢复，前道设备需求预计在 2024 年 Q2 迎来强劲反弹。国产设备厂商在刻蚀、薄膜沉积领域份额提升超预期，建议关注具备核心技术突破的头部企业。
+                            </p>
+</div>
+<div class="mt-space-lg flex items-center justify-between">
+<div class="flex gap-space-lg">
+<div class="flex items-center gap-1 text-secondary font-caption text-caption">
+<span class="material-symbols-outlined text-[16px]">visibility</span> 3.1k 阅读
+                                </div>
+<div class="flex items-center gap-1 text-secondary font-caption text-caption">
+<span class="material-symbols-outlined text-[16px]">download</span> 920 下载
+                                </div>
+</div>
+<div class="flex gap-space-sm">
+<span class="bg-surface-container px-3 py-1 rounded text-secondary font-micro-badge text-micro-badge">#半导体</span>
+<span class="bg-surface-container px-3 py-1 rounded text-secondary font-micro-badge text-micro-badge">#硬科技</span>
+</div>
+</div>
+</article>
+</div>
+<!-- Load More -->
+<div class="py-space-xl text-center">
+<button class="px-space-2xl py-space-md bg-surface border border-border-default rounded-full text-secondary font-label-sm text-label-sm hover:border-primary hover:text-primary transition-all shadow-sm flex items-center gap-2 mx-auto">
+<span class="material-symbols-outlined text-[20px]">refresh</span> 加载更多报告...
+                    </button>
+</div>
+</section>
+</div>
+</main>
+<!-- Floating Action Button for New Research -->
+<div class="fixed bottom-space-xl right-space-xl">
+<button class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all group relative">
+<span class="material-symbols-outlined text-[28px]">add</span>
+<div class="absolute right-full mr-4 bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-lg font-label-sm text-label-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                撰写新研究报告
+            </div>
+</button>
+</div>
+<script>
+        // Micro-interaction: Active nav states and hover logic
+        document.querySelectorAll('aside nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                // If this were a real app, logic would go here
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        const searchIcon = searchInput.previousElementSibling;
+        searchInput.addEventListener('focus', () => {
+            searchIcon.classList.add('text-primary');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchIcon.classList.remove('text-primary');
+        });
+    </script>
+</body></html>

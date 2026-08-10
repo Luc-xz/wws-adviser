@@ -1,0 +1,132 @@
+# 10. 里程碑计划（Phase 0–3 工作项、退出条件、验收映射）
+
+> 文档版本：v1.0  
+> 文档状态：开发基线  
+> 更新日期：2026-07-19  
+> 关联：技术架构 §24 §25 · PRD §4.2 §16 §17 §18 · 索引：[0_DEVELOPMENT_GUIDE_INDEX.md](./0_DEVELOPMENT_GUIDE_INDEX.md)
+
+## 1. 目的
+
+把 PRD §17 迭代计划与技术架构 §24 实施顺序落为**可被 `gsd:plan-phase` 直接消费的阶段卡片**：每个 Phase 一组工作项、退出条件（硬门槛）、对应验收场景（AC）与成功指标。本文是排期入口；某 Phase 开始前先读本文对应卡片，再读 1–8 的子文档契约。
+
+约定：
+
+- **退出条件是硬门槛**：未全绿不进下一 Phase（PRD §17 退出条件、§18 上线门槛、技术架构 §25）。
+- 工作项可拆为 `gsd:plan-phase` 任务，每任务原子提交（索引 §6）。
+- 外部供应商未定项在该 Phase 内以端口 + 占位适配器交付，标 `TODO(data-source-selection)` / `TODO(model-vendor-selection)` / `TODO(notifier-selection)`，不阻塞退出。
+
+## 2. Phase 0：工程基础骨架
+
+**对应**：PRD §17 阶段 0 · 技术架构 §24 Phase 0 · 验收 AC-08（PWA 可安装子集）、AC-09（备份骨架子集）。
+
+| # | 工作项 | 主文档 |
+| --- | --- | --- |
+| 0.1 | 前后端目录、锁文件（`uv.lock`/`pnpm-lock`）、Makefile、ruff/mypy/eslint/vitest 基线与 CI | [1_REPO_STRUCTURE.md](./1_REPO_STRUCTURE.md) |
+| 0.2 | FastAPI 生命周期、`core/config`、结构化日志、错误模型（Problem Details）、`/health/live` `/health/ready` `/health/dependencies` | [3_API_CONTRACT.md](./3_API_CONTRACT.md) · [8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §6 |
+| 0.3 | SQLite（WAL + 外键 + busy timeout）、Alembic 空库可建、备份骨架、单 worker enforce + scheduler 文件锁 | [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) · [1_REPO_STRUCTURE.md](./1_REPO_STRUCTURE.md) §7 |
+| 0.4 | Vue PWA 外壳、登录、五导航（首页/持仓/助手/研究/设置）、OpenAPI 类型生成流 | [7_FRONTEND_AND_PWA.md](./7_FRONTEND_AND_PWA.md) §6 |
+| 0.5 | Identity（Argon2id、会话哈希、Cookie 安全属性）、Audit（只追加）、Jobs（持久任务表 + APScheduler 入队）基础 | [8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §3 · [6_MODEL_AND_REPORT_PIPELINE.md](./6_MODEL_AND_REPORT_PIPELINE.md) §7 |
+| 0.6 | 数据源/模型/通知端口 Protocol + 占位适配器（`stub_*`）+ 契约测试 cassette 骨架 | [5_DATA_INGESTION_AND_QUALITY.md](./5_DATA_INGESTION_AND_QUALITY.md) §9 · [6](./6_MODEL_AND_REPORT_PIPELINE.md) §3 |
+
+**退出条件**：
+
+- [ ] 手机可安装 PWA 并安全登录（AC-08 安装子集）。
+- [ ] 服务持久化数据，`/health/ready` 在 DB 可写时绿，不可写时 fail。
+- [ ] 基础任务可入队、领取、租约到期可重领（[6](./6_MODEL_AND_REPORT_PIPELINE.md) §7）。
+- [ ] 端口 + 占位适配器可跑通一条 stub 数据→领域→API 闭环。
+- [ ] CI 静态 + 单元 + 迁移门禁全绿（[9_TEST_AND_CI.md](./9_TEST_AND_CI.md) §7）。
+- [ ] 备份骨架能产出一致性副本（不进模型/通知，AC-09 子集）。
+
+## 3. Phase 1：持仓—报告闭环（MVP 核心）
+
+**对应**：PRD §17 阶段 1 · 技术架构 §24 Phase 1 · 验收 AC-01/02/04/06/08/09 · 成功指标 PRD §4.2。
+
+| # | 工作项 | 主文档 | 关联 AC |
+| --- | --- | --- | --- |
+| 1.1 | Instrument/Portfolio/transactions + CSV 导入（指纹去重、错误行预览拒绝、幂等键） | [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §6 · [3_API_CONTRACT.md](./3_API_CONTRACT.md) §3 | AC-01 |
+| 1.2 | Market Data 日线/净值/快照 + 质量状态 + 新鲜度门禁骨架（日线为主） | [5_DATA_INGESTION_AND_QUALITY.md](./5_DATA_INGESTION_AND_QUALITY.md) | AC-02 |
+| 1.3 | Documents 公告/少量新闻 + 内容寻址 + FTS5 | [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §7 | AC-02 |
+| 1.4 | 确定性组合指标（成本/盈亏/归因）+ 风险规则（硬上限截断骨架） | [4_ANALYTICS_AND_RISK.md](./4_ANALYTICS_AND_RISK.md) | AC-04 |
+| 1.5 | 开市前/收市后报告流水线（`analysis_snapshot` 冻结、可复现、降级路径） | [6_MODEL_AND_REPORT_PIPELINE.md](./6_MODEL_AND_REPORT_PIPELINE.md) §4 §8 | AC-02/04 |
+| 1.6 | Model Gateway（结构化输出 + 后置校验 + 一次受控修复）+ 一个通知渠道（`TODO(notifier-selection)`） | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §3 §5 §10 | AC-06 |
+| 1.7 | 首页/持仓页/开市前报告/收市后复盘移动端页面 + SSE/轮询兜底 | [7_FRONTEND_AND_PWA.md](./7_FRONTEND_AND_PWA.md) | AC-08 |
+| 1.8 | 连续 10 个交易日运行验证（PRD §17 阶段 1 退出） | 全局运行 | AC-02/04 |
+
+**退出条件**：
+
+- [ ] 连续 10 个交易日稳定形成“交易—持仓—报告—复盘”闭环（PRD §17 阶段 1）。
+- [ ] 账本对账一致率 100%；报告关键数值可追溯率 100%（PRD §4.2）。
+- [ ] 开市前/收市后报告按时生成率 ≥95%（PRD §4.2）。
+- [ ] 模型关闭仍可登录/管交易/更新行情/展示确定性风险摘要，报告显示可重试降级（AC-06）。
+- [ ] CSV 重复导入不产生重复流水；错误行被预览拒绝（AC-01）。
+- [ ] 公告源失败时报告标记不完整（AC-02）。
+- [ ] 备份恢复演练通过，账本哈希/持仓一致，密钥不进普通备份（AC-09）。
+
+## 4. Phase 2：盘中与凯利
+
+**对应**：PRD §17 阶段 2 · 技术架构 §24 Phase 2 · 验收 AC-03/07 · 风险/降级自动测试门槛 PRD §18。
+
+| # | 工作项 | 主文档 | 关联 AC |
+| --- | --- | --- | --- |
+| 2.1 | 盘中行情 TTL + 市场状态机 + 新鲜度门禁（90s 阈值） | [5_DATA_INGESTION_AND_QUALITY.md](./5_DATA_INGESTION_AND_QUALITY.md) §8 | AC-03 |
+| 2.2 | 盘中快速问询 + SSE + 10 分钟有效期 + 失效条件 | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §9 · [7](./7_FRONTEND_AND_PWA.md) §11 | AC-03 |
+| 2.3 | 回测 + 概率校准（Platt/滚动）+ 信号版本 + 校准状态机 | [4_ANALYTICS_AND_RISK.md](./4_ANALYTICS_AND_RISK.md) §4 §5 | AC-07 |
+| 2.4 | 分数凯利纯函数 + 约束轨迹 + Advice 状态机 + 原因链 | [4_ANALYTICS_AND_RISK.md](./4_ANALYTICS_AND_RISK.md) §6 §7 | AC-07 |
+| 2.5 | 建议评价回灌 + 行为偏差分析 + 降级安全测试 | [4](./4_ANALYTICS_AND_RISK.md) §8 §9 | AC-03/07 |
+
+**退出条件**：
+
+- [ ] 凯利输入通过样本外校准；模型 Gateway 无权写 `p`（AC-07、技术架构 §25）。
+- [ ] 硬风险上限始终截断理论值；移除校准标记后不再给凯利新增仓位（AC-07）。
+- [ ] 行情过期/账本未对账/模型冲突时可靠进入降级，拒绝时不输出具体区间（PRD §18、技术架构 §25）。
+- [ ] 盘中快照新鲜度达标率 ≥95%；用户快速建议阅读 ≤30 秒（PRD §4.2）。
+- [ ] AC-03 全路径：过期行情 → 停止给具体交易数量。
+
+## 5. Phase 3：深度研究与体验增强
+
+**对应**：PRD §17 阶段 3 · 技术架构 §24 Phase 3 · 验收 AC-05、AC-08 增强。
+
+| # | 工作项 | 主文档 | 关联 AC |
+| --- | --- | --- | --- |
+| 3.1 | 研究任务分解 + 文档解析 + 证据切片 + 引用白名单 | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §4 · [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §7 | AC-05 |
+| 3.2 | 公司/行业模板 + 估值情景（DCF/可比）+ 长期跟踪指标 | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §4 | AC-05 |
+| 3.3 | 多数据源交叉验证 + 事实/计算/判断/未证实标签 | [5_DATA_INGESTION_AND_QUALITY.md](./5_DATA_INGESTION_AND_QUALITY.md) §6 · AC-05 | AC-05 |
+| 3.4 | 离线报告缓存（SW 私有缓存，按 user+report+version 隔离）+ 报告导出 | [7_FRONTEND_AND_PWA.md](./7_FRONTEND_AND_PWA.md) §5 | AC-08 |
+| 3.5 | Web Push + Passkey（P1）+ 隐私通知模式 | [8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §3 · [6](./6_MODEL_AND_REPORT_PIPELINE.md) §10 | AC-08 |
+
+**退出条件**：
+
+- [ ] 抽样研究报告关键事实均可追溯，无来源结论标“未证实”（AC-05、PRD §17 阶段 3）。
+- [ ] 移动端阅读与异步任务体验稳定（SSE + 轮询兜底，[7](./7_FRONTEND_AND_PWA.md) §11）。
+- [ ] 离线可打开最近报告并显示缓存时间；盘中/建议入口离线不可用（AC-08）。
+- [ ] 退出登录清除私有缓存；PWA 装机验证 iOS+Android 等效环境（PRD §18）。
+
+## 6. Phase 4：按需扩展（非 MVP）
+
+PRD §17 阶段 4、技术架构 §21 扩展触发条件。**不预设规模提前增复杂度**，仅触发时升级（SQLite→PG、独立 worker、时序存储、向量索引、原生 App）。每次扩展经 ADR，Repository 接口不变（技术架构 §21.1）。本文不展开，作为占位。
+
+## 7. 上线门槛核对（PRD §18 + 技术架构 §25，进入个人真实使用前）
+
+Phase 3 完成后逐项核：
+
+- [ ] 持仓计算测试覆盖买/卖/费用/分红/拆分/申赎/调整（Phase 1）。
+- [ ] 风险规则、凯利、降级逻辑有自动测试（Phase 2）。
+- [ ] 报告关键数字可溯至数据记录或确定性计算（Phase 1/3）。
+- [ ] 交易时段行情过期可靠阻止具体交易数量（Phase 2）。
+- [ ] 模型不可用/异常不破坏业务数据（Phase 1）。
+- [ ] PWA 在 iOS+Android 等效环境验证（Phase 0/3）。
+- [ ] 备份恢复演练完成（Phase 0 骨架 → Phase 1 全量）。
+- [ ] 公网部署 HTTPS/身份/会话/密钥检查（[8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §11）。
+- [ ] 数据源使用符合授权与服务条款（供应商确定后复核）。
+- [ ] 技术架构 §25 MVP 架构验收清单 16 项全绿。
+
+## 8. 待确认项
+
+| 事项 | 当前默认 | 备注 |
+| --- | --- | --- |
+| Phase 4 触发与范围 | 仅占位 | 达 [技术架构 §21](../TECHNICAL_ARCHITECTURE.md) 触发条件再立 ADR |
+| 通知渠道首选 | 待选企业微信/Server 酱/邮件一种 | `TODO(notifier-selection)`，Phase 1.6 前定 |
+| 数据源供应商 | 未定，端口+占位 | `TODO(data-source-selection)`，《数据源选型与质量规范》 |
+| 模型供应商 | OpenAI-compatible，未定具体 | `TODO(model-vendor-selection)`，《模型与路由规范》 |
+| 成功指标观察窗 | 连续 20 交易日 | PRD §4.2，Phase 1 后启动观察 |
+| 连续 10 交易日验证起点 | Phase 1.8 | 单实例手动起算并记审计 |

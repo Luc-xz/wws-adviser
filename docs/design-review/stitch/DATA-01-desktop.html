@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "market-down": "#079455",
+                        "on-surface": "#141b2c",
+                        "on-tertiary-container": "#dde0e1",
+                        "on-secondary-container": "#60646f",
+                        "inverse-primary": "#b7c4ff",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-on-surface": "#edf0ff",
+                        "border-default": "#E4E7EC",
+                        "secondary": "#5a5e69",
+                        "secondary-fixed": "#dee2ef",
+                        "inverse-surface": "#293041",
+                        "canvas": "#F5F7FA",
+                        "primary-fixed": "#dde1ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e0e8ff",
+                        "error-container": "#ffdad6",
+                        "surface": "#FFFFFF",
+                        "outline-variant": "#c4c5d6",
+                        "secondary-container": "#dee2ef",
+                        "surface-container-lowest": "#ffffff",
+                        "risk-critical": "#C11574",
+                        "surface-tint": "#2c53d1",
+                        "on-primary-fixed": "#001452",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "surface-container-highest": "#dbe2f9",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#d8ddff",
+                        "risk-warning": "#DC6803",
+                        "on-background": "#141b2c",
+                        "surface-dim": "#d2daf0",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "primary": "#063cbc",
+                        "background": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#424751",
+                        "primary-container": "#3157d5",
+                        "on-surface-variant": "#444654",
+                        "on-secondary-fixed": "#171c25",
+                        "tertiary-container": "#606365",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#484b4d",
+                        "tertiary-fixed": "#e0e3e5",
+                        "market-up": "#D92D20",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "outline": "#747685",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container": "#e9edff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-xs": "4px",
+                        "unit": "4px",
+                        "space-md": "12px",
+                        "margin-mobile": "16px",
+                        "space-lg": "16px",
+                        "space-xl": "24px",
+                        "space-sm": "8px",
+                        "space-2xl": "32px",
+                        "gutter-mobile": "12px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "headline-h3": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                        "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                        "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #F5F7FA; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Side Navigation Shell -->
+<aside class="h-full w-[224px] fixed left-0 top-0 bg-surface-container-low dark:bg-surface-dim border-r border-border-default dark:border-outline-variant flex flex-col py-space-xl z-20">
+<div class="px-space-xl mb-10">
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight">WWS Adviser</h1>
+<p class="text-[10px] uppercase tracking-widest text-outline opacity-70">Terminal v2.4</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-space-xl py-3 text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">home</span>
+<span class="font-label-sm text-label-sm font-semibold">首页</span>
+</a>
+<a class="flex items-center px-space-xl py-3 text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm font-semibold">持仓</span>
+</a>
+<a class="flex items-center px-space-xl py-3 text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">smart_toy</span>
+<span class="font-label-sm text-label-sm font-semibold">助手</span>
+</a>
+<a class="flex items-center px-space-xl py-3 text-primary dark:text-inverse-primary font-bold border-r-2 border-primary dark:border-inverse-primary bg-surface-container/50" href="#">
+<span class="material-symbols-outlined mr-3">analytics</span>
+<span class="font-label-sm text-label-sm font-semibold">研究</span>
+</a>
+<a class="flex items-center px-space-xl py-3 text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">settings</span>
+<span class="font-label-sm text-label-sm font-semibold">设置</span>
+</a>
+</nav>
+<div class="px-space-xl mt-auto pt-6 border-t border-border-default/50">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-xs font-bold">JD</div>
+<div>
+<p class="text-label-sm font-bold">Admin User</p>
+<p class="text-[10px] text-outline">System Monitoring</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[224px] min-h-screen">
+<!-- Top Navbar -->
+<header class="h-[64px] sticky top-0 right-0 z-10 bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline-variant flex justify-between items-center px-space-xl">
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-lg text-body-md focus:ring-2 focus:ring-primary w-64 transition-all" placeholder="搜索数据源或指标..." type="text"/>
+</div>
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-market-down animate-pulse"></span>
+<span class="text-caption font-medium text-on-surface-variant">系统实时状态: 正常</span>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full transition-all">notifications</button>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-space-xl max-w-[1400px] mx-auto space-y-space-xl">
+<!-- System Health Giant Card (Bento Style) -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+<div class="lg:col-span-2 bg-surface rounded-xl border border-border-default p-space-xl relative overflow-hidden group">
+<div class="relative z-10">
+<div class="flex items-center justify-between mb-4">
+<span class="bg-market-down/10 text-market-down px-3 py-1 rounded-full text-micro-badge font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                系统总体运行正常
+                            </span>
+<span class="text-caption text-outline">最后巡检: 2023-11-24 14:30:05</span>
+</div>
+<h2 class="font-display-lg text-display-lg mb-2">数据中心状态概览 (DATA-01)</h2>
+<p class="text-body-md text-on-surface-variant max-w-xl mb-6">
+                            当前全球 12 个核心数据源连接稳定。行情网关、基金净值推送及宏观日历同步延迟均维持在 <span class="text-primary font-bold">150ms</span> 以下的专业级阈值。
+                        </p>
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-canvas p-4 rounded-lg border border-border-default">
+<p class="text-caption text-outline mb-1">平均延迟</p>
+<p class="font-headline-h2 text-headline-h2 text-primary">84ms</p>
+</div>
+<div class="bg-canvas p-4 rounded-lg border border-border-default">
+<p class="text-caption text-outline mb-1">吞吐量</p>
+<p class="font-headline-h2 text-headline-h2 text-primary">1.2GB/s</p>
+</div>
+<div class="bg-canvas p-4 rounded-lg border border-border-default">
+<p class="text-caption text-outline mb-1">同步成功率</p>
+<p class="font-headline-h2 text-headline-h2 text-primary">99.99%</p>
+</div>
+</div>
+</div>
+<div class="absolute -right-10 -bottom-10 opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-[200px]" style="font-variation-settings: 'wght' 200;">hub</span>
+</div>
+</div>
+<!-- Live Monitoring Sidebar -->
+<div class="bg-inverse-surface text-on-tertiary-container rounded-xl p-space-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary-fixed">query_stats</span>
+<h3 class="font-headline-h3 text-headline-h3 text-white">实时负载</h3>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-caption mb-1">
+<span>计算节点 A (Tokyo)</span>
+<span>42%</span>
+</div>
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed w-[42%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-caption mb-1">
+<span>存储集群 (Singapore)</span>
+<span>78%</span>
+</div>
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-risk-warning w-[78%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-caption mb-1">
+<span>分发网络 (New York)</span>
+<span>15%</span>
+</div>
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-market-down w-[15%]"></div>
+</div>
+</div>
+</div>
+</div>
+<button class="mt-8 w-full py-3 bg-primary-fixed text-on-primary-fixed font-bold rounded-lg text-body-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">settings_input_component</span>
+                        进入管理控制台
+                    </button>
+</div>
+</section>
+<!-- Data Source Matrix -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<h2 class="font-headline-h2 text-headline-h2">数据源矩阵</h2>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant text-micro-badge rounded">Total: 12</span>
+</div>
+<div class="flex gap-2">
+<button class="p-2 rounded border border-border-default bg-surface hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-sm">filter_list</span></button>
+<button class="p-2 rounded border border-border-default bg-surface hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-sm">refresh</span></button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg">
+<!-- Card: Market Quotes -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg hover:shadow-lg transition-all group cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-market-down"></span>
+<span class="text-caption text-market-down font-bold">ACTIVE</span>
+</div>
+</div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-1">实时行情 (Quotes)</h4>
+<p class="text-caption text-outline mb-4">涵盖 A股、港股、美股 L1/L2</p>
+<div class="space-y-3 pt-4 border-t border-border-default/50">
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">实时延迟</span>
+<span class="text-body-md font-bold text-market-down">12ms</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">同步频率</span>
+<span class="text-body-md font-medium text-on-surface">1s/Tick</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">最后同步</span>
+<span class="text-[11px] text-outline">14:32:01</span>
+</div>
+</div>
+</div>
+<!-- Card: Financial Calendar -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg hover:shadow-lg transition-all group cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-risk-warning/10 flex items-center justify-center text-risk-warning">
+<span class="material-symbols-outlined">calendar_month</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-risk-warning"></span>
+<span class="text-caption text-risk-warning font-bold">DEGRADED</span>
+</div>
+</div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-1">全球财经日历</h4>
+<p class="text-caption text-outline mb-4">宏观数据、央行动态、业绩报</p>
+<div class="space-y-3 pt-4 border-t border-border-default/50">
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">实时延迟</span>
+<span class="text-body-md font-bold text-risk-warning">2.4s</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">同步频率</span>
+<span class="text-body-md font-medium text-on-surface">Event-driven</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">最后同步</span>
+<span class="text-[11px] text-outline">14:28:15</span>
+</div>
+</div>
+</div>
+<!-- Card: News Feed -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg hover:shadow-lg transition-all group cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">newspaper</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-market-down"></span>
+<span class="text-caption text-market-down font-bold">ACTIVE</span>
+</div>
+</div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-1">资讯头条 (News)</h4>
+<p class="text-caption text-outline mb-4">7x24 实时全网新闻聚合</p>
+<div class="space-y-3 pt-4 border-t border-border-default/50">
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">实时延迟</span>
+<span class="text-body-md font-bold text-market-down">450ms</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">同步频率</span>
+<span class="text-body-md font-medium text-on-surface">Polling 10s</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">最后同步</span>
+<span class="text-[11px] text-outline">14:31:58</span>
+</div>
+</div>
+</div>
+<!-- Card: Fund NAV -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg hover:shadow-lg transition-all group cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-market-down"></span>
+<span class="text-caption text-market-down font-bold">ACTIVE</span>
+</div>
+</div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-1">基金净值 (NAV)</h4>
+<p class="text-caption text-outline mb-4">公募、私募基金每日净值更新</p>
+<div class="space-y-3 pt-4 border-t border-border-default/50">
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">同步进度</span>
+<span class="text-body-md font-bold text-primary">82%</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">同步频率</span>
+<span class="text-body-md font-medium text-on-surface">Daily Night</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">最后同步</span>
+<span class="text-[11px] text-outline">Yesterday 23:45</span>
+</div>
+</div>
+</div>
+<!-- Card: Corporate Actions -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg hover:shadow-lg transition-all group cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">corporate_fare</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-market-down"></span>
+<span class="text-caption text-market-down font-bold">ACTIVE</span>
+</div>
+</div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-1">公司行为 (Actions)</h4>
+<p class="text-caption text-outline mb-4">分红、配股、增发、回购公告</p>
+<div class="space-y-3 pt-4 border-t border-border-default/50">
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">实时延迟</span>
+<span class="text-body-md font-bold text-market-down">1.2s</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">同步频率</span>
+<span class="text-body-md font-medium text-on-surface">Real-time</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">最后同步</span>
+<span class="text-[11px] text-outline">14:30:12</span>
+</div>
+</div>
+</div>
+<!-- Card: Risk Models -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg hover:shadow-lg transition-all group cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-risk-critical/10 flex items-center justify-center text-risk-critical">
+<span class="material-symbols-outlined">security</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="text-caption text-error font-bold">ERROR</span>
+</div>
+</div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-1">风险模型数据</h4>
+<p class="text-caption text-outline mb-4">VAR、波动率曲面、信用违约</p>
+<div class="space-y-3 pt-4 border-t border-border-default/50">
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">异常原因</span>
+<span class="text-[11px] font-bold text-error">连接超时(504)</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">重试计数</span>
+<span class="text-body-md font-medium text-on-surface">3/5</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">最后尝试</span>
+<span class="text-[11px] text-outline">14:31:45</span>
+</div>
+</div>
+</div>
+<!-- Card: Alternative Data -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg hover:shadow-lg transition-all group cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">satellite_alt</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="text-caption text-outline font-bold">OFFLINE</span>
+</div>
+</div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-1">另类数据 (Alt)</h4>
+<p class="text-caption text-outline mb-4">卫星影像、舆情情绪、供应链</p>
+<div class="space-y-3 pt-4 border-t border-border-default/50">
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">同步状态</span>
+<span class="text-body-md font-bold text-outline">未启动</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">调度计划</span>
+<span class="text-body-md font-medium text-on-surface">18:00 Weekly</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-caption text-on-surface-variant">上个周期</span>
+<span class="text-[11px] text-outline">7 days ago</span>
+</div>
+</div>
+</div>
+<!-- Add New Card Placeholder -->
+<div class="border-2 border-dashed border-border-default rounded-xl p-space-lg flex flex-col items-center justify-center gap-2 text-outline hover:border-primary hover:text-primary transition-all cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-primary/10">
+<span class="material-symbols-outlined">add</span>
+</div>
+<p class="font-label-sm text-label-sm">添加新数据源</p>
+</div>
+</div>
+</section>
+<!-- Bottom Log Sheet (Simplified for view) -->
+<section class="bg-surface border border-border-default rounded-xl overflow-hidden">
+<div class="bg-surface-container-low px-space-xl py-4 border-b border-border-default flex justify-between items-center">
+<h3 class="font-headline-h3 text-headline-h3 flex items-center gap-2">
+<span class="material-symbols-outlined">list_alt</span>
+                        系统运行日志
+                    </h3>
+<div class="flex gap-4">
+<span class="text-caption text-on-surface-variant"><b class="text-market-down">14,290</b> 事件正常</span>
+<span class="text-caption text-on-surface-variant"><b class="text-risk-warning">12</b> 警告</span>
+<span class="text-caption text-on-surface-variant"><b class="text-error">2</b> 异常</span>
+</div>
+</div>
+<div class="divide-y divide-border-default/50 font-mono text-[12px]">
+<div class="px-space-xl py-3 flex gap-4 hover:bg-canvas transition-colors">
+<span class="text-outline shrink-0">14:32:05</span>
+<span class="text-market-down font-bold shrink-0">[INFO]</span>
+<span class="text-on-surface-variant truncate">Successfully connected to ICE Data Services Gateway #4. Handshake took 24ms.</span>
+</div>
+<div class="px-space-xl py-3 flex gap-4 hover:bg-canvas transition-colors">
+<span class="text-outline shrink-0">14:31:58</span>
+<span class="text-risk-warning font-bold shrink-0">[WARN]</span>
+<span class="text-on-surface-variant truncate">Latency on HKEX Quote Service increased to 340ms (Threshold: 200ms). Monitoring...</span>
+</div>
+<div class="px-space-xl py-3 flex gap-4 hover:bg-canvas transition-colors bg-error-container/20">
+<span class="text-outline shrink-0">14:31:45</span>
+<span class="text-error font-bold shrink-0">[ERR!]</span>
+<span class="text-on-surface-variant truncate">RiskEngine-Shard-03: Connection reset by peer. Attempting automatic failover to Shard-04.</span>
+</div>
+<div class="px-space-xl py-3 flex gap-4 hover:bg-canvas transition-colors">
+<span class="text-outline shrink-0">14:31:30</span>
+<span class="text-market-down font-bold shrink-0">[INFO]</span>
+<span class="text-on-surface-variant truncate">NewsAggregator processed 1,402 articles in the last 60 seconds. Average sentiment: 0.12 (Neutral).</span>
+</div>
+</div>
+<div class="p-4 bg-canvas text-center">
+<button class="text-primary font-bold text-caption hover:underline">查看完整审计日志</button>
+</div>
+</section>
+</div>
+</main>
+<!-- Contextual Micro-interaction Script -->
+<script>
+        // Simple heartbeat effect for live status
+        document.querySelectorAll('.animate-pulse').forEach(el => {
+            setInterval(() => {
+                el.style.opacity = el.style.opacity === '0.4' ? '1' : '0.4';
+            }, 1000);
+        });
+
+        // Hover effects for cards to show extra detail
+        const cards = document.querySelectorAll('.grid > div');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>

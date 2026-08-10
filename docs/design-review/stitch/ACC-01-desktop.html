@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<title>WWS Adviser - 账户与对账 (ACC-01)</title>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "market-down": "#079455",
+                        "on-surface": "#141b2c",
+                        "on-tertiary-container": "#dde0e1",
+                        "on-secondary-container": "#60646f",
+                        "inverse-primary": "#b7c4ff",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-on-surface": "#edf0ff",
+                        "border-default": "#E4E7EC",
+                        "secondary": "#5a5e69",
+                        "secondary-fixed": "#dee2ef",
+                        "inverse-surface": "#293041",
+                        "canvas": "#F5F7FA",
+                        "primary-fixed": "#dde1ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e0e8ff",
+                        "error-container": "#ffdad6",
+                        "surface": "#FFFFFF",
+                        "outline-variant": "#c4c5d6",
+                        "secondary-container": "#dee2ef",
+                        "surface-container-lowest": "#ffffff",
+                        "risk-critical": "#C11574",
+                        "surface-tint": "#2c53d1",
+                        "on-primary-fixed": "#001452",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "surface-container-highest": "#dbe2f9",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#d8ddff",
+                        "risk-warning": "#DC6803",
+                        "on-background": "#141b2c",
+                        "surface-dim": "#d2daf0",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "primary": "#063cbc",
+                        "background": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#424751",
+                        "primary-container": "#3157d5",
+                        "on-surface-variant": "#444654",
+                        "on-secondary-fixed": "#171c25",
+                        "tertiary-container": "#606365",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#484b4d",
+                        "tertiary-fixed": "#e0e3e5",
+                        "market-up": "#D92D20",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "outline": "#747685",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container": "#e9edff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-xs": "4px",
+                        "unit": "4px",
+                        "space-md": "12px",
+                        "margin-mobile": "16px",
+                        "space-lg": "16px",
+                        "space-xl": "24px",
+                        "space-sm": "8px",
+                        "space-2xl": "32px",
+                        "gutter-mobile": "12px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "headline-h3": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                        "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                        "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface">
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-full w-[224px] fixed left-0 top-0 bg-surface-container-low dark:bg-surface-dim border-r border-border-default dark:border-outline-variant flex flex-col py-space-xl z-20">
+<div class="px-space-xl mb-space-2xl">
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-outline">Terminal v2.4</p>
+</div>
+<nav class="flex-1 px-space-sm space-y-1">
+<a class="flex items-center px-space-md py-space-sm font-label-sm text-label-sm font-semibold text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-space-md" data-icon="home">home</span>
+                首页
+            </a>
+<a class="flex items-center px-space-md py-space-sm font-label-sm text-label-sm font-bold text-primary dark:text-inverse-primary border-r-2 border-primary dark:border-inverse-primary bg-surface-container-high transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined mr-space-md" data-icon="account_balance_wallet" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+                持仓
+            </a>
+<a class="flex items-center px-space-md py-space-sm font-label-sm text-label-sm font-semibold text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-space-md" data-icon="smart_toy">smart_toy</span>
+                助手
+            </a>
+<a class="flex items-center px-space-md py-space-sm font-label-sm text-label-sm font-semibold text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-space-md" data-icon="analytics">analytics</span>
+                研究
+            </a>
+<a class="flex items-center px-space-md py-space-sm font-label-sm text-label-sm font-semibold text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-space-md" data-icon="settings">settings</span>
+                设置
+            </a>
+</nav>
+<div class="px-space-xl pt-space-xl border-t border-border-default mt-auto">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-xs font-bold">W</div>
+<div>
+<p class="font-label-sm text-label-sm">Admin</p>
+<p class="font-caption text-caption text-outline">v2.4.0-stable</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopNavBar (Shared Component) -->
+<header class="h-[64px] fixed top-0 right-0 left-[224px] z-10 bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline-variant flex justify-between items-center px-space-xl">
+<div class="flex items-center bg-surface-container-low px-space-md py-2 rounded-lg w-96 border border-border-default">
+<span class="material-symbols-outlined text-outline text-lg mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md font-body-md w-full placeholder:text-outline" placeholder="搜索账户或对账单..." type="text"/>
+</div>
+<div class="flex items-center gap-space-xl">
+<button class="relative p-2 hover:bg-surface-container-low rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="flex items-center gap-2">
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-on-surface leading-tight">账户对账 (ACC-01)</p>
+<p class="font-caption text-caption text-outline leading-tight">最后同步: 2024-05-20 09:41</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-variant border border-border-default overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional business headshot of a corporate financial analyst in a clean-cut suit. The lighting is soft and neutral, consistent with a high-end corporate fintech interface. The background is a blurred office environment with a professional and trustworthy color palette of whites and grays." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxVsHYzGs_8-ZUSpcBZXb5Lfpzh5b_6DW9jnNfDiFlj-Rwt53oRjWihsa42DJ90kHHN4TYYwWWpGsvjYa__LyhU_c0_Jj8nRz38GnWqZoTW7q_0bUljs9quYl-up-afN8ZNTNPX8HWxJC_7013YDsjYerCnGmZol6xx6FnN9Dffe0CJ3TTRiNMf4XS45kepFZmSM-Hc7dw1pZhXIDxyPgs4lj5JWP0zODzOdFWxvvea9k1zRNAkmksiI1-Sz3Df4citNHT57ZBzuLn"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pl-[224px] pt-[64px] min-h-screen">
+<div class="max-w-[1200px] mx-auto p-space-xl space-y-space-xl">
+<!-- Page Header Actions -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline-h1 text-headline-h1 text-on-surface">账户概况与对账中心</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">依据规范 10.11 节，确保系统数据与外部确认的一致性。</p>
+</div>
+<div class="flex gap-space-md">
+<button class="flex items-center gap-2 px-space-lg py-2 border border-border-default rounded-lg font-label-sm text-label-sm hover:bg-surface-container-low transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]" data-icon="history">history</span>
+                        查看历史
+                    </button>
+<button class="flex items-center gap-2 px-space-lg py-2 bg-primary text-white rounded-lg font-label-sm text-label-sm hover:bg-primary-container transition-all active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="done_all">done_all</span>
+                        标记已对账
+                    </button>
+</div>
+</div>
+<!-- Bento Grid - Account Overview Cards -->
+<div class="grid grid-cols-12 gap-space-lg">
+<!-- Main Account Balance Card -->
+<div class="col-span-8 bg-surface border border-border-default rounded-xl p-space-xl flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-[120px]" data-icon="account_balance">account_balance</span>
+</div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-micro-badge text-micro-badge uppercase tracking-wider bg-primary-fixed text-on-primary-fixed px-2 py-1 rounded">主账户 ID: 8849-002-C</span>
+<span class="flex items-center gap-1 font-caption text-caption text-market-down bg-green-50 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-sm" data-icon="verified">verified</span>
+                                状态：活动中
+                            </span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-on-surface">¥ 12,845,920.45</span>
+<span class="font-body-md text-body-md text-outline">CNY</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-8 border-t border-border-default pt-6">
+<div>
+<p class="font-caption text-caption text-outline">待对账差异项</p>
+<p class="font-headline-h2 text-headline-h2 text-risk-warning mt-1">3 项</p>
+</div>
+<div>
+<p class="font-caption text-caption text-outline">上次对账时间</p>
+<p class="font-label-sm text-label-sm text-on-surface mt-1">2024-05-19 18:00</p>
+</div>
+<div>
+<p class="font-caption text-caption text-outline">对账周期</p>
+<p class="font-label-sm text-label-sm text-on-surface mt-1">T+1 (每日自动)</p>
+</div>
+</div>
+</div>
+<!-- Secondary Stats Grid -->
+<div class="col-span-4 flex flex-col gap-space-lg">
+<div class="flex-1 bg-surface border border-border-default rounded-xl p-space-lg">
+<p class="font-caption text-caption text-outline">现金余额差异</p>
+<p class="font-headline-h2 text-headline-h2 text-market-up mt-2">- ¥ 1,204.00</p>
+<div class="mt-4 flex items-center justify-between">
+<span class="font-micro-badge text-micro-badge text-error bg-error-container px-2 py-0.5 rounded">严重性：中</span>
+<span class="material-symbols-outlined text-outline" data-icon="payments">payments</span>
+</div>
+</div>
+<div class="flex-1 bg-surface border border-border-default rounded-xl p-space-lg">
+<p class="font-caption text-caption text-outline">资产对账率</p>
+<p class="font-headline-h2 text-headline-h2 text-on-surface mt-2">99.98%</p>
+<div class="w-full bg-surface-container h-1.5 rounded-full mt-4">
+<div class="bg-primary h-full rounded-full" style="width: 99.98%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reconciliation Comparison Table (Asymmetric Layout) -->
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm">
+<div class="p-space-xl border-b border-border-default bg-surface-container-low flex justify-between items-center">
+<div>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">实时对账对比视图</h3>
+<p class="font-caption text-caption text-outline">并列对比系统计算值与外部机构/用户确认值</p>
+</div>
+<div class="flex bg-white border border-border-default rounded-lg p-1">
+<button class="px-4 py-1 text-label-sm font-label-sm bg-primary text-white rounded-md">所有项目</button>
+<button class="px-4 py-1 text-label-sm font-label-sm text-on-surface hover:bg-surface-container rounded-md">仅差异项</button>
+</div>
+</div>
+<table class="w-full border-collapse">
+<thead class="bg-surface-container-lowest">
+<tr>
+<th class="text-left py-4 px-space-xl font-label-sm text-label-sm text-on-surface-variant border-b border-border-default w-1/4">资产名称 / 类型</th>
+<th class="text-right py-4 px-space-xl font-label-sm text-label-sm text-on-surface-variant border-b border-border-default">系统计算值 (System)</th>
+<th class="text-right py-4 px-space-xl font-label-sm text-label-sm text-on-surface-variant border-b border-border-default bg-surface-container-low">确认值 (Confirmed)</th>
+<th class="text-right py-4 px-space-xl font-label-sm text-label-sm text-on-surface-variant border-b border-border-default">差异金额 (Diff)</th>
+<th class="text-center py-4 px-space-xl font-label-sm text-label-sm text-on-surface-variant border-b border-border-default">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-default">
+<!-- Diff Row 1 -->
+<tr class="hover:bg-surface-bright transition-colors">
+<td class="py-5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="savings">savings</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface">现金 - CNY 活期</p>
+<p class="font-caption text-caption text-outline">流动资产</p>
+</div>
+</div>
+</td>
+<td class="py-5 px-space-xl text-right">
+<p class="font-body-md text-body-md text-on-surface">¥ 4,502,300.00</p>
+</td>
+<td class="py-5 px-space-xl text-right bg-surface-container-low">
+<p class="font-body-md text-body-md text-on-surface">¥ 4,501,096.00</p>
+</td>
+<td class="py-5 px-space-xl text-right">
+<div class="inline-flex items-center gap-1 text-market-up bg-red-50 px-2 py-0.5 rounded font-label-sm">
+<span class="material-symbols-outlined text-xs" data-icon="trending_down">trending_down</span>
+                                    -1,204.00
+                                </div>
+</td>
+<td class="py-5 px-space-xl text-center">
+<button class="text-primary font-label-sm hover:underline">核实差异</button>
+</td>
+</tr>
+<!-- Row 2 (Matched) -->
+<tr class="hover:bg-surface-bright transition-colors">
+<td class="py-5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="show_chart">show_chart</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface">中债-综合财富指数</p>
+<p class="font-caption text-caption text-outline">固定收益 (2,000 单位)</p>
+</div>
+</div>
+</td>
+<td class="py-5 px-space-xl text-right">
+<p class="font-body-md text-body-md text-on-surface">¥ 2,120,400.00</p>
+</td>
+<td class="py-5 px-space-xl text-right bg-surface-container-low">
+<p class="font-body-md text-body-md text-on-surface">¥ 2,120,400.00</p>
+</td>
+<td class="py-5 px-space-xl text-right">
+<span class="font-label-sm text-market-down">—</span>
+</td>
+<td class="py-5 px-space-xl text-center">
+<span class="material-symbols-outlined text-market-down" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</td>
+</tr>
+<!-- Diff Row 3 (Quantity Diff) -->
+<tr class="hover:bg-surface-bright transition-colors">
+<td class="py-5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="candlestick_chart">candlestick_chart</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface">腾讯控股 (00700.HK)</p>
+<p class="font-caption text-caption text-outline">股票资产 (成本对账)</p>
+</div>
+</div>
+</td>
+<td class="py-5 px-space-xl text-right">
+<p class="font-body-md text-body-md text-on-surface">¥ 380,240.50 (单位成本)</p>
+</td>
+<td class="py-5 px-space-xl text-right bg-surface-container-low">
+<p class="font-body-md text-body-md text-on-surface">¥ 380,240.22 (单位成本)</p>
+</td>
+<td class="py-5 px-space-xl text-right">
+<div class="inline-flex items-center gap-1 text-risk-warning bg-orange-50 px-2 py-0.5 rounded font-label-sm">
+<span class="material-symbols-outlined text-xs" data-icon="info">info</span>
+                                    +0.28 (精度差异)
+                                </div>
+</td>
+<td class="py-5 px-space-xl text-center">
+<button class="text-primary font-label-sm hover:underline">更新成本</button>
+</td>
+</tr>
+<!-- Diff Row 4 (Quantity) -->
+<tr class="hover:bg-surface-bright transition-colors">
+<td class="py-5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="inventory_2">inventory_2</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface">沪深300 ETF</p>
+<p class="font-caption text-caption text-outline">数量对账 (待入库)</p>
+</div>
+</div>
+</td>
+<td class="py-5 px-space-xl text-right">
+<p class="font-body-md text-body-md text-on-surface">15,000</p>
+</td>
+<td class="py-5 px-space-xl text-right bg-surface-container-low">
+<p class="font-body-md text-body-md text-on-surface">15,200</p>
+</td>
+<td class="py-5 px-space-xl text-right">
+<div class="inline-flex items-center gap-1 text-risk-critical bg-pink-50 px-2 py-0.5 rounded font-label-sm">
+<span class="material-symbols-outlined text-xs" data-icon="report">report</span>
+                                    -200 (在途项)
+                                </div>
+</td>
+<td class="py-5 px-space-xl text-center">
+<button class="text-primary font-label-sm hover:underline">标记在途</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-space-lg bg-surface flex justify-between items-center text-caption font-caption text-outline">
+<p>展示 4 / 28 个资产项</p>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center border border-border-default rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span></button>
+<button class="w-8 h-8 flex items-center justify-center border border-border-default rounded bg-primary text-white">1</button>
+<button class="w-8 h-8 flex items-center justify-center border border-border-default rounded hover:bg-surface-container transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center border border-border-default rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span></button>
+</div>
+</div>
+</div>
+<!-- Traceability Tag & Guidance Section -->
+<div class="bg-surface border border-border-default rounded-xl p-space-xl flex gap-space-2xl items-start">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-space-md">
+<span class="font-micro-badge text-micro-badge uppercase tracking-widest bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded">对账规范 (TRAC-10.11)</span>
+<h4 class="font-headline-h3 text-headline-h3 text-on-surface">操作指南与合规说明</h4>
+</div>
+<div class="space-y-3 font-body-md text-body-md text-on-surface-variant">
+<p>1. <strong>现金对账</strong>：所有现金差异必须在 T+0 闭市前核实并手动调整或备注原因。</p>
+<p>2. <strong>数量核对</strong>：若发现股份数量差异，请核对最近 48 小时内的企业行动 (Corporate Actions) 或在途交易。</p>
+<p>3. <strong>成本基准</strong>：系统采用加权平均成本法，确认值若存在汇率计算差异需在备注中声明。</p>
+</div>
+<button class="mt-space-xl text-primary font-label-sm flex items-center gap-1 group">
+                        阅读完整合规手册 10.11
+                        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="w-1/3 bg-surface-container-low rounded-lg p-space-lg border border-border-default">
+<p class="font-label-sm text-label-sm mb-4">本月对账趋势</p>
+<!-- Small Sparkline Representation -->
+<div class="h-32 flex items-end gap-1.5">
+<div class="flex-1 bg-primary-container opacity-20 h-2/3 rounded-t-sm"></div>
+<div class="flex-1 bg-primary-container opacity-30 h-3/4 rounded-t-sm"></div>
+<div class="flex-1 bg-primary-container opacity-40 h-2/5 rounded-t-sm"></div>
+<div class="flex-1 bg-primary-container opacity-60 h-4/5 rounded-t-sm"></div>
+<div class="flex-1 bg-primary-container opacity-80 h-full rounded-t-sm"></div>
+<div class="flex-1 bg-primary-container h-5/6 rounded-t-sm"></div>
+<div class="flex-1 bg-primary h-[95%] rounded-t-sm"></div>
+</div>
+<div class="flex justify-between mt-2 text-outline font-caption text-caption">
+<span>W1</span>
+<span>W2</span>
+<span>W3</span>
+<span>W4</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Success Toast (Interaction Logic placeholder) -->
+<div class="fixed bottom-space-xl right-space-xl bg-inverse-surface text-inverse-on-surface px-space-xl py-space-lg rounded-xl shadow-lg transform translate-y-32 transition-transform duration-300 flex items-center gap-3 z-50" id="successToast">
+<span class="material-symbols-outlined text-market-down" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<p class="font-label-sm text-label-sm">对账成功</p>
+<p class="font-caption text-caption opacity-80">所有 12,845,920.45 资产已标记为“已确认”。</p>
+</div>
+</div>
+<script>
+        // Simple Micro-interaction for buttons
+        document.querySelector('button[class*="bg-primary"]').addEventListener('click', function() {
+            const toast = document.getElementById('successToast');
+            toast.classList.remove('translate-y-32');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32');
+            }, 4000);
+        });
+
+        // Hover effect for side nav
+        const navLinks = document.querySelectorAll('aside nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.forEach(l => {
+                    l.classList.remove('text-primary', 'font-bold', 'border-r-2', 'border-primary', 'bg-surface-container-high');
+                    l.classList.add('text-on-secondary-fixed-variant', 'font-semibold');
+                    const icon = l.querySelector('.material-symbols-outlined');
+                    if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+                });
+                this.classList.add('text-primary', 'font-bold', 'border-r-2', 'border-primary', 'bg-surface-container-high');
+                this.classList.remove('text-on-secondary-fixed-variant', 'font-semibold');
+                const icon = this.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+            });
+        });
+    </script>
+</body></html>

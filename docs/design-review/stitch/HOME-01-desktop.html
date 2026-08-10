@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#d2daf0",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e9edff",
+                        "on-background": "#141b2c",
+                        "outline": "#747685",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "risk-critical": "#C11574",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f9f9ff",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "on-surface-variant": "#444654",
+                        "inverse-surface": "#293041",
+                        "canvas": "#F5F7FA",
+                        "surface": "#FFFFFF",
+                        "on-surface": "#141b2c",
+                        "primary-container": "#3157d5",
+                        "on-secondary-fixed": "#171c25",
+                        "surface-tint": "#2c53d1",
+                        "border-default": "#E4E7EC",
+                        "inverse-primary": "#b7c4ff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#606365",
+                        "tertiary-fixed": "#e0e3e5",
+                        "surface-container-low": "#f1f3ff",
+                        "market-up": "#D92D20",
+                        "on-primary-fixed": "#001452",
+                        "primary": "#063cbc",
+                        "secondary-container": "#dee2ef",
+                        "secondary": "#5a5e69",
+                        "on-secondary-container": "#60646f",
+                        "tertiary": "#484b4d",
+                        "on-secondary-fixed-variant": "#424751",
+                        "surface-container-high": "#e0e8ff",
+                        "risk-warning": "#DC6803",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container-highest": "#dbe2f9",
+                        "primary-fixed": "#dde1ff",
+                        "on-primary-container": "#d8ddff",
+                        "error": "#ba1a1a",
+                        "background": "#f9f9ff",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#dde0e1",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "market-down": "#079455",
+                        "surface-variant": "#dbe2f9",
+                        "secondary-fixed": "#dee2ef",
+                        "inverse-on-surface": "#edf0ff",
+                        "outline-variant": "#c4c5d6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter-mobile": "12px",
+                        "space-sm": "8px",
+                        "space-md": "12px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "space-2xl": "32px",
+                        "space-xs": "4px",
+                        "space-xl": "24px",
+                        "space-lg": "16px"
+                    },
+                    "fontFamily": {
+                        "caption": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h3": ["Inter"]
+                    },
+                    "fontSize": {
+                        "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                        "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                        "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F5F7FA; color: #141b2c; margin: 0; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; vertical-align: middle; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid #E4E7EC; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar Anchor -->
+<aside class="bg-surface-container-low dark:bg-surface-dim h-full w-[224px] fixed left-0 top-0 border-r border-border-default dark:border-outline-variant flex flex-col py-space-xl z-20">
+<div class="px-6 mb-10">
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-secondary opacity-70">Terminal v2.4</p>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<!-- Active: 首页 -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary dark:text-inverse-primary font-bold border-r-2 border-primary dark:border-inverse-primary transition-colors bg-surface-container/50" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">持仓</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-sm text-label-sm">助手</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-sm text-label-sm">研究</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-sm text-label-sm">设置</span>
+</a>
+</nav>
+<div class="px-6 pt-4 mt-auto border-t border-border-default/50">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center">
+<span class="text-primary font-bold text-xs">JD</span>
+</div>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">John Doe</p>
+<p class="text-[10px] text-secondary truncate">Premium Account</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[224px] flex-1 flex flex-col min-h-screen">
+<!-- TopNavBar Anchor -->
+<header class="h-[64px] sticky top-0 bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline-variant z-10 flex items-center justify-between px-space-xl">
+<div class="flex items-center gap-space-md w-1/3">
+<div class="relative w-full max-w-sm">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 font-body-md text-body-md focus:ring-2 focus:ring-primary/20" placeholder="搜索标的、研究或功能..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-space-lg">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="h-8 w-[1px] bg-border-default mx-2"></div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface">市场状态:</span>
+<span class="flex items-center gap-1 px-2 py-0.5 rounded bg-market-down/10 text-market-down text-[10px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-market-down animate-pulse"></span>
+                        交易中 (HK)
+                    </span>
+</div>
+</div>
+</header>
+<!-- Scrollable Dashboard Content -->
+<section class="p-space-xl space-y-space-xl max-w-[1400px] mx-auto w-full">
+<!-- 1. Metrics Grid (4 items) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-xl">
+<!-- Total Assets -->
+<div class="bg-surface border border-border-default p-space-lg rounded-xl flex flex-col justify-between hover:border-primary/30 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-secondary font-label-sm text-label-sm">总资产 (HKD)</span>
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors" data-icon="account_balance">account_balance</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg tracking-tight mb-1" style="font-variant-numeric: tabular-nums;">1,248,502.40</div>
+<div class="flex items-center gap-1 text-market-up">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+<span class="font-caption text-caption font-semibold">+1.24% 较昨日</span>
+</div>
+</div>
+</div>
+<!-- Daily P/L -->
+<div class="bg-surface border border-border-default p-space-lg rounded-xl flex flex-col justify-between hover:border-primary/30 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-secondary font-label-sm text-label-sm">今日盈亏</span>
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors" data-icon="monitoring">monitoring</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg tracking-tight mb-1 text-market-up" style="font-variant-numeric: tabular-nums;">+15,290.11</div>
+<div class="font-caption text-caption text-secondary">包含盘前预估盈利</div>
+</div>
+</div>
+<!-- Cash Position -->
+<div class="bg-surface border border-border-default p-space-lg rounded-xl flex flex-col justify-between hover:border-primary/30 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-secondary font-label-sm text-label-sm">可用现金</span>
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors" data-icon="payments">payments</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg tracking-tight mb-1" style="font-variant-numeric: tabular-nums;">312,045.00</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-[10px] font-bold text-secondary">购买力: 2.1x</span>
+</div>
+</div>
+</div>
+<!-- Risk Profile -->
+<div class="bg-surface border border-border-default p-space-lg rounded-xl flex flex-col justify-between hover:border-primary/30 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-secondary font-label-sm text-label-sm">组合风险等级</span>
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors" data-icon="security">security</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg tracking-tight mb-1 flex items-center gap-2">
+                            中等偏高
+                            <span class="w-3 h-3 rounded-full bg-risk-warning"></span>
+</div>
+<div class="font-caption text-caption text-secondary">VaR(95%) 预估 2.84%</div>
+</div>
+</div>
+</div>
+<!-- 2. Main Layout (8+4 Columns) -->
+<div class="grid grid-cols-12 gap-space-xl">
+<!-- Left Column (8 Columns) -->
+<div class="col-span-12 lg:col-span-8 space-y-space-xl">
+<!-- Section: 今日建议行动 -->
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<h2 class="font-headline-h2 text-headline-h2 tracking-tight">今日建议行动</h2>
+<button class="text-primary font-label-sm text-label-sm hover:underline">查看全部 AI 解析</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Advice Card 1 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-5">
+<span class="material-symbols-outlined text-6xl" data-icon="bolt">bolt</span>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded bg-primary-fixed text-primary font-micro-badge text-micro-badge">系统预判</span>
+<span class="text-outline text-caption font-caption">追踪编号 #2904</span>
+</div>
+<h3 class="font-headline-h3 text-headline-h3 mb-2">调整中芯国际仓位至 5.0%</h3>
+<p class="text-secondary font-body-md text-body-md mb-6 flex-1">
+                                    鉴于半导体行业近期周期性波动加剧，且您的组合在该板块暴露过高。建议减持 1.5% 的中芯国际 (0981.HK) 以锁定利润并降低整体波动率。
+                                </p>
+<div class="flex items-center gap-3">
+<button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-all active:scale-[0.98]">立即执行</button>
+<button class="px-4 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg font-label-sm text-label-sm hover:bg-secondary-container/80 transition-all">忽略</button>
+</div>
+</div>
+<!-- Advice Card 2 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-5">
+<span class="material-symbols-outlined text-6xl" data-icon="fact_check">fact_check</span>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded bg-market-down/10 text-market-down font-micro-badge text-micro-badge">基本面事实</span>
+<span class="text-outline text-caption font-caption">追踪编号 #2905</span>
+</div>
+<h3 class="font-headline-h3 text-headline-h3 mb-2">现金再投资：国债 ETF</h3>
+<p class="text-secondary font-body-md text-body-md mb-6 flex-1">
+                                    目前账户闲置现金占比 25%，超出了您的 15% 长期战略设定。建议将 10% 闲置现金配置于“华夏政金债 ETF”，在保持流动性的同时获取稳健收益。
+                                </p>
+<div class="flex items-center gap-3">
+<button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-all active:scale-[0.98]">了解详情</button>
+<button class="px-4 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg font-label-sm text-label-sm hover:bg-secondary-container/80 transition-all">稍后提醒</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: 核心持仓表现 -->
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden">
+<div class="px-space-lg py-4 border-b border-border-default flex items-center justify-between bg-surface-container-low/30">
+<h2 class="font-label-sm text-label-sm font-bold">核心持仓表现</h2>
+<div class="flex gap-2">
+<button class="p-1 hover:bg-surface-container rounded transition-colors"><span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span></button>
+<button class="p-1 hover:bg-surface-container rounded transition-colors"><span class="material-symbols-outlined text-sm" data-icon="more_horiz">more_horiz</span></button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low/50">
+<tr>
+<th class="px-space-lg py-3 font-micro-badge text-micro-badge text-outline uppercase tracking-wider">标的名称/代码</th>
+<th class="px-space-lg py-3 font-micro-badge text-micro-badge text-outline uppercase tracking-wider text-right">持仓量</th>
+<th class="px-space-lg py-3 font-micro-badge text-micro-badge text-outline uppercase tracking-wider text-right">现价</th>
+<th class="px-space-lg py-3 font-micro-badge text-micro-badge text-outline uppercase tracking-wider text-right">当日涨跌</th>
+<th class="px-space-lg py-3 font-micro-badge text-micro-badge text-outline uppercase tracking-wider text-right">盈亏</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-default">
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-lg py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-bold text-[10px]">TENC</div>
+<div>
+<div class="font-label-sm text-label-sm">腾讯控股</div>
+<div class="font-caption text-caption text-outline">0700.HK</div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md">2,500</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md">385.20</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md text-market-up">+2.45%</td>
+<td class="px-space-lg py-4 text-right">
+<div class="font-label-sm text-label-sm text-market-up">+23,500.00</div>
+<div class="font-caption text-caption text-outline">HKD</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-lg py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-bold text-[10px]">NVDA</div>
+<div>
+<div class="font-label-sm text-label-sm">英伟达</div>
+<div class="font-caption text-caption text-outline">NVDA.US</div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md">150</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md">132.89</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md text-market-down">-0.84%</td>
+<td class="px-space-lg py-4 text-right">
+<div class="font-label-sm text-label-sm text-market-down">-1,120.40</div>
+<div class="font-caption text-caption text-outline">USD</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-lg py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-bold text-[10px]">PING</div>
+<div>
+<div class="font-label-sm text-label-sm">中国平安</div>
+<div class="font-caption text-caption text-outline">2318.HK</div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md">5,000</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md">42.15</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md text-market-up">+0.12%</td>
+<td class="px-space-lg py-4 text-right">
+<div class="font-label-sm text-label-sm text-market-up">+450.00</div>
+<div class="font-caption text-caption text-outline">HKD</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-lg py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-bold text-[10px]">HSBC</div>
+<div>
+<div class="font-label-sm text-label-sm">汇丰控股</div>
+<div class="font-caption text-caption text-outline">0005.HK</div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md">8,000</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md">64.95</td>
+<td class="px-space-lg py-4 text-right font-body-md text-body-md text-outline">0.00%</td>
+<td class="px-space-lg py-4 text-right">
+<div class="font-label-sm text-label-sm text-outline">0.00</div>
+<div class="font-caption text-caption text-outline">HKD</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-space-lg py-3 border-t border-border-default bg-surface text-center">
+<button class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors">展开所有持仓 (24个)</button>
+</div>
+</div>
+</div>
+<!-- Right Column (4 Columns) -->
+<div class="col-span-12 lg:col-span-4 space-y-space-xl">
+<!-- Section: 风险提示聚合 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-label-sm text-label-sm font-bold">风险提示聚合</h3>
+<span class="w-5 h-5 rounded-full bg-risk-critical text-white text-[10px] flex items-center justify-center font-bold">2</span>
+</div>
+<div class="space-y-3">
+<div class="p-3 bg-error-container/20 border-l-4 border-risk-critical rounded-r-lg">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-risk-critical text-sm" data-icon="report">report</span>
+<span class="font-label-sm text-label-sm text-risk-critical">关键警报</span>
+</div>
+<p class="text-caption font-caption text-on-surface-variant">恒指成分股“碧桂园服务”财报未达预期，相关持仓信用评分下调。</p>
+</div>
+<div class="p-3 bg-risk-warning/10 border-l-4 border-risk-warning rounded-r-lg">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-risk-warning text-sm" data-icon="warning">warning</span>
+<span class="font-label-sm text-label-sm text-risk-warning">一般预警</span>
+</div>
+<p class="text-caption font-caption text-on-surface-variant">美联储今晚公布纪要，预计美元对离岸人民币汇率波动率将上升。</p>
+</div>
+</div>
+</div>
+<!-- Section: 最新研报与任务状态 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<h3 class="font-label-sm text-label-sm font-bold mb-4">研究与任务</h3>
+<div class="space-y-4">
+<!-- Research Item -->
+<div class="group cursor-pointer">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="description">description</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<h4 class="font-label-sm text-label-sm truncate group-hover:text-primary transition-colors">2024 AI 算力行业深度展望</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] text-outline">Goldman Sachs</span>
+<span class="text-[10px] text-outline">•</span>
+<span class="text-[10px] text-outline">3小时前</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Task Item -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-primary-container border-t-transparent animate-spin shrink-0"></div>
+<div>
+<div class="font-label-sm text-label-sm">生成式分析报告</div>
+<div class="w-full bg-surface-container-low h-1 rounded-full mt-1 overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+<div class="text-[10px] text-outline mt-1">正在整合 12 个数据源... 65%</div>
+</div>
+</div>
+<!-- Task Item Completed -->
+<div class="flex items-center gap-3 opacity-60">
+<div class="w-10 h-10 rounded bg-market-down/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-market-down text-sm" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm line-through">税务年度审计数据导出</div>
+<div class="text-[10px] text-outline">已于 09:12 完成</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2 border border-border-default rounded-lg text-caption font-caption text-secondary hover:bg-surface-container transition-colors">管理所有研究计划</button>
+</div>
+<!-- Section: 数据源质量看板 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-label-sm text-label-sm font-bold">数据源健康度</h3>
+<span class="material-symbols-outlined text-outline text-sm" data-icon="info">info</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-caption font-caption text-secondary">Bloomberg Terminal</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-caption font-caption text-secondary">Refinitiv Real-time</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+<div class="w-1 h-3 rounded-full bg-outline/20"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-caption font-caption text-secondary">Alternative Data AI</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+<div class="w-1 h-3 rounded-full bg-market-down"></div>
+<div class="w-1 h-3 rounded-full bg-risk-warning"></div>
+<div class="w-1 h-3 rounded-full bg-outline/20"></div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-border-default">
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-outline">平均同步延迟</span>
+<span class="text-[10px] font-bold text-market-down">14ms</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer Atmospheric Layer -->
+<footer class="mt-auto p-space-xl text-center">
+<p class="text-outline text-caption font-caption">© 2024 WWS Adviser. 所有数据延迟 15 分钟，除非另有说明。 投资有风险，决策需谨慎。</p>
+</footer>
+</main>
+<!-- FAB Suppression: This is a Dashboard/Overview, so a contextual FAB for "New Order" could be relevant -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 group">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="absolute right-full mr-4 px-3 py-1.5 bg-inverse-surface text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">快速下单</span>
+</button>
+<script>
+        // Micro-interaction for numbers
+        document.querySelectorAll('.font-display-lg').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                el.style.transform = 'translateY(-2px)';
+                el.style.transition = 'transform 0.2s ease';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simulating data updates
+        setInterval(() => {
+            const upElements = document.querySelectorAll('.text-market-up');
+            if (upElements.length > 0) {
+                const randomEl = upElements[Math.floor(Math.random() * upElements.length)];
+                randomEl.classList.add('brightness-125');
+                setTimeout(() => randomEl.classList.remove('brightness-125'), 500);
+            }
+        }, 3000);
+    </script>
+</body></html>
