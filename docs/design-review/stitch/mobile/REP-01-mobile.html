@@ -1,0 +1,365 @@
+<!DOCTYPE html><html class="light" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>WWS Adviser - 开市前报告</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#dde0e1",
+                        "surface-tint": "#2c53d1",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "primary-fixed": "#dde1ff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-bright": "#f9f9ff",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "secondary": "#5a5e69",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#171c25",
+                        "primary-container": "#3157d5",
+                        "surface-container-lowest": "#ffffff",
+                        "market-up": "#D92D20",
+                        "tertiary": "#484b4d",
+                        "on-primary-fixed": "#001452",
+                        "on-surface-variant": "#444654",
+                        "secondary-container": "#dee2ef",
+                        "surface-container-highest": "#dbe2f9",
+                        "risk-warning": "#DC6803",
+                        "surface-container": "#e9edff",
+                        "on-background": "#141b2c",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-primary-container": "#d8ddff",
+                        "canvas": "#F5F7FA",
+                        "on-secondary-container": "#60646f",
+                        "tertiary-fixed": "#e0e3e5",
+                        "primary": "#063cbc",
+                        "on-tertiary-fixed": "#191c1e",
+                        "risk-critical": "#C11574",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "on-surface": "#141b2c",
+                        "outline-variant": "#c4c5d6",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#dbe2f9",
+                        "on-secondary-fixed-variant": "#424751",
+                        "market-down": "#079455",
+                        "outline": "#747685",
+                        "inverse-on-surface": "#edf0ff",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f1f3ff",
+                        "surface-dim": "#d2daf0",
+                        "secondary-fixed": "#dee2ef",
+                        "surface": "#FFFFFF",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9ff",
+                        "inverse-surface": "#293041",
+                        "surface-container-high": "#e0e8ff",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#606365",
+                        "inverse-primary": "#b7c4ff",
+                        "border-default": "#E4E7EC"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-xl": "24px",
+                        "space-sm": "8px",
+                        "space-md": "12px",
+                        "space-lg": "16px",
+                        "space-2xl": "32px",
+                        "margin-mobile": "16px",
+                        "space-xs": "4px",
+                        "gutter-mobile": "12px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "micro-badge": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface min-h-screen flex flex-col pb-safe">
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-border-default sticky top-0 z-50 transition-colors duration-200 ease-in-out w-full px-margin-mobile h-16 flex justify-between items-center">
+<button class="text-primary hover:bg-surface-container-low rounded-full p-2 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-h2 text-headline-h2 font-bold text-primary tracking-tight">开市前报告 (REP-01)</h1>
+<button class="text-primary hover:bg-surface-container-low rounded-full p-2 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+</button>
+</header>
+<main class="flex-1 w-full max-w-5xl mx-auto px-margin-mobile md:px-space-2xl py-space-xl flex flex-col gap-space-xl">
+<!-- Report Header Info -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-space-sm border-b border-border-default pb-space-md">
+<div>
+<p class="font-headline-h1 text-headline-h1 text-on-surface mb-space-xs">2026-07-16 晨间洞察</p>
+<p class="font-body-md text-body-md text-secondary">数据截止时间: 2026-07-16 08:30 GMT+8</p>
+</div>
+<div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-sm rounded-lg border border-border-default">
+<span class="material-symbols-outlined text-risk-warning" data-icon="info">info</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">报告状态: 最终版</span>
+</div>
+</section>
+<!-- Executive Summary (Bento Grid) -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Portfolio Risk -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-space-sm justify-between shadow-sm">
+<div class="flex justify-between items-center">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">组合风险评分</h3>
+<span class="material-symbols-outlined text-risk-warning" data-icon="warning">warning</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-display-lg-mobile text-display-lg-mobile text-risk-warning">中等</span>
+<span class="font-caption text-caption text-secondary">/ 65 pts</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">受隔夜外围市场波动及部分个股消息影响。</p>
+</div>
+<!-- Key Events -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-space-sm justify-between shadow-sm">
+<div class="flex justify-between items-center">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">重大事项监控</h3>
+<span class="material-symbols-outlined text-primary" data-icon="notifications_active">notifications_active</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-display-lg-mobile text-display-lg-mobile text-on-surface">3</span>
+<span class="font-caption text-caption text-secondary">项需关注</span>
+</div>
+<div class="flex gap-space-xs mt-space-xs">
+<span class="bg-error-container text-on-error-container px-2 py-1 rounded font-micro-badge text-micro-badge">1 高风险</span>
+<span class="bg-surface-container-highest text-on-surface px-2 py-1 rounded font-micro-badge text-micro-badge">2 常规</span>
+</div>
+</div>
+<!-- Suggested Actions -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-space-sm justify-between shadow-sm">
+<div class="flex justify-between items-center">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">建议动作分布</h3>
+<span class="material-symbols-outlined text-primary" data-icon="insights">insights</span>
+</div>
+<div class="flex flex-col gap-space-xs mt-space-sm">
+<div class="flex items-center justify-between font-caption text-caption">
+<span class="text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-risk-critical"></span> 减仓/平仓</span>
+<span class="font-medium">1</span>
+</div>
+<div class="flex items-center justify-between font-caption text-caption">
+<span class="text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-surface-tint"></span> 调仓/买入</span>
+<span class="font-medium">1</span>
+</div>
+<div class="flex items-center justify-between font-caption text-caption">
+<span class="text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span> 观望</span>
+<span class="font-medium">多数</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Critical Risk Alert -->
+<section class="bg-error-container border border-error/30 rounded-xl p-space-lg flex flex-col md:flex-row gap-space-md items-start">
+<div class="bg-error text-on-error p-space-sm rounded-lg flex-shrink-0">
+<span class="material-symbols-outlined" data-icon="crisis_alert">crisis_alert</span>
+</div>
+<div class="flex-1">
+<h3 class="font-headline-h3 text-headline-h3 text-on-error-container mb-space-xs">关键风险提醒：宁德时代发布重大减持公告</h3>
+<p class="font-body-md text-body-md text-on-error-container/80 mb-space-md">
+                    宁德时代（300750.SZ）控股股东昨晚发布减持计划，拟减持不超过总股本2%的股份。鉴于该标的在您的组合中占比达12%，预计今日开盘将面临较大抛压，可能导致组合整体净值回撤超1.5%。
+                </p>
+<div class="flex gap-space-sm">
+<button class="bg-error text-on-error px-space-md py-space-sm rounded-lg font-label-sm text-label-sm hover:bg-error/90 transition-colors">查看持仓详情</button>
+<button class="bg-surface text-on-error-container border border-error/50 px-space-md py-space-sm rounded-lg font-label-sm text-label-sm hover:bg-error-container transition-colors">忽略提醒</button>
+</div>
+</div>
+</section>
+<!-- Today's Actions (Advice Cards) -->
+<section class="flex flex-col gap-space-md">
+<h2 class="font-headline-h2 text-headline-h2 text-on-surface border-l-4 border-primary pl-space-sm">今日行动建议</h2>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-md">
+<!-- Advice Card 1 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-space-md hover:border-outline-variant transition-colors shadow-sm">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">降低新能源板块敞口</h3>
+<div class="flex gap-space-xs">
+<span class="bg-surface-container text-primary px-2 py-1 rounded font-micro-badge text-micro-badge border border-primary/20">Judgment</span>
+<span class="bg-error-container text-on-error-container px-2 py-1 rounded font-micro-badge text-micro-badge">Risk: High</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-tertiary" data-icon="sell">sell</span>
+</div>
+<div class="bg-canvas p-space-sm rounded-lg border border-border-default font-body-md text-body-md text-secondary">
+                        基于控股股东减持公告及近期行业产能过剩的宏观数据（事实），模型计算显示短期下行风险概率&gt;75%（计算），建议逢高降低宁德时代及相关产业链标的仓位至5%以内（判断）。
+                    </div>
+<div class="flex justify-between items-center mt-auto pt-space-sm border-t border-border-default">
+<span class="font-caption text-caption text-secondary">相关标的: 300750.SZ, 002812.SZ</span>
+<button class="bg-[#EEF2FF] text-primary px-space-md py-space-sm rounded-lg font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-colors border border-primary/10">执行减仓预案</button>
+</div>
+</div>
+<!-- Advice Card 2 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-space-md hover:border-outline-variant transition-colors shadow-sm">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">逢低布局高股息资产</h3>
+<div class="flex gap-space-xs">
+<span class="bg-surface-container text-primary px-2 py-1 rounded font-micro-badge text-micro-badge border border-primary/20">Calculation</span>
+<span class="bg-[#e8f5e9] text-[#2e7d32] px-2 py-1 rounded font-micro-badge text-micro-badge">Opportunity</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-tertiary" data-icon="add_shopping_cart">add_shopping_cart</span>
+</div>
+<div class="bg-canvas p-space-sm rounded-lg border border-border-default font-body-md text-body-md text-secondary">
+                        美联储降息预期增强，国内流动性充裕。煤炭、公用事业板块历史分位数处于合理区间（计算），建议利用市场波动将减仓资金逐步转移至高股息红利ETF，增强组合防御性（判断）。
+                    </div>
+<div class="flex justify-between items-center mt-auto pt-space-sm border-t border-border-default">
+<span class="font-caption text-caption text-secondary">标的: 510880.SH (股息率 5.2%)</span>
+<button class="bg-primary text-on-primary px-space-md py-space-sm rounded-lg font-label-sm text-label-sm hover:bg-primary-fixed-variant transition-colors">生成买入草稿</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Market Events (Tables/Lists) -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-space-xl">
+<!-- Overnight News -->
+<div class="flex flex-col gap-space-md">
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface border-l-4 border-tertiary pl-space-sm">隔夜重大公告 / 行业事件</h2>
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm">
+<div class="flex flex-col divide-y divide-border-default">
+<div class="p-space-md flex gap-space-md items-start hover:bg-canvas transition-colors">
+<span class="bg-surface-container text-primary font-caption text-caption px-2 py-1 rounded shrink-0">宏观</span>
+<div class="flex-1">
+<p class="font-label-sm text-label-sm text-on-surface">美国CPI数据不及预期，通胀降温</p>
+<p class="font-caption text-caption text-secondary mt-1">利好贵金属及全球流动性宽松预期。</p>
+</div>
+</div>
+<div class="p-space-md flex gap-space-md items-start hover:bg-canvas transition-colors">
+<span class="bg-error-container text-on-error-container font-caption text-caption px-2 py-1 rounded shrink-0">公告</span>
+<div class="flex-1">
+<p class="font-label-sm text-label-sm text-on-surface">贵州茅台发布半年报业绩预告</p>
+<p class="font-caption text-caption text-secondary mt-1">预计净利润同比增长15%左右，符合预期。</p>
+</div>
+</div>
+<div class="p-space-md flex gap-space-md items-start hover:bg-canvas transition-colors">
+<span class="bg-secondary-container text-on-secondary-container font-caption text-caption px-2 py-1 rounded shrink-0">行业</span>
+<div class="flex-1">
+<p class="font-label-sm text-label-sm text-on-surface">工信部印发算力基础设施高质量发展行动计划</p>
+<p class="font-caption text-caption text-secondary mt-1">关注算力产业链、光模块等标的。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Calendar -->
+<div class="flex flex-col gap-space-md">
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface border-l-4 border-tertiary pl-space-sm">停复牌 / 分红日历 (持仓相关)</h2>
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead class="bg-canvas border-b border-border-default">
+<tr>
+<th class="p-space-md font-label-sm text-label-sm text-secondary font-medium">标的</th>
+<th class="p-space-md font-label-sm text-label-sm text-secondary font-medium">事件类型</th>
+<th class="p-space-md font-label-sm text-label-sm text-secondary font-medium text-right">详情</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-default">
+<tr class="hover:bg-canvas transition-colors h-[48px]">
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface">中国神华</span>
+<span class="font-caption text-caption text-secondary">601088.SH</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<span class="bg-[#e3f2fd] text-[#1565c0] px-2 py-1 rounded font-micro-badge text-micro-badge">分红派息</span>
+</td>
+<td class="px-space-md py-space-sm text-right">
+<span class="font-label-sm text-label-sm text-on-surface">今日除权除息</span>
+</td>
+</tr>
+<tr class="hover:bg-canvas transition-colors h-[48px]">
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface">恒瑞医药</span>
+<span class="font-caption text-caption text-secondary">600276.SH</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<span class="bg-surface-container-highest text-tertiary px-2 py-1 rounded font-micro-badge text-micro-badge">股东大会</span>
+</td>
+<td class="px-space-md py-space-sm text-right">
+<span class="font-label-sm text-label-sm text-on-surface">14:00 召开</span>
+</td>
+</tr>
+<tr class="hover:bg-canvas transition-colors h-[48px]">
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface">某信托产品</span>
+<span class="font-caption text-caption text-secondary">非标资产</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<span class="bg-error-container text-on-error-container px-2 py-1 rounded font-micro-badge text-micro-badge">付息日</span>
+</td>
+<td class="px-space-md py-space-sm text-right">
+<span class="font-label-sm text-label-sm text-on-surface">需关注兑付情况</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- Footer / Disclaimers -->
+<footer class="mt-space-2xl pt-space-xl border-t border-border-default flex flex-col gap-space-md">
+<div class="font-caption text-caption text-secondary space-y-2">
+<p><strong>数据来源:</strong> 万得资讯 (Wind), 彭博 (Bloomberg), 内部量化模型 v4.2。行情数据存在约 15 分钟延迟。</p>
+<p><strong>免责声明:</strong> 本报告仅供 WWS Adviser 系统内部参考，不构成任何投资建议。模型计算基于历史数据和特定算法假设，不保证未来收益。投资有风险，决策需谨慎。</p>
+</div>
+<div class="flex items-center gap-space-sm mt-space-md opacity-50">
+<span class="material-symbols-outlined text-secondary" data-icon="verified_user">verified_user</span>
+<span class="font-micro-badge text-micro-badge text-secondary">Generated by WWS Adviser Engine</span>
+</div>
+</footer>
+</main>
+<!-- BottomNavBar (Hidden on MD and above, shown on mobile) -->
+<!-- Note: Following guidelines, nav is suppressed if it's a linear/focused view. A specific report (REP-01) is a focused view (has back button).
+         Therefore, the BottomNavBar is NOT rendered here as per "Shell Visibility & Relevance (THE FILTER)" rule for Task-Focused pages. -->
+</body></html>

@@ -173,8 +173,8 @@ uvicorn wws_adviser.main:app --host 0.0.0.0 --port 8000 --workers 1
 
 | 事项 | 当前默认 | 备注 |
 | --- | --- | --- |
-| 通知渠道首选 | 待选企业微信/Server 酱/邮件一种 | `TODO(notifier-selection)` |
+| 通知渠道首选 | 待选企业微信/Server 酱/邮件一种 | `TODO(notifier-selection)`，**Phase 1.6 前定** |
 | 备份异地加密 | 客户端可选加密，异地启用 | 密钥与备份分离 |
-| 反代选型 | Caddy 或 Nginx | 云端部署时定 |
 | CSRF 策略 | 双提交 Token + SameSite | 高敏感操作额外 Origin 校验 |
-| 磁盘加密 | 宿主机可选 | NAS 部署评估 |
+
+> **已确认（2026-08-11）**：部署形态为**云端 VPS（单容器）**；反向代理 / HTTPS 选定 **Nginx** + 证书（certbot 或同等方案）。原“NAS 部署评估磁盘加密”随部署变更取消，改为 VPS 宿主机磁盘加密按云厂商能力评估。

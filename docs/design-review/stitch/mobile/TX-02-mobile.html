@@ -1,0 +1,269 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>WWS Adviser - New Transaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "risk-warning": "#DC6803",
+                      "surface-tint": "#2c53d1",
+                      "canvas": "#F5F7FA",
+                      "secondary-fixed": "#dee2ef",
+                      "primary": "#063cbc",
+                      "tertiary": "#484b4d",
+                      "secondary": "#5a5e69",
+                      "tertiary-fixed": "#e0e3e5",
+                      "inverse-primary": "#b7c4ff",
+                      "primary-container": "#3157d5",
+                      "surface-container-lowest": "#ffffff",
+                      "on-surface": "#141b2c",
+                      "inverse-on-surface": "#edf0ff",
+                      "market-down": "#079455",
+                      "on-primary-fixed-variant": "#0038b6",
+                      "surface-container-high": "#e0e8ff",
+                      "secondary-container": "#dee2ef",
+                      "surface-variant": "#dbe2f9",
+                      "secondary-fixed-dim": "#c2c6d3",
+                      "surface-container": "#e9edff",
+                      "primary-fixed": "#dde1ff",
+                      "tertiary-container": "#606365",
+                      "on-secondary-container": "#60646f",
+                      "primary-fixed-dim": "#b7c4ff",
+                      "on-tertiary-container": "#dde0e1",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed": "#001452",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "error": "#ba1a1a",
+                      "on-primary-container": "#d8ddff",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed": "#171c25",
+                      "background": "#f9f9ff",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "surface-container-low": "#f1f3ff",
+                      "on-secondary-fixed-variant": "#424751",
+                      "market-up": "#D92D20",
+                      "on-surface-variant": "#444654",
+                      "risk-critical": "#C11574",
+                      "inverse-surface": "#293041",
+                      "outline": "#747685",
+                      "surface-container-highest": "#dbe2f9",
+                      "surface-dim": "#d2daf0",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "border-default": "#E4E7EC",
+                      "surface-bright": "#f9f9ff",
+                      "on-background": "#141b2c",
+                      "surface": "#FFFFFF",
+                      "outline-variant": "#c4c5d6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "unit": "4px",
+                      "gutter-mobile": "12px",
+                      "space-xl": "24px",
+                      "space-sm": "8px",
+                      "space-md": "12px",
+                      "space-lg": "16px",
+                      "space-2xl": "32px",
+                      "space-xs": "4px"
+              },
+              "fontFamily": {
+                      "micro-badge": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "caption": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-h2": ["Inter"],
+                      "headline-h1": ["Inter"],
+                      "display-lg-mobile": ["Inter"],
+                      "headline-h3": ["Inter"],
+                      "label-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                      "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                      "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                      "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface min-h-screen pb-safe">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline flat no shadows flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-50">
+<button class="text-on-surface-variant p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<div class="font-headline-h2 text-headline-h2 font-bold text-primary dark:text-primary-fixed-dim">
+            New Transaction
+        </div>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="p-margin-mobile flex flex-col gap-space-xl">
+<!-- Transaction Type Selector -->
+<section class="bg-surface rounded-xl border border-border-default p-space-md">
+<h2 class="font-label-sm text-label-sm text-on-surface-variant mb-space-sm uppercase tracking-wider">Transaction Type</h2>
+<div class="grid grid-cols-4 gap-space-xs">
+<button class="bg-primary-container text-on-primary-container font-body-md text-body-md py-2 rounded-lg border border-primary font-medium flex flex-col items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+                    Buy
+                </button>
+<button class="bg-surface text-on-surface-variant font-body-md text-body-md py-2 rounded-lg border border-border-default hover:bg-surface-container-low flex flex-col items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[20px]">remove_circle</span>
+                    Sell
+                </button>
+<button class="bg-surface text-on-surface-variant font-body-md text-body-md py-2 rounded-lg border border-border-default hover:bg-surface-container-low flex flex-col items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[20px]">subscriptions</span>
+                    Sub
+                </button>
+<button class="bg-surface text-on-surface-variant font-body-md text-body-md py-2 rounded-lg border border-border-default hover:bg-surface-container-low flex flex-col items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+                    Div
+                </button>
+</div>
+</section>
+<!-- Instrument Search -->
+<section class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant ml-1">Instrument</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface border border-border-default rounded-[10px] py-3 pl-10 pr-4 font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" placeholder="Search ISIN, Ticker, or Name" type="text">
+</div>
+</section>
+<!-- Details Form -->
+<section class="bg-surface rounded-xl border border-border-default p-space-md flex flex-col gap-space-lg">
+<!-- Date/Time -->
+<div class="grid grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Trade Date</label>
+<div class="relative">
+<input class="w-full bg-surface border border-border-default rounded-[10px] py-2 px-3 font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" type="date" value="2024-05-14">
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Settlement Date</label>
+<div class="relative">
+<input class="w-full bg-surface border border-border-default rounded-[10px] py-2 px-3 font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow text-on-surface-variant" readonly="" type="date" value="2024-05-16">
+</div>
+</div>
+</div>
+<hr class="border-border-default border-t">
+<!-- Quantities -->
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-end">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Quantity / Units</label>
+</div>
+<input class="w-full bg-surface border border-border-default rounded-[10px] py-3 px-3 font-body-lg text-body-lg text-right focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" placeholder="0.0000" type="number">
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-end">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Price / NAV</label>
+<span class="font-caption text-caption text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded">USD</span>
+</div>
+<input class="w-full bg-surface border border-border-default rounded-[10px] py-3 px-3 font-body-lg text-body-lg text-right focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" placeholder="0.00" type="number">
+</div>
+</div>
+<hr class="border-border-default border-t">
+<!-- Fees & Taxes -->
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Include Fees/Taxes?</label>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-surface-container-low appearance-none cursor-pointer checked:right-0 checked:border-primary" id="toggle" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-low cursor-pointer" for="toggle"></label>
+</div>
+<style>
+                        .toggle-checkbox:checked { right: 0; border-color: #063cbc; }
+                        .toggle-checkbox:checked + .toggle-label { background-color: #e0e8ff; }
+                    </style>
+</div>
+<!-- Expanded Fee Section (Hidden by default, shown for UI completeness) -->
+<div class="grid grid-cols-2 gap-space-md bg-surface-container-low p-space-sm rounded-lg border border-border-default">
+<div class="flex flex-col gap-space-xs">
+<label class="font-caption text-caption text-on-surface-variant">Commission</label>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 font-caption text-caption text-on-surface-variant">$</span>
+<input class="w-full bg-surface border border-border-default rounded-[10px] py-1.5 pl-5 pr-2 font-body-md text-body-md text-right focus:outline-none focus:border-primary" placeholder="0.00" type="number">
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-caption text-caption text-on-surface-variant">Taxes</label>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 font-caption text-caption text-on-surface-variant">$</span>
+<input class="w-full bg-surface border border-border-default rounded-[10px] py-1.5 pl-5 pr-2 font-body-md text-body-md text-right focus:outline-none focus:border-primary" placeholder="0.00" type="number">
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Cash Impact Preview -->
+<section class="bg-surface-bright rounded-xl border border-primary-fixed p-space-md shadow-sm">
+<h3 class="font-label-sm text-label-sm text-primary mb-space-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] filled-icon">account_balance</span>
+                Estimated Cash Impact
+            </h3>
+<div class="flex justify-between items-end">
+<span class="font-body-md text-body-md text-on-surface-variant">Gross Amount</span>
+<span class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">
+<span class="font-caption text-caption text-on-surface-variant mr-1">USD</span>- 0.00
+                </span>
+</div>
+<div class="flex justify-between items-end mt-1">
+<span class="font-caption text-caption text-on-surface-variant">Net Amount (inc. fees)</span>
+<span class="font-body-md text-body-md text-on-surface tabular-nums text-market-up">
+<span class="font-caption text-caption text-on-surface-variant mr-1">USD</span>- 0.00
+                </span>
+</div>
+</section>
+<!-- Save Button -->
+<div class="pt-space-sm pb-space-2xl">
+<button class="w-full bg-primary text-on-primary font-headline-h3 text-headline-h3 py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-on-primary-fixed-variant transition-colors shadow-sm">
+<span class="material-symbols-outlined">save</span>
+                Save Transaction
+            </button>
+</div>
+</main>
+</body></html>

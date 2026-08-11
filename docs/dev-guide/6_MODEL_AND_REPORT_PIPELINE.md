@@ -297,6 +297,8 @@ PENDING → RUNNING → COMPLETED
 | 快速/研究模型档位划分 | 按 `task_type` 路由 | `model_profiles.task_routes_json` |
 | 盘中有效期默认 | 10 分钟 | 可配（FR-CHAT-003） |
 | 模型一次受控修复策略 | 一次 Pydantic 自动修复后重校 | 复杂 schema 可能需放宽，留 ADR |
-| 通知渠道首选 | 待选企业微信/Server 酱/邮件一种 | `TODO(notifier-selection)` |
+| 通知渠道首选 | 待选企业微信/Server 酱/邮件一种 | `TODO(notifier-selection)`，**Phase 1.6 前定** |
 | 告警冷却窗口 | 按 `event_type` 配置 | 选型后填充 |
 | 任务 `max_attempts` 默认 | 留运行配置 | 区分报告/采集/备份 |
+
+> **已确认（2026-08-11）**：开市前报告 **08:30 启动、09:00 前完成**（较原 08:45/09:10 提前 15 分钟，约束隔夜采集任务须在 08:30 前就位）；收市后复盘 16:00 启动、17:00 前完成。标的范围仅 A 股 + 场内 ETF，研究/检索流水线无需覆盖场外公募基金净值披露。

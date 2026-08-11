@@ -1,0 +1,271 @@
+<!DOCTYPE html><html class="light" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>WWS Adviser - 设置</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#171c25",
+                        "inverse-primary": "#b7c4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-on-surface": "#edf0ff",
+                        "error-container": "#ffdad6",
+                        "border-default": "#E4E7EC",
+                        "on-primary-container": "#d8ddff",
+                        "risk-warning": "#DC6803",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#dbe2f9",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#dee2ef",
+                        "secondary": "#5a5e69",
+                        "secondary-fixed": "#dee2ef",
+                        "on-secondary-fixed-variant": "#424751",
+                        "on-primary-fixed": "#001452",
+                        "on-surface": "#141b2c",
+                        "market-up": "#D92D20",
+                        "surface-dim": "#d2daf0",
+                        "primary-fixed": "#dde1ff",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "market-down": "#079455",
+                        "primary": "#063cbc",
+                        "surface": "#FFFFFF",
+                        "tertiary": "#484b4d",
+                        "on-tertiary-container": "#dde0e1",
+                        "outline": "#747685",
+                        "background": "#f9f9ff",
+                        "primary-container": "#3157d5",
+                        "inverse-surface": "#293041",
+                        "tertiary-fixed": "#e0e3e5",
+                        "canvas": "#F5F7FA",
+                        "risk-critical": "#C11574",
+                        "on-surface-variant": "#444654",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "surface-tint": "#2c53d1",
+                        "outline-variant": "#c4c5d6",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container": "#e9edff",
+                        "on-secondary-container": "#60646f",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container-high": "#e0e8ff",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "surface-container-low": "#f1f3ff",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-background": "#141b2c",
+                        "tertiary-container": "#606365",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#0038b6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "space-lg": "16px",
+                        "margin-mobile": "16px",
+                        "space-2xl": "32px",
+                        "space-md": "12px",
+                        "space-xs": "4px",
+                        "space-sm": "8px",
+                        "gutter-mobile": "12px",
+                        "space-xl": "24px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter", "sans-serif"],
+                        "headline-h3": ["Inter", "sans-serif"],
+                        "caption": ["Inter", "sans-serif"],
+                        "micro-badge": ["Inter", "sans-serif"],
+                        "headline-h2": ["Inter", "sans-serif"],
+                        "headline-h1": ["Inter", "sans-serif"],
+                        "display-lg": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "display-lg-mobile": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-background antialiased min-h-screen flex flex-col pt-16 pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-40 bg-surface border-b border-border-default flex justify-between items-center w-full px-margin-mobile h-16">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 ease-in-out p-2 rounded-full">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+<h1 class="font-headline-h2 text-headline-h2 text-primary font-bold">WWS Adviser</h1>
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 ease-in-out p-2 rounded-full">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-3xl mx-auto px-margin-mobile py-space-xl space-y-space-xl md:px-32 md:py-8 md:space-y-8">
+<div class="mb-space-lg">
+<h2 class="font-headline-h1 text-headline-h1 text-on-surface">设置</h2>
+</div>
+<!-- 投资与风险 -->
+<section class="space-y-space-sm">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider pl-2">投资与风险</h3>
+<div class="bg-surface rounded-xl border border-border-default overflow-hidden">
+<a class="flex items-center justify-between p-space-lg border-b border-border-default hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<div>
+<p class="font-headline-h3 text-headline-h3 text-on-surface">风险限额配置</p>
+<p class="font-caption text-caption text-secondary">当前限额: $500k / 单笔</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-space-lg hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">percent</span>
+</div>
+<div>
+<p class="font-headline-h3 text-headline-h3 text-on-surface">凯利折扣参数</p>
+<p class="font-caption text-caption text-secondary">保守模式: 0.5f</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- 数据与模型 -->
+<section class="space-y-space-sm">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider pl-2">数据与模型</h3>
+<div class="bg-surface rounded-xl border border-border-default overflow-hidden">
+<a class="flex items-center justify-between p-space-lg border-b border-border-default hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div>
+<p class="font-headline-h3 text-headline-h3 text-on-surface">数据源状态</p>
+<p class="font-caption text-caption text-market-down flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-market-down inline-block"></span>
+                                Bloomberg, Reuters 正常连接
+                            </p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-space-lg hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">neurology</span>
+</div>
+<div>
+<p class="font-headline-h3 text-headline-h3 text-on-surface">LLM 路由选择</p>
+<p class="font-caption text-caption text-secondary">主模型: GPT-4o Connected</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- 通知与任务 -->
+<section class="space-y-space-sm">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider pl-2">通知与任务</h3>
+<div class="bg-surface rounded-xl border border-border-default overflow-hidden">
+<a class="flex items-center justify-between p-space-lg border-b border-border-default hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schedule</span>
+</div>
+<div>
+<p class="font-headline-h3 text-headline-h3 text-on-surface">报告调度</p>
+<p class="font-caption text-caption text-secondary">每日收盘简报开启</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-space-lg hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+</div>
+<div>
+<p class="font-headline-h3 text-headline-h3 text-on-surface">隐私警报</p>
+<p class="font-caption text-caption text-secondary">推送与邮件通知已配置</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-gutter-mobile pt-2 pb-safe bg-surface/90 backdrop-blur-md border-t border-border-default z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">持仓</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl">smart_toy</span>
+<span class="font-label-sm text-label-sm">助手</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl">analytics</span>
+<span class="font-label-sm text-label-sm">研究</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-3 py-1 transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-sm text-label-sm">设置</span>
+</a>
+</nav>
+</body></html>

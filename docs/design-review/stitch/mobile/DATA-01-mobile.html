@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DATA-01 Data Status Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "risk-warning": "#DC6803",
+                        "surface-tint": "#2c53d1",
+                        "canvas": "#F5F7FA",
+                        "secondary-fixed": "#dee2ef",
+                        "primary": "#063cbc",
+                        "tertiary": "#484b4d",
+                        "secondary": "#5a5e69",
+                        "tertiary-fixed": "#e0e3e5",
+                        "inverse-primary": "#b7c4ff",
+                        "primary-container": "#3157d5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#141b2c",
+                        "inverse-on-surface": "#edf0ff",
+                        "market-down": "#079455",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "surface-container-high": "#e0e8ff",
+                        "secondary-container": "#dee2ef",
+                        "surface-variant": "#dbe2f9",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "surface-container": "#e9edff",
+                        "primary-fixed": "#dde1ff",
+                        "tertiary-container": "#606365",
+                        "on-secondary-container": "#60646f",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-tertiary-container": "#dde0e1",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#001452",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#d8ddff",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#171c25",
+                        "background": "#f9f9ff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container-low": "#f1f3ff",
+                        "on-secondary-fixed-variant": "#424751",
+                        "market-up": "#D92D20",
+                        "on-surface-variant": "#444654",
+                        "risk-critical": "#C11574",
+                        "inverse-surface": "#293041",
+                        "outline": "#747685",
+                        "surface-container-highest": "#dbe2f9",
+                        "surface-dim": "#d2daf0",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "border-default": "#E4E7EC",
+                        "surface-bright": "#f9f9ff",
+                        "on-background": "#141b2c",
+                        "surface": "#FFFFFF",
+                        "outline-variant": "#c4c5d6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "gutter-mobile": "12px",
+                        "space-xl": "24px",
+                        "space-sm": "8px",
+                        "space-md": "12px",
+                        "space-lg": "16px",
+                        "space-2xl": "32px",
+                        "space-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "micro-badge": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F5F7FA; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid #E4E7EC; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface antialiased min-h-screen flex flex-col pb-safe">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline docked full-width top-0 z-40 sticky">
+<button class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 ease-in-out p-2 rounded-full">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="font-headline-h2 text-headline-h2 text-primary dark:text-primary-fixed-dim font-bold">Data Status Center</h1>
+<button class="text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 ease-in-out p-2 rounded-full">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">refresh</span>
+</button>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 px-margin-mobile py-space-xl flex flex-col gap-space-lg">
+<!-- Overall Health Banner -->
+<section class="glass-panel rounded-xl p-space-lg flex flex-col gap-space-sm items-center text-center relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-surface to-surface-container-low opacity-50 pointer-events-none"></div>
+<div class="relative z-10 flex flex-col items-center">
+<span class="material-symbols-outlined text-4xl text-market-down mb-space-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<h2 class="font-headline-h1 text-headline-h1">System Normal</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">All main data pipelines are operational.</p>
+<p class="font-caption text-caption text-secondary mt-space-xs">Last checked: Just now</p>
+</div>
+<button class="relative z-10 mt-space-md bg-primary text-on-primary font-label-sm text-label-sm px-6 py-2 rounded-lg hover:bg-on-primary-fixed-variant transition-colors">
+                Run Diagnostics
+            </button>
+</section>
+<!-- Bento Grid: Data Sources -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Market Quotes -->
+<div class="bg-surface rounded-xl p-space-md border border-border-default flex flex-col gap-space-sm hover:border-outline transition-colors relative group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+</div>
+<div>
+<h3 class="font-headline-h3 text-headline-h3">Market Quotes</h3>
+<p class="font-caption text-caption text-secondary">Real-time Equities</p>
+</div>
+</div>
+<span class="bg-market-down/10 text-market-down font-micro-badge text-micro-badge px-2 py-1 rounded-full flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-market-down"></span> Healthy
+                    </span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm mt-space-sm pt-space-sm border-t border-border-default">
+<div>
+<p class="font-caption text-caption text-secondary">Latency</p>
+<p class="font-body-md text-body-md font-medium">12ms</p>
+</div>
+<div>
+<p class="font-caption text-caption text-secondary">Last Sync</p>
+<p class="font-body-md text-body-md font-medium">09:42:15 UTC</p>
+</div>
+</div>
+</div>
+<!-- Economic Calendar -->
+<div class="bg-surface rounded-xl p-space-md border border-border-default flex flex-col gap-space-sm hover:border-outline transition-colors relative group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+</div>
+<div>
+<h3 class="font-headline-h3 text-headline-h3">Macro Calendar</h3>
+<p class="font-caption text-caption text-secondary">Daily Events</p>
+</div>
+</div>
+<span class="bg-market-down/10 text-market-down font-micro-badge text-micro-badge px-2 py-1 rounded-full flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-market-down"></span> Healthy
+                    </span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm mt-space-sm pt-space-sm border-t border-border-default">
+<div>
+<p class="font-caption text-caption text-secondary">Latency</p>
+<p class="font-body-md text-body-md font-medium">45ms</p>
+</div>
+<div>
+<p class="font-caption text-caption text-secondary">Last Sync</p>
+<p class="font-body-md text-body-md font-medium">08:00:00 UTC</p>
+</div>
+</div>
+</div>
+<!-- News Feed (Warning State) -->
+<div class="bg-surface rounded-xl p-space-md border border-border-default flex flex-col gap-space-sm hover:border-outline transition-colors relative group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-risk-warning">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">newspaper</span>
+</div>
+<div>
+<h3 class="font-headline-h3 text-headline-h3">News Feed</h3>
+<p class="font-caption text-caption text-secondary">Global Providers</p>
+</div>
+</div>
+<span class="bg-risk-warning/10 text-risk-warning font-micro-badge text-micro-badge px-2 py-1 rounded-full flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-risk-warning animate-pulse"></span> Degraded
+                    </span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm mt-space-sm pt-space-sm border-t border-border-default">
+<div>
+<p class="font-caption text-caption text-secondary">Latency</p>
+<p class="font-body-md text-body-md font-medium text-risk-warning">850ms</p>
+</div>
+<div>
+<p class="font-caption text-caption text-secondary">Last Sync</p>
+<p class="font-body-md text-body-md font-medium">09:35:00 UTC</p>
+</div>
+</div>
+<p class="font-caption text-caption text-risk-warning mt-1">Provider B experiencing delays.</p>
+</div>
+<!-- Fund NAVs -->
+<div class="bg-surface rounded-xl p-space-md border border-border-default flex flex-col gap-space-sm hover:border-outline transition-colors relative group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+</div>
+<div>
+<h3 class="font-headline-h3 text-headline-h3">Fund NAVs</h3>
+<p class="font-caption text-caption text-secondary">End of Day pricing</p>
+</div>
+</div>
+<span class="bg-market-down/10 text-market-down font-micro-badge text-micro-badge px-2 py-1 rounded-full flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-market-down"></span> Healthy
+                    </span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm mt-space-sm pt-space-sm border-t border-border-default">
+<div>
+<p class="font-caption text-caption text-secondary">Latency</p>
+<p class="font-body-md text-body-md font-medium">-</p>
+</div>
+<div>
+<p class="font-caption text-caption text-secondary">Last Sync</p>
+<p class="font-body-md text-body-md font-medium">Yesterday 22:00</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Suppressed Nav Shells as this is a specific functional page / dead end -->
+</body></html>

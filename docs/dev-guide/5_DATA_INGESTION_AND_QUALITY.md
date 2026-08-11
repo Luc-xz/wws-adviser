@@ -175,8 +175,10 @@ fresh = age <= INTRADAY_FRESHNESS_THRESHOLD        # 默认 90s（命名常量�
 | 事项 | 当前默认 | 备注 |
 | --- | --- | --- |
 | 数据源供应商（行情/公告/新闻） | 未定，端口 + 占位适配器 | `TODO(data-source-selection)`，《数据源选型与质量规范》 |
-| 盘中新鲜度阈值 | 90 秒 | `INTRADAY_FRESHNESS_THRESHOLD` 可配 |
+| 盘中新鲜度阈值 | **180 秒**（2026-08-11 由 90s 放宽） | `INTRADAY_FRESHNESS_THRESHOLD` 可配 |
 | 时钟偏差阈值 | `CLOCK_SKEW_THRESHOLD` TODO | 留运行配置 |
 | 字段级冲突容差表 | `FIELD_TOLERANCE[field]` TODO | 按字段（价格/状态/公司行动/财务）分别定 |
 | 熔断窗口/连续失败阈值 | 按 `<source>` 配置 | 选型后填充 |
 | 日线/净值 SQLite vs Parquet 分布 | SQLite 索引+元数据，Parquet 全量 | 见 [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §13 |
+
+> 标的范围已确认仅 A 股 + 场内 ETF（PRD §20），无需覆盖场外公募基金净值 T+1 披露源；Instruments 端口与占位适配器对应简化。

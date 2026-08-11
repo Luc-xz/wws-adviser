@@ -1,0 +1,282 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>账户与对账 - WWS Adviser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#171c25",
+                        "inverse-primary": "#b7c4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-on-surface": "#edf0ff",
+                        "error-container": "#ffdad6",
+                        "border-default": "#E4E7EC",
+                        "on-primary-container": "#d8ddff",
+                        "risk-warning": "#DC6803",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#dbe2f9",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#dee2ef",
+                        "secondary": "#5a5e69",
+                        "secondary-fixed": "#dee2ef",
+                        "on-secondary-fixed-variant": "#424751",
+                        "on-primary-fixed": "#001452",
+                        "on-surface": "#141b2c",
+                        "market-up": "#D92D20",
+                        "surface-dim": "#d2daf0",
+                        "primary-fixed": "#dde1ff",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "market-down": "#079455",
+                        "primary": "#063cbc",
+                        "surface": "#FFFFFF",
+                        "tertiary": "#484b4d",
+                        "on-tertiary-container": "#dde0e1",
+                        "outline": "#747685",
+                        "background": "#f9f9ff",
+                        "primary-container": "#3157d5",
+                        "inverse-surface": "#293041",
+                        "tertiary-fixed": "#e0e3e5",
+                        "canvas": "#F5F7FA",
+                        "risk-critical": "#C11574",
+                        "on-surface-variant": "#444654",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "surface-tint": "#2c53d1",
+                        "outline-variant": "#c4c5d6",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container": "#e9edff",
+                        "on-secondary-container": "#60646f",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container-high": "#e0e8ff",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "surface-container-low": "#f1f3ff",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-background": "#141b2c",
+                        "tertiary-container": "#606365",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#0038b6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "space-lg": "16px",
+                        "margin-mobile": "16px",
+                        "space-2xl": "32px",
+                        "space-md": "12px",
+                        "space-xs": "4px",
+                        "space-sm": "8px",
+                        "gutter-mobile": "12px",
+                        "space-xl": "24px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter", "sans-serif"],
+                        "headline-h3": ["Inter", "sans-serif"],
+                        "caption": ["Inter", "sans-serif"],
+                        "micro-badge": ["Inter", "sans-serif"],
+                        "headline-h2": ["Inter", "sans-serif"],
+                        "headline-h1": ["Inter", "sans-serif"],
+                        "display-lg": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "display-lg-mobile": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                        "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                        "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                        "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-background antialiased min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-border-default flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-50">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low transition-colors duration-200 text-on-surface-variant">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-h2 text-headline-h2 text-primary font-bold">账户与对账</h1>
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low transition-colors duration-200 text-primary">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+</header>
+<main class="max-w-4xl mx-auto p-margin-mobile pb-space-2xl space-y-space-xl">
+<!-- Discrepancy Alert -->
+<div class="bg-surface border border-risk-warning rounded-xl p-space-lg flex items-start space-x-space-md shadow-sm">
+<div class="flex-shrink-0 text-risk-warning mt-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="flex-1">
+<h3 class="font-headline-h3 text-headline-h3 text-on-background mb-space-xs">需要注意：存在对账差异</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-sm">检测到系统记录与实际银行流水存在现金差额。</p>
+<div class="inline-flex items-center bg-error-container text-on-error-container px-3 py-1 rounded-full font-label-sm text-label-sm">
+                    Cash difference: ¥1,200.00
+                </div>
+</div>
+<button class="text-primary hover:text-primary-container font-label-sm text-label-sm">查看详情</button>
+</div>
+<!-- Account Overview -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- System Value -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg shadow-sm">
+<div class="flex justify-between items-center mb-space-sm">
+<h2 class="font-label-sm text-label-sm text-on-surface-variant">系统总资产 (System Value)</h2>
+<span class="material-symbols-outlined text-outline">account_balance</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-background mb-space-xs">
+                    ¥ 8,450,200<span class="font-caption text-caption text-on-surface-variant ml-1">.00</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">包含现金、持仓及在途资金</p>
+</div>
+<!-- Actual Value -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg shadow-sm">
+<div class="flex justify-between items-center mb-space-sm">
+<h2 class="font-label-sm text-label-sm text-on-surface-variant">实际银行余额 (Actual Value)</h2>
+<div class="flex items-center space-x-1">
+<span class="w-2 h-2 rounded-full bg-market-down"></span>
+<span class="font-micro-badge text-micro-badge text-market-down">已同步</span>
+</div>
+</div>
+<div class="font-display-lg text-display-lg text-on-background mb-space-xs">
+                    ¥ 8,449,000<span class="font-caption text-caption text-on-surface-variant ml-1">.00</span>
+</div>
+<div class="flex items-center text-on-surface-variant font-caption text-caption">
+<span class="material-symbols-outlined text-[16px] mr-1">history</span>
+                    Last Reconciled: 2 days ago
+                </div>
+</div>
+</section>
+<!-- Side-by-side comparison Table -->
+<section class="bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm">
+<div class="p-space-lg border-b border-border-default bg-surface-container-lowest">
+<h2 class="font-headline-h3 text-headline-h3 text-on-background">资产对比明细</h2>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-border-default">
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant font-normal">项目</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant font-normal text-right">系统值 (System)</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant font-normal text-right">实际值 (Actual)</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant font-normal text-right">差异 (Diff)</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<tr class="border-b border-border-default hover:bg-surface-bright transition-colors">
+<td class="p-space-md text-on-background font-medium">现金 (Cash)</td>
+<td class="p-space-md text-right text-on-surface-variant">¥ 1,250,200.00</td>
+<td class="p-space-md text-right text-on-surface-variant">¥ 1,249,000.00</td>
+<td class="p-space-md text-right text-market-up font-medium">+ ¥ 1,200.00</td>
+</tr>
+<tr class="border-b border-border-default hover:bg-surface-bright transition-colors">
+<td class="p-space-md text-on-background font-medium">持仓 (Positions)</td>
+<td class="p-space-md text-right text-on-surface-variant">¥ 7,200,000.00</td>
+<td class="p-space-md text-right text-on-surface-variant">¥ 7,200,000.00</td>
+<td class="p-space-md text-right text-on-surface-variant">¥ 0.00</td>
+</tr>
+<tr class="hover:bg-surface-bright transition-colors">
+<td class="p-space-md text-on-background font-medium">费用与成本 (Cost)</td>
+<td class="p-space-md text-right text-on-surface-variant">¥ -5,000.00</td>
+<td class="p-space-md text-right text-on-surface-variant">¥ -5,000.00</td>
+<td class="p-space-md text-right text-on-surface-variant">¥ 0.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Action Buttons -->
+<div class="p-space-lg border-t border-border-default bg-surface-container-lowest flex flex-col sm:flex-row justify-end space-y-space-sm sm:space-y-0 sm:space-x-space-md">
+<button class="w-full sm:w-auto px-6 py-2.5 rounded-lg font-label-sm text-label-sm bg-secondary-container text-on-primary-fixed hover:bg-surface-variant transition-colors border border-transparent">
+                    创建对账调整
+                </button>
+<button class="w-full sm:w-auto px-6 py-2.5 rounded-lg font-label-sm text-label-sm bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm">
+                    标记已对账
+                </button>
+</div>
+</section>
+<!-- History -->
+<section>
+<h2 class="font-headline-h3 text-headline-h3 text-on-background mb-space-md">历史对账记录</h2>
+<div class="space-y-space-sm">
+<!-- History Item 1 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-md flex items-center justify-between hover:border-outline transition-colors">
+<div class="flex items-center space-x-space-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-background">2023年10月20日 自动对账</div>
+<div class="font-caption text-caption text-on-surface-variant">无差异，系统自动标记</div>
+</div>
+</div>
+<button class="text-outline hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<!-- History Item 2 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-md flex items-center justify-between hover:border-outline transition-colors">
+<div class="flex items-center space-x-space-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">edit_document</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-background">2023年10月15日 手动对账调整</div>
+<div class="font-caption text-caption text-on-surface-variant">调整金额：-¥500.00 (手续费遗漏)</div>
+</div>
+</div>
+<button class="text-outline hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<!-- History Item 3 -->
+<div class="bg-surface border border-border-default rounded-xl p-space-md flex items-center justify-between hover:border-outline transition-colors">
+<div class="flex items-center space-x-space-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-background">2023年10月10日 自动对账</div>
+<div class="font-caption text-caption text-on-surface-variant">无差异，系统自动标记</div>
+</div>
+</div>
+<button class="text-outline hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="mt-space-md text-center">
+<button class="font-label-sm text-label-sm text-primary hover:text-primary-container transition-colors">查看全部历史</button>
+</div>
+</section>
+</main>
+</body></html>

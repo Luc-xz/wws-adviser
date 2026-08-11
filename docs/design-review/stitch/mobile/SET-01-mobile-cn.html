@@ -1,0 +1,234 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>WWS Adviser - 风险与投资约束</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "risk-warning": "#DC6803",
+                        "surface-tint": "#2c53d1",
+                        "canvas": "#F5F7FA",
+                        "secondary-fixed": "#dee2ef",
+                        "primary": "#063cbc",
+                        "tertiary": "#484b4d",
+                        "secondary": "#5a5e69",
+                        "tertiary-fixed": "#e0e3e5",
+                        "inverse-primary": "#b7c4ff",
+                        "primary-container": "#3157d5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#141b2c",
+                        "inverse-on-surface": "#edf0ff",
+                        "market-down": "#079455",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "surface-container-high": "#e0e8ff",
+                        "secondary-container": "#dee2ef",
+                        "surface-variant": "#dbe2f9",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "surface-container": "#e9edff",
+                        "primary-fixed": "#dde1ff",
+                        "tertiary-container": "#606365",
+                        "on-secondary-container": "#60646f",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-tertiary-container": "#dde0e1",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#001452",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#d8ddff",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#171c25",
+                        "background": "#f9f9ff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container-low": "#f1f3ff",
+                        "on-secondary-fixed-variant": "#424751",
+                        "market-up": "#D92D20",
+                        "on-surface-variant": "#444654",
+                        "risk-critical": "#C11574",
+                        "inverse-surface": "#293041",
+                        "outline": "#747685",
+                        "surface-container-highest": "#dbe2f9",
+                        "surface-dim": "#d2daf0",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "border-default": "#E4E7EC",
+                        "surface-bright": "#f9f9ff",
+                        "on-background": "#141b2c",
+                        "surface": "#FFFFFF",
+                        "outline-variant": "#c4c5d6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "gutter-mobile": "12px",
+                        "space-xl": "24px",
+                        "space-sm": "8px",
+                        "space-md": "12px",
+                        "space-lg": "16px",
+                        "space-2xl": "32px",
+                        "space-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "micro-badge": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-canvas text-on-surface antialiased pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline docked full-width top-0 z-40 sticky">
+<div class="flex justify-between items-center w-full px-margin-mobile h-16">
+<button class="text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full transition-colors duration-200 ease-in-out flex items-center justify-center">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-h2 text-headline-h2 font-bold text-primary dark:text-primary-fixed-dim">风险与投资约束</h1>
+<button class="text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full transition-colors duration-200 ease-in-out flex items-center justify-center">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+</div>
+</header>
+<main class="px-margin-mobile pt-space-lg pb-space-2xl md:hidden max-w-md mx-auto flex flex-col gap-space-lg">
+<div class="mb-space-sm">
+<p class="font-body-md text-body-md text-on-surface-variant">配置投资限制和风险管理参数，用于投资组合自动平衡。</p>
+</div>
+<!-- Constraint Group: Max Single Instrument Weight -->
+<section class="bg-surface border border-border-default rounded-lg p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">单标持仓上限</h2>
+<p class="font-caption text-caption text-on-surface-variant mt-unit">单个股票或债券的风险敞口上限。</p>
+</div>
+<div class="flex items-center gap-unit bg-surface-container-lowest border border-border-default rounded px-2 py-1">
+<span class="material-symbols-outlined text-sm text-outline">tune</span>
+<span class="font-micro-badge text-micro-badge text-on-surface-variant uppercase tracking-wider">Soft</span>
+<label class="relative inline-flex items-center cursor-pointer ml-1">
+<input class="sr-only peer" type="checkbox" value="">
+<div class="w-7 h-4 bg-secondary-fixed rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</div>
+<div class="relative">
+<input class="w-full font-body-lg text-body-lg text-on-surface border border-border-default rounded-lg py-2 pl-3 pr-10 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-shadow text-right bg-surface" type="number" value="15.0">
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-caption text-caption text-secondary">%</span>
+</div>
+</section>
+<!-- Constraint Group: Max Industry Weight -->
+<section class="bg-surface border border-border-default rounded-lg p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">行业集中度上限</h2>
+<p class="font-caption text-caption text-on-surface-variant mt-unit">防止在单一经济部门过度集中。</p>
+</div>
+<div class="flex items-center gap-unit bg-surface-container-lowest border border-border-default rounded px-2 py-1">
+<span class="material-symbols-outlined text-sm text-primary">gavel</span>
+<span class="font-micro-badge text-micro-badge text-primary uppercase tracking-wider">Hard</span>
+<label class="relative inline-flex items-center cursor-pointer ml-1">
+<input checked="" class="sr-only peer" type="checkbox" value="">
+<div class="w-7 h-4 bg-secondary-fixed rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</div>
+<div class="relative">
+<input class="w-full font-body-lg text-body-lg text-on-surface border border-border-default rounded-lg py-2 pl-3 pr-10 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-shadow text-right bg-surface" type="number" value="25.0">
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-caption text-caption text-secondary">%</span>
+</div>
+</section>
+<!-- Constraint Group: Min Cash Level -->
+<section class="bg-surface border border-border-default rounded-lg p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">最低现金比例</h2>
+<p class="font-caption text-caption text-on-surface-variant mt-unit">为维持操作稳定所需的流动性缓冲。</p>
+</div>
+<div class="flex items-center gap-unit bg-surface-container-lowest border border-border-default rounded px-2 py-1">
+<span class="material-symbols-outlined text-sm text-primary">gavel</span>
+<span class="font-micro-badge text-micro-badge text-primary uppercase tracking-wider">Hard</span>
+<label class="relative inline-flex items-center cursor-pointer ml-1">
+<input checked="" class="sr-only peer" type="checkbox" value="">
+<div class="w-7 h-4 bg-secondary-fixed rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</div>
+<div class="relative">
+<input class="w-full font-body-lg text-body-lg text-on-surface border border-border-default rounded-lg py-2 pl-3 pr-10 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-shadow text-right bg-surface" type="number" value="5.0">
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-caption text-caption text-secondary">%</span>
+</div>
+</section>
+<!-- Constraint Group: Kelly Fraction Discount -->
+<section class="bg-surface border border-border-default rounded-lg p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">凯利折扣参数</h2>
+<p class="font-caption text-caption text-on-surface-variant mt-unit">避免过度投注波动的调整系数（分数凯利）。</p>
+</div>
+<div class="flex items-center gap-unit bg-surface-container-lowest border border-border-default rounded px-2 py-1">
+<span class="material-symbols-outlined text-sm text-outline">tune</span>
+<span class="font-micro-badge text-micro-badge text-on-surface-variant uppercase tracking-wider">Soft</span>
+<label class="relative inline-flex items-center cursor-pointer ml-1">
+<input class="sr-only peer" type="checkbox" value="">
+<div class="w-7 h-4 bg-secondary-fixed rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</div>
+<div class="relative">
+<input class="w-full font-body-lg text-body-lg text-on-surface border border-border-default rounded-lg py-2 pl-3 pr-10 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-shadow text-right bg-surface" step="0.1" type="number" value="0.5">
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-caption text-caption text-secondary">x</span>
+</div>
+</section>
+<!-- Action Area -->
+<div class="mt-space-md flex flex-col gap-space-sm bg-surface-container-low p-space-md rounded-lg border border-border-default">
+<div class="flex justify-between items-center mb-unit">
+<span class="font-label-sm text-label-sm text-on-surface-variant">预估影响:</span>
+<span class="font-micro-badge text-micro-badge bg-surface-variant text-on-surface-variant px-2 py-1 rounded">中等</span>
+</div>
+<button class="w-full bg-primary text-on-primary font-headline-h3 text-headline-h3 py-3 rounded-lg shadow-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-space-sm">
+<span class="material-symbols-outlined text-lg">save</span>
+                应用约束配置
+            </button>
+</div>
+</main>
+<!-- BottomNavBar (Hidden per instructions for task-focused sub-page) -->
+</body></html>

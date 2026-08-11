@@ -1,0 +1,289 @@
+<!DOCTYPE html><html lang="zh-CN" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background": "#f9f9ff",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "surface": "#FFFFFF",
+                        "surface-container-high": "#e0e8ff",
+                        "error": "#ba1a1a",
+                        "market-down": "#079455",
+                        "inverse-primary": "#b7c4ff",
+                        "inverse-on-surface": "#edf0ff",
+                        "tertiary": "#484b4d",
+                        "outline-variant": "#c4c5d6",
+                        "tertiary-container": "#606365",
+                        "canvas": "#F5F7FA",
+                        "surface-dim": "#d2daf0",
+                        "tertiary-fixed": "#e0e3e5",
+                        "secondary": "#5a5e69",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#dde0e1",
+                        "border-default": "#E4E7EC",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#dbe2f9",
+                        "primary-container": "#3157d5",
+                        "inverse-surface": "#293041",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "risk-critical": "#C11574",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "primary": "#063cbc",
+                        "secondary-fixed": "#dee2ef",
+                        "on-secondary-fixed-variant": "#424751",
+                        "on-primary-container": "#d8ddff",
+                        "surface-container-low": "#f1f3ff",
+                        "on-surface": "#141b2c",
+                        "on-primary-fixed": "#001452",
+                        "secondary-container": "#dee2ef",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-background": "#141b2c",
+                        "on-secondary": "#ffffff",
+                        "risk-warning": "#DC6803",
+                        "on-secondary-fixed": "#171c25",
+                        "outline": "#747685",
+                        "surface-tint": "#2c53d1",
+                        "market-up": "#D92D20",
+                        "on-secondary-container": "#60646f",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#e9edff",
+                        "surface-variant": "#dbe2f9",
+                        "on-surface-variant": "#444654",
+                        "primary-fixed": "#dde1ff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "margin-mobile": "16px",
+                        "space-sm": "8px",
+                        "unit": "4px",
+                        "space-2xl": "32px",
+                        "space-xl": "24px",
+                        "space-lg": "16px",
+                        "gutter-mobile": "12px",
+                        "space-md": "12px",
+                        "space-xs": "4px",
+                        "pb-safe": "env(safe-area-inset-bottom, 24px)"
+                    },
+                    fontFamily: {
+                        "headline-h1": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "caption": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "headline-h1": ["24px", { lineHeight: "1.3", fontWeight: "700" }],
+                        "body-lg": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "headline-h2": ["20px", { lineHeight: "1.35", fontWeight: "600" }],
+                        "caption": ["12px", { lineHeight: "1.45", fontWeight: "400" }],
+                        "display-lg": ["32px", { lineHeight: "1.2", fontWeight: "700" }],
+                        "headline-h3": ["17px", { lineHeight: "1.4", fontWeight: "600" }],
+                        "display-lg-mobile": ["28px", { lineHeight: "1.2", fontWeight: "700" }],
+                        "micro-badge": ["11px", { lineHeight: "1.35", fontWeight: "500" }],
+                        "label-sm": ["13px", { lineHeight: "1.4", fontWeight: "600" }],
+                        "body-md": ["14px", { lineHeight: "1.55", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    }catch(_e){}</script><meta charset="utf-8"></head><body class="bg-canvas text-on-background min-h-screen pb-24 md:pb-0 font-body-md">
+<!-- Top Navigation App Bar (Shared Component) -->
+<header class="fixed md:hidden z-50 bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline docked full-width top-0">
+<div class="flex justify-between items-center w-full px-margin-mobile h-16"><button class="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container-low transition-colors duration-200 rounded-full">
+    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="font-headline-h2 text-headline-h2 text-on-surface font-bold">交易记录</h1>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container-low transition-colors duration-200 rounded-full">
+    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">filter_list</span>
+</button></div>
+</header>
+<!-- Desktop Navigation Cluster (TopAppBar equivalent for md:up) -->
+<header class="hidden md:flex fixed top-0 w-full z-50 bg-surface border-b border-border-default h-16 px-space-2xl justify-between items-center">
+<div class="flex items-center gap-space-lg">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<span class="font-headline-h1 text-headline-h1 font-bold text-primary">WWS Adviser</span>
+<nav class="flex gap-space-md ml-space-xl">
+<!-- Mapping exact active state to 首页 based on JSON, but context implies we highlight 持仓 -->
+<a href="#" class="px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 ease-in-out font-label-sm text-label-sm">首页</a>
+<a href="#" class="px-space-md py-space-sm rounded-lg text-primary font-bold bg-primary-container text-on-primary-container font-label-sm text-label-sm">持仓</a>
+<a href="#" class="px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 ease-in-out font-label-sm text-label-sm">助手</a>
+<a href="#" class="px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 ease-in-out font-label-sm text-label-sm">研究</a>
+<a href="#" class="px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 ease-in-out font-label-sm text-label-sm">设置</a>
+</nav>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="w-10 h-10 flex items-center justify-center text-primary rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">refresh</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-border-default flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 md:pt-24 px-margin-mobile md:px-space-2xl max-w-4xl mx-auto flex flex-col gap-space-lg">
+<!-- Contextual Header & Actions -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-space-md bg-surface p-space-md rounded-xl border border-border-default">
+<div class="flex items-center gap-space-sm w-full md:w-auto">
+<button class="flex items-center gap-space-xs text-on-surface font-headline-h3 text-headline-h3 hover:bg-surface-container-low px-space-sm py-unit rounded transition-colors">
+<span class="">2024年 5月</span>
+<span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+</button>
+<div class="ml-auto md:ml-space-md flex gap-space-md text-on-surface-variant font-caption text-caption">
+<span class="">本月交易 12 笔</span>
+<span class="">资金变动 <span class="tabular-nums font-medium text-market-up">+¥124,500.00</span></span>
+</div>
+</div>
+<div class="flex gap-space-sm w-full md:w-auto mt-space-sm md:mt-0">
+<button class="flex-1 md:flex-none flex items-center justify-center gap-space-xs bg-[#EEF2FF] text-primary px-space-md py-space-sm rounded-lg font-label-sm text-label-sm hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm">upload_file</span>
+                    导入 CSV
+                </button>
+<button class="flex-1 md:flex-none flex items-center justify-center gap-space-xs bg-primary text-on-primary px-space-md py-space-sm rounded-lg font-label-sm text-label-sm hover:bg-primary-fixed-dim hover:text-on-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+                    记录交易
+                </button>
+</div>
+</div>
+<!-- Transaction Group: Date 1 -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm py-unit">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">5月14日 星期二</span>
+</div>
+<div class="bg-surface rounded-xl border border-border-default overflow-hidden">
+<!-- Row 1 -->
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between p-space-md border-b border-border-default hover:border-outline-variant transition-colors group">
+<div class="flex items-start md:items-center gap-space-md w-full md:w-auto mb-space-sm md:mb-0">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary-container flex-shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-h3 text-headline-h3 text-on-surface">Apple Inc.</span>
+<span class="font-micro-badge text-micro-badge text-primary bg-[#EEF2FF] px-1.5 py-0.5 rounded">买入</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant">AAPL • 纳斯达克</span>
+</div>
+</div>
+<div class="flex justify-between w-full md:w-auto md:text-right gap-space-xl">
+<div class="flex flex-col items-start md:items-end">
+<span class="font-caption text-caption text-on-surface-variant">数量 x 价格</span>
+<span class="font-body-md text-body-md text-on-surface tabular-nums">100 x $175.50</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-caption text-caption text-on-surface-variant">总额 (CNY)</span>
+<span class="font-headline-h3 text-headline-h3 text-on-surface tabular-nums">¥125,131.50</span>
+</div>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between p-space-md hover:border-outline-variant transition-colors group">
+<div class="flex items-start md:items-center gap-space-md w-full md:w-auto mb-space-sm md:mb-0">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-risk-warning flex-shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">do_not_disturb_on</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-h3 text-headline-h3 text-on-surface">Tesla Motors</span>
+<span class="font-micro-badge text-micro-badge text-risk-warning bg-[#FEF0C7] px-1.5 py-0.5 rounded">卖出</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant">TSLA • 纳斯达克</span>
+</div>
+</div>
+<div class="flex justify-between w-full md:w-auto md:text-right gap-space-xl">
+<div class="flex flex-col items-start md:items-end">
+<span class="font-caption text-caption text-on-surface-variant">数量 x 价格</span>
+<span class="font-body-md text-body-md text-on-surface tabular-nums">50 x $180.20</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-caption text-caption text-on-surface-variant">总额 (CNY)</span>
+<span class="font-headline-h3 text-headline-h3 text-on-surface tabular-nums">¥64,241.30</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Transaction Group: Date 2 -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm py-unit">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">5月10日 星期五</span>
+</div>
+<div class="bg-surface rounded-xl border border-border-default overflow-hidden">
+<!-- Row 1 -->
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between p-space-md hover:border-outline-variant transition-colors group">
+<div class="flex items-start md:items-center gap-space-md w-full md:w-auto mb-space-sm md:mb-0">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-market-up flex-shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-h3 text-headline-h3 text-on-surface">Vanguard S&amp;P 500 ETF</span>
+<span class="font-micro-badge text-micro-badge text-market-up bg-[#FEE4E2] px-1.5 py-0.5 rounded">分红</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant">VOO • 纽交所</span>
+</div>
+</div>
+<div class="flex justify-between w-full md:w-auto md:text-right gap-space-xl">
+<div class="flex flex-col items-start md:items-end">
+<span class="font-caption text-caption text-on-surface-variant">数量 x 价格</span>
+<span class="font-body-md text-body-md text-on-surface tabular-nums">-</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-caption text-caption text-on-surface-variant">总额 (CNY)</span>
+<span class="font-headline-h3 text-headline-h3 text-on-surface tabular-nums text-market-up">+¥1,420.00</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation App Bar (Shared Component for Mobile) -->
+<nav class="md:hidden border-t border-border-default dark:border-outline bg-surface/90 backdrop-blur-md fixed bottom-0 left-0 w-full flex justify-around items-center px-gutter-mobile pt-2 pb-safe bg-surface dark:bg-inverse-surface z-50">
+<!-- Inactive: 首页 -->
+<a href="#" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150 w-16">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-sm text-label-sm mt-1">首页</span>
+</a>
+<!-- Active: 持仓 (Portfolio/Holdings -> Transaction is a sub-tab) -->
+<a href="#" class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-xl px-3 py-1 scale-95 active:scale-90 transition-transform duration-150 w-16">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm mt-1">持仓</span>
+</a>
+<!-- Inactive: 助手 -->
+<a href="#" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150 w-16">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">smart_toy</span>
+<span class="font-label-sm text-label-sm mt-1">助手</span>
+</a>
+<!-- Inactive: 研究 -->
+<a href="#" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150 w-16">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: &quot;FILL&quot; 0;">analytics</span>
+<span class="font-label-sm text-label-sm mt-1">研究</span>
+</a>
+<!-- Inactive: 设置 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150 w-16" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-sm text-label-sm mt-1">设置</span>
+</a>
+</nav>
+</body></html>

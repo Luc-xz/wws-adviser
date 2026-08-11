@@ -76,15 +76,29 @@
 3. 用 `gsd:execute-phase` 执行，每个任务原子提交。
 4. 达到退出条件后用 `gsd:verify-work` 验证对应验收清单。
 
-## 7. 待确认项汇总（跨文档）
+## 7. 决策与待确认项汇总（跨文档）
 
-| 事项 | 当前默认 | 归属文档 |
+### 7.1 已确认决策（2026-08-11 复核）
+
+| 事项 | 确认值 | 归属文档 |
+| --- | --- | --- |
+| 标的范围 | A 股 + 场内 ETF（**移除公募基金**） | PRD §20 / 5 / 6 |
+| 开市前报告 | 08:30 启动，09:00 前完成 | 6 |
+| 收市后复盘 | 16:00 启动，17:00 前完成 | 6 |
+| 盘中新鲜度阈值 | **180 秒**（原 90s） | 5_DATA_INGESTION_AND_QUALITY |
+| 盘中建议有效期 | 10 分钟 | 6 |
+| 凯利折扣 | 默认 0.20，范围 0.10–0.25 | 4_ANALYTICS_AND_RISK |
+| 校准有效期 | 60 交易日 | 4_ANALYTICS_AND_RISK |
+| `n_eff` 门禁 | <30 拒绝；30≤n<100 半折扣 | 4_ANALYTICS_AND_RISK |
+| 部署形态 | **云端 VPS**（单容器，原 NAS+Tailscale） | 8_SECURITY_AND_DEPLOYMENT |
+| 反向代理 / HTTPS | **Nginx** + 证书（原待定） | 8_SECURITY_AND_DEPLOYMENT |
+| 登录方案 | 密码 → P1 加 Passkey | 8 |
+| 数据保留 | 交易/报告永久；intraday parquet 90 天可配；日志 30 天 | 2 |
+
+### 7.2 待确认项（供应商与参数类）
+
+| 事项 | 当前状态 | 归属文档 |
 | --- | --- | --- |
 | 数据源供应商（行情/公告/新闻） | 未定，端口契约+占位 | 5_DATA_INGESTION_AND_QUALITY |
 | 模型供应商 | OpenAI-compatible，未定具体 | 6_MODEL_AND_REPORT_PIPELINE |
-| 初始通知渠道 | 待选企业微信/Server 酱/邮件一种 | 6 / 8 |
-| 凯利折扣 | 默认 0.20，范围 0.10–0.25 | 4_ANALYTICS_AND_RISK |
-| 盘中新鲜度阈值 | 90 秒 | 5_DATA_INGESTION_AND_QUALITY |
-| 校准有效期 | 60 交易日 | 4_ANALYTICS_AND_RISK |
-| `n_eff` 门禁 | <30 拒绝；30≤n<100 半折扣 | 4_ANALYTICS_AND_RISK |
-| 部署形态 | 单容器，优先 NAS+Tailscale | 8_SECURITY_AND_DEPLOYMENT |
+| 初始通知渠道 | 待选企业微信/Server 酱/邮件一种（Phase 1.6 前定） | 6 / 8 |
