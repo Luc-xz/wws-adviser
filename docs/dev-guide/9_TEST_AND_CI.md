@@ -12,7 +12,7 @@
 核心约束：
 
 - 不变量测试是“硬护栏”，CI 红则不合并；性能预算与金丝是“软信号”，不阻断合并但记 issue。
-- 外部供应商未定，测试绑**端口契约**而非具体供应商（[5_DATA_INGESTION_AND_QUALITY.md](./5_DATA_INGESTION_AND_QUALITY.md) §9）。
+- 测试绑**端口契约**而非具体供应商（[5_DATA_INGESTION_AND_QUALITY.md](./5_DATA_INGESTION_AND_QUALITY.md) §9）——即便 MVP 数据源已定 AKShare，端口契约测试仍是切换/升级供应商时的回归保障。
 - 时间相关测试**冻结** `Asia/Shanghai` 时钟，禁止依赖墙上时间。
 
 ## 2. 测试分层（技术架构 §18.1）
@@ -97,12 +97,16 @@
 
 每个 PR 描述含“不变量覆盖”段：本改动触及哪些 §3 不变量、对应测试文件。无不变量覆盖的领域改动需说明理由。CI 红的 PR 不合并；金丝 diff 记 issue 不阻塞。
 
-## 10. 待确认项
+## 10. 运行配置项（2026-08-11 复核）
 
-| 事项 | 当前默认 | 备注 |
+> 以下事项确认采用「运行配置 / ADR」策略。
+
+| 事项 | 确认策略 | 备注 |
 | --- | --- | --- |
-| E2E 浏览器矩阵 | iOS Safari + Android Chrome 等效浏览器环境 | PRD §18，设备/模拟器选型留 Phase 0 |
-| 金丝回放业务日期集 | 固定 3 个代表性交易日 | 覆盖正常/午休/基金未披露 |
+| 金丝回放业务日期集 | 固定 3 个代表性交易日 | 覆盖正常/午休/数据源部分缺失 |
 | `downgrade -1` 可逆性 | 建议保留，复杂迁移留 ADR | [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §10 |
 | 性能采样在 CI 跑 | 不阻断，定期手动 | 触发扩展迁移时复核（技术架构 §21） |
-| 许可证策略白名单 | 待定 | Phase 0 选默认策略后填 |
+
+> **已确认（2026-08-11）**：
+> - **E2E 浏览器矩阵**：Playwright 桌面等效环境，模拟 iOS Safari + Android Chrome 的 user-agent + viewport（PRD §18），无需真机/模拟器。
+> - **依赖许可证策略**：**宽松白名单**——允许 MIT / Apache-2.0 / BSD-2/3-Clause / ISC；拒绝 GPL / AGPL 等 copyleft（避免传染，适合闭源个人项目）。LGPL/MPL 弱 copyleft 需个案评估。CI 用 `pip-licenses` + 许可证检查脚本守门。

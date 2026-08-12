@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Data Source &amp; Quality - WWS Adviser</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-surface": "#141b2c",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "on-background": "#141b2c",
+                      "on-error": "#ffffff",
+                      "on-tertiary-container": "#dde0e1",
+                      "on-primary-container": "#d8ddff",
+                      "secondary-fixed": "#dee2ef",
+                      "inverse-primary": "#b7c4ff",
+                      "surface-container-high": "#e0e8ff",
+                      "inverse-on-surface": "#edf0ff",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed-dim": "#c2c6d3",
+                      "secondary": "#5a5e69",
+                      "on-primary-fixed": "#001452",
+                      "secondary-container": "#dee2ef",
+                      "on-surface-variant": "#444654",
+                      "market-up": "#D92D20",
+                      "on-tertiary": "#ffffff",
+                      "inverse-surface": "#293041",
+                      "surface-container-highest": "#dbe2f9",
+                      "primary-container": "#3157d5",
+                      "outline": "#747685",
+                      "risk-critical": "#C11574",
+                      "surface-tint": "#2c53d1",
+                      "primary-fixed": "#dde1ff",
+                      "tertiary-fixed": "#e0e3e5",
+                      "on-secondary-fixed-variant": "#424751",
+                      "primary-fixed-dim": "#b7c4ff",
+                      "error": "#ba1a1a",
+                      "risk-warning": "#DC6803",
+                      "tertiary-container": "#606365",
+                      "background": "#f9f9ff",
+                      "surface-container": "#e9edff",
+                      "surface": "#FFFFFF",
+                      "on-secondary": "#ffffff",
+                      "surface-bright": "#f9f9ff",
+                      "on-primary-fixed-variant": "#0038b6",
+                      "on-secondary-container": "#60646f",
+                      "market-down": "#079455",
+                      "on-secondary-fixed": "#171c25",
+                      "surface-dim": "#d2daf0",
+                      "surface-container-low": "#f1f3ff",
+                      "on-error-container": "#93000a",
+                      "outline-variant": "#c4c5d6",
+                      "canvas": "#F5F7FA",
+                      "border-default": "#E4E7EC",
+                      "tertiary": "#484b4d",
+                      "on-primary": "#ffffff",
+                      "primary": "#063cbc",
+                      "surface-variant": "#dbe2f9",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      // Custom semantic colors for data source trust levels based on guidance
+                      "trust-l1": "#079455",
+                      "trust-l2": "#175CD3",
+                      "trust-l3": "#DC6803",
+                      "trust-l4": "#667085",
+                      "trust-l5": "#C11574"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "space-xs": "4px",
+                      "space-sm": "8px",
+                      "gutter-mobile": "12px",
+                      "space-md": "12px",
+                      "margin-mobile": "16px",
+                      "space-2xl": "32px",
+                      "space-xl": "24px",
+                      "unit": "4px",
+                      "space-lg": "16px"
+              },
+              "fontFamily": {
+                      "headline-h2": ["Inter"],
+                      "headline-h3": ["Inter"],
+                      "display-lg-mobile": ["Inter"],
+                      "headline-h1": ["Inter"],
+                      "micro-badge": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "caption": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "display-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                      "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                      "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}],
+                      "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}]
+              }
+            },
+          }
+        }
+    </script>
+</head>
+<body class="bg-canvas text-on-surface font-body-md antialiased h-screen flex overflow-hidden selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-low dark:bg-surface-dim h-full w-[224px] fixed left-0 top-0 border-r border-border-default dark:border-outline-variant flex flex-col py-space-xl z-20">
+<!-- Brand Header -->
+<div class="px-space-xl mb-space-2xl">
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-secondary mt-1">Terminal v2.4</p>
+</div>
+<!-- Navigation Tabs -->
+<ul class="flex flex-col w-full font-label-sm text-label-sm font-semibold flex-grow">
+<!-- Tab 1 -->
+<li>
+<a class="flex items-center px-space-xl py-space-md text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors group" href="#">
+<span class="material-symbols-outlined mr-space-md opacity-70 group-hover:opacity-100 transition-opacity">home</span>
+                    首页
+                </a>
+</li>
+<!-- Tab 2 -->
+<li>
+<a class="flex items-center px-space-xl py-space-md text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors group" href="#">
+<span class="material-symbols-outlined mr-space-md opacity-70 group-hover:opacity-100 transition-opacity">account_balance_wallet</span>
+                    持仓
+                </a>
+</li>
+<!-- Tab 3 -->
+<li>
+<a class="flex items-center px-space-xl py-space-md text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors group" href="#">
+<span class="material-symbols-outlined mr-space-md opacity-70 group-hover:opacity-100 transition-opacity">smart_toy</span>
+                    助手
+                </a>
+</li>
+<!-- Tab 4 -->
+<li>
+<a class="flex items-center px-space-xl py-space-md text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors group" href="#">
+<span class="material-symbols-outlined mr-space-md opacity-70 group-hover:opacity-100 transition-opacity">analytics</span>
+                    研究
+                </a>
+</li>
+<!-- Tab 5 (Active) -->
+<li>
+<a class="flex items-center px-space-xl py-space-md text-primary dark:text-inverse-primary font-bold border-r-2 border-primary dark:border-inverse-primary bg-surface-container dark:bg-inverse-surface opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined mr-space-md" style="font-variation-settings: 'FILL' 1;">settings</span>
+                    设置
+                </a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-[224px] flex-1 flex flex-col h-full bg-canvas relative w-[calc(100%-224px)]">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-inverse-surface h-[64px] border-b border-border-default dark:border-outline-variant flex justify-between items-center px-space-xl w-full flex-shrink-0 z-10 sticky top-0">
+<!-- Left: Breadcrumbs -->
+<div class="flex items-center font-body-md text-body-md text-on-surface-variant dark:text-outline">
+<span class="hover:text-primary transition-colors cursor-pointer">Settings</span>
+<span class="material-symbols-outlined mx-space-sm text-sm">chevron_right</span>
+<span class="text-primary font-medium">Data Source &amp; Quality</span>
+</div>
+<!-- Right: Actions -->
+<div class="flex items-center space-x-space-lg">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-label-sm font-bold border border-primary-fixed overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5iN7M9wIRaweTgD2y-OrAVueMsMH7GTtDtEOAOaAX7RGw5PrjeuqsVJRdSXt_fbO46UYIAZtZxGj_7jUEDi_2MWHu96WUHs5NSIl4KaGGsUBvrmI3mIQWNlm8EPF9zELYP-gD2kw2cIfuqivNHyYENGDMvQ9pYfIx63Iop1g655gRcHbthIiZeK1miERV76SPuT-AGDlFAQ3235J1NAdZRQoOs-QddjTjufMlx0KRPxPKZ10wFPiaqXr3UWKxZEkQ-wjV0X3ygPTV"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto p-space-xl xl:p-space-2xl">
+<div class="max-w-[1200px] mx-auto space-y-space-xl">
+<!-- Page Title -->
+<div>
+<h2 class="font-headline-h2 text-headline-h2 text-on-surface">Data Source &amp; Quality (SET-02)</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage external data feeds, monitor quality metrics, and configure source priorities.</p>
+</div>
+<!-- Info Banner -->
+<div class="bg-[#EEF2FF] border border-primary-fixed rounded-lg p-space-md flex items-start gap-space-md">
+<span class="material-symbols-outlined text-primary mt-0.5">info</span>
+<p class="font-body-md text-body-md text-on-surface">
+                        盘中建议以标记为主行情源的数据时间为准。可信等级 L1(官方) &gt; L2(授权行情) &gt; L3(可信新闻) &gt; L4(聚合) &gt; L5(社交)。
+                    </p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-space-xl items-start">
+<!-- Group 1: 行情源 (Market Data Sources) - Spans full width on smaller screens, 1 col on XL -->
+<section class="space-y-space-md col-span-1 xl:col-span-2">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface border-b border-border-default pb-space-sm">行情源 (Market Data)</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Card A: Healthy Source -->
+<div class="bg-surface rounded-lg border border-border-default p-space-lg flex flex-col justify-between hover:border-outline transition-colors relative group">
+<div class="flex justify-between items-start mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-2 h-2 rounded-full bg-market-down" title="Healthy"></div>
+<h4 class="font-label-sm text-label-sm text-on-surface font-semibold">主行情源 A</h4>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#EFF8FF] text-trust-l2 border border-[#B2DDFF]">L2</span>
+</div>
+<!-- Toggle Switch Placeholder -->
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-sm mb-space-md">
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Status</p>
+<span class="inline-flex items-center gap-1 font-micro-badge text-micro-badge text-market-down bg-[#ECFDF3] px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[12px]">check_circle</span> Healthy
+                                        </span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Latency</p>
+<span class="inline-flex items-center font-micro-badge text-micro-badge text-market-down bg-[#ECFDF3] px-2 py-1 rounded">
+                                            实时
+                                        </span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Last Success</p>
+<p class="font-body-md text-body-md tabular-nums text-on-surface">10:32:01</p>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Priority</p>
+<p class="font-body-md text-body-md tabular-nums text-on-surface">1</p>
+</div>
+</div>
+<div class="flex gap-space-sm pt-space-md border-t border-border-default mt-auto">
+<button class="flex-1 bg-surface border border-border-default hover:bg-surface-container-low text-on-surface font-label-sm text-label-sm py-1.5 rounded transition-colors">连接测试</button>
+<button class="flex-1 bg-surface border border-border-default hover:bg-surface-container-low text-on-surface font-label-sm text-label-sm py-1.5 rounded transition-colors">查看错误</button>
+</div>
+<p class="font-caption text-caption text-outline mt-space-md text-xs">Auth: Authorized Partner API / Terms v2.1</p>
+</div>
+<!-- Card B: Abnormal Source -->
+<div class="bg-[#FEF3F2] rounded-lg border border-error p-space-lg flex flex-col justify-between relative group">
+<div class="absolute inset-0 bg-gradient-to-br from-error/5 to-transparent pointer-events-none rounded-lg"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-2 h-2 rounded-full bg-risk-warning animate-pulse" title="Delayed"></div>
+<h4 class="font-label-sm text-label-sm text-on-surface font-semibold">辅助行情 B</h4>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#EFF8FF] text-trust-l2 border border-[#B2DDFF]">L2</span>
+</div>
+<!-- Toggle Switch Placeholder -->
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-sm mb-space-md">
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Status</p>
+<span class="inline-flex items-center gap-1 font-micro-badge text-micro-badge text-risk-warning bg-[#FFFAEB] px-2 py-1 rounded border border-[#FEDF89]">
+<span class="material-symbols-outlined text-[12px]">warning</span> DELAYED
+                                            </span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Latency</p>
+<span class="inline-flex items-center font-micro-badge text-micro-badge text-risk-warning bg-[#FFFAEB] px-2 py-1 rounded border border-[#FEDF89] tabular-nums">
+                                                +3 分钟
+                                            </span>
+</div>
+<div class="col-span-2">
+<p class="font-caption text-caption text-on-surface-variant mb-1">Last Error</p>
+<p class="font-body-md text-body-md text-error">超时 (Connection Timeout)</p>
+</div>
+</div>
+<div class="flex gap-space-sm pt-space-md border-t border-error/20 mt-auto">
+<button class="flex-1 bg-error-container hover:bg-error/20 text-on-error-container font-label-sm text-label-sm py-1.5 rounded transition-colors">重启连接</button>
+<button class="flex-1 bg-surface/50 border border-error/30 hover:bg-surface text-on-surface font-label-sm text-label-sm py-1.5 rounded transition-colors">查看日志</button>
+</div>
+<p class="font-caption text-caption text-outline mt-space-md text-xs">Auth: Fallback API / Terms v1.0</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Group 2: 公告源 (Announcement Sources) -->
+<section class="space-y-space-md">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface border-b border-border-default pb-space-sm">公告源 (Announcements)</h3>
+<div class="flex flex-col gap-space-md">
+<!-- Source 1 -->
+<div class="bg-surface rounded-lg border border-border-default p-space-md flex justify-between items-center hover:border-outline transition-colors">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-trust-l1 border border-border-default">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div>
+<div class="flex items-center gap-space-sm">
+<h4 class="font-label-sm text-label-sm text-on-surface font-semibold">交易所披露</h4>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#ECFDF3] text-trust-l1 border border-[#A6F4C5]">L1</span>
+</div>
+<p class="font-caption text-caption text-outline text-xs mt-0.5">Direct Exchange Feed</p>
+</div>
+</div>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+</div>
+</div>
+<!-- Source 2 -->
+<div class="bg-surface rounded-lg border border-border-default p-space-md flex justify-between items-center hover:border-outline transition-colors">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-trust-l1 border border-border-default">
+<span class="material-symbols-outlined">corporate_fare</span>
+</div>
+<div>
+<div class="flex items-center gap-space-sm">
+<h4 class="font-label-sm text-label-sm text-on-surface font-semibold">公司公告</h4>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#ECFDF3] text-trust-l1 border border-[#A6F4C5]">L1</span>
+</div>
+<p class="font-caption text-caption text-outline text-xs mt-0.5">Corporate IR Feed</p>
+</div>
+</div>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column Wrapper for Group 3 & 4 to align nicely in Grid -->
+<div class="space-y-space-xl flex flex-col">
+<!-- Group 3: 基金净值源 (Fund NAV Sources) -->
+<section class="space-y-space-md">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface border-b border-border-default pb-space-sm">基金净值源 (Fund NAV)</h3>
+<div class="bg-surface rounded-lg border border-border-default p-space-md hover:border-outline transition-colors flex flex-col gap-space-sm">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-trust-l2 border border-border-default">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<div>
+<div class="flex items-center gap-space-sm">
+<h4 class="font-label-sm text-label-sm text-on-surface font-semibold">基金净值供应商</h4>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#EFF8FF] text-trust-l2 border border-[#B2DDFF]">L2</span>
+</div>
+<p class="font-caption text-caption text-outline text-xs mt-0.5">Third-party Aggregator</p>
+</div>
+</div>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+</div>
+</div>
+<div class="mt-2 bg-surface-container-low rounded p-2 flex justify-between items-center border border-border-default">
+<span class="font-caption text-caption text-on-surface-variant">Daily Sync Status</span>
+<span class="inline-flex items-center font-micro-badge text-micro-badge text-tertiary bg-tertiary-fixed px-2 py-1 rounded border border-outline-variant">
+                                        待确认净值 (Pending Confirmation)
+                                    </span>
+</div>
+</div>
+</section>
+<!-- Group 4: 新闻源 (News Sources) -->
+<section class="space-y-space-md flex-1">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface border-b border-border-default pb-space-sm">新闻源 (News)</h3>
+<div class="flex flex-col gap-space-md">
+<!-- News 1 -->
+<div class="bg-surface rounded-lg border border-border-default p-space-md flex justify-between items-center hover:border-outline transition-colors">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-trust-l4 border border-border-default">
+<span class="material-symbols-outlined">newspaper</span>
+</div>
+<div>
+<div class="flex items-center gap-space-sm">
+<h4 class="font-label-sm text-label-sm text-on-surface font-semibold">财经新闻聚合</h4>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-surface-container-high text-trust-l4 border border-outline-variant">L4</span>
+</div>
+<p class="font-caption text-caption text-outline text-xs mt-0.5">General Financial News</p>
+</div>
+</div>
+<div class="w-8 h-4 bg-surface-variant rounded-full relative cursor-pointer border border-outline-variant">
+<div class="w-3 h-3 bg-white rounded-full absolute left-0.5 top-0.5 shadow-sm"></div>
+</div>
+</div>
+<!-- News 2 -->
+<div class="bg-surface rounded-lg border border-border-default p-space-md flex justify-between items-center hover:border-outline transition-colors">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center text-trust-l3 border border-border-default">
+<span class="material-symbols-outlined">biotech</span>
+</div>
+<div>
+<div class="flex items-center gap-space-sm">
+<h4 class="font-label-sm text-label-sm text-on-surface font-semibold">行业研究</h4>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#FFFAEB] text-trust-l3 border border-[#FEDF89]">L3</span>
+</div>
+<p class="font-caption text-caption text-outline text-xs mt-0.5">Sector Analysis &amp; Reports</p>
+</div>
+</div>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Footer Legend -->
+<footer class="mt-space-2xl pt-space-xl border-t border-border-default pb-space-2xl">
+<h5 class="font-label-sm text-label-sm text-on-surface mb-space-md">System State Legend</h5>
+<div class="flex flex-wrap gap-x-space-xl gap-y-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-market-down"></div>
+<span class="font-caption text-caption text-on-surface-variant">OK (Healthy)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-risk-warning"></div>
+<span class="font-caption text-caption text-on-surface-variant">DELAYED (Stale Data)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="font-caption text-caption text-on-surface-variant">MISSING (Data Gap)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-[#9333EA]"></div> <!-- Arbitrary purple for conflict -->
+<span class="font-caption text-caption text-on-surface-variant">CONFLICT (Mismatch)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-outline"></div>
+<span class="font-caption text-caption text-on-surface-variant">PARSE_FAILED (Format Error)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-on-surface"></div>
+<span class="font-caption text-caption text-on-surface-variant">SOURCE_UNAVAILABLE (Down)</span>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</main>
+</body></html>

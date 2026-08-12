@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WWS Adviser - 系统状态</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c4c5d6",
+                        "inverse-primary": "#b7c4ff",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#e0e8ff",
+                        "risk-warning": "#DC6803",
+                        "market-down": "#079455",
+                        "tertiary": "#484b4d",
+                        "on-secondary-fixed": "#171c25",
+                        "primary-container": "#3157d5",
+                        "surface-tint": "#2c53d1",
+                        "on-primary-fixed": "#001452",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-secondary-container": "#60646f",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#d8ddff",
+                        "on-secondary-fixed-variant": "#424751",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#dbe2f9",
+                        "secondary": "#5a5e69",
+                        "inverse-surface": "#293041",
+                        "surface": "#FFFFFF",
+                        "border-default": "#E4E7EC",
+                        "surface-container-low": "#f1f3ff",
+                        "secondary-fixed": "#dee2ef",
+                        "primary": "#063cbc",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "on-background": "#141b2c",
+                        "market-up": "#D92D20",
+                        "tertiary-fixed": "#e0e3e5",
+                        "on-surface": "#141b2c",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "inverse-on-surface": "#edf0ff",
+                        "surface-container": "#e9edff",
+                        "secondary-container": "#dee2ef",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "canvas": "#F5F7FA",
+                        "surface-dim": "#d2daf0",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "on-tertiary-container": "#dde0e1",
+                        "outline": "#747685",
+                        "surface-container-highest": "#dbe2f9",
+                        "background": "#f9f9ff",
+                        "primary-fixed": "#dde1ff",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-bright": "#f9f9ff",
+                        "tertiary-container": "#606365",
+                        "risk-critical": "#C11574",
+                        "on-surface-variant": "#444654"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "space-xl": "24px",
+                        "space-lg": "16px",
+                        "margin-mobile": "16px",
+                        "space-2xl": "32px",
+                        "space-sm": "8px",
+                        "gutter-mobile": "12px",
+                        "space-md": "12px",
+                        "space-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter", "sans-serif"],
+                        "display-lg-mobile": ["Inter", "sans-serif"],
+                        "headline-h2": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "micro-badge": ["Inter", "sans-serif"],
+                        "display-lg": ["Inter", "sans-serif"],
+                        "headline-h3": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "headline-h1": ["Inter", "sans-serif"],
+                        "caption": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: theme('colors.canvas'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="text-on-surface antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<nav class="h-full w-[224px] fixed left-0 top-0 bg-surface-container-low border-r border-border-default flex flex-col py-space-xl z-20">
+<div class="px-space-xl mb-space-2xl">
+<h1 class="font-headline-h3 text-headline-h3 text-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-on-surface-variant mt-1">Terminal v2.4</p>
+</div>
+<div class="flex-1 overflow-y-auto">
+<ul class="flex flex-col gap-unit">
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-on-secondary-fixed-variant hover:text-on-surface hover:bg-surface-container transition-colors font-label-sm text-label-sm opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">home</span>
+                        首页
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-on-secondary-fixed-variant hover:text-on-surface hover:bg-surface-container transition-colors font-label-sm text-label-sm opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+                        持仓
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-on-secondary-fixed-variant hover:text-on-surface hover:bg-surface-container transition-colors font-label-sm text-label-sm opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">smart_toy</span>
+                        助手
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-on-secondary-fixed-variant hover:text-on-surface hover:bg-surface-container transition-colors font-label-sm text-label-sm opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+                        研究
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-primary font-bold border-r-2 border-primary bg-surface-container-low opacity-80 duration-150 font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                        设置
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-[224px] flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="h-[64px] shrink-0 bg-surface border-b border-border-default flex justify-between items-center px-space-xl w-full z-10 sticky top-0">
+<div class="flex items-center gap-space-sm font-body-md text-body-md text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">设置</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-surface font-medium">系统状态</span>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Scrollable Canvas -->
+<main class="flex-1 overflow-y-auto p-space-2xl">
+<div class="max-w-[1000px] mx-auto space-y-space-xl">
+<!-- 1. App Info -->
+<section class="bg-surface border border-border-default rounded-lg p-space-xl flex justify-between items-center">
+<div>
+<h2 class="font-headline-h2 text-headline-h2 text-on-surface flex items-center gap-space-sm">
+                            WWS Adviser <span class="bg-surface-container-low text-primary font-micro-badge text-micro-badge px-2 py-0.5 rounded-full border border-border-default">v0.4.2</span>
+</h2>
+</div>
+<div class="flex gap-space-xl text-right font-body-md text-body-md text-on-surface-variant tabular-nums">
+<div>
+<div class="font-caption text-caption text-outline mb-1">最后更新</div>
+<div class="text-on-surface font-medium">2026-08-10 14:30</div>
+</div>
+<div>
+<div class="font-caption text-caption text-outline mb-1">持续运行</div>
+<div class="text-on-surface font-medium">3d 12h</div>
+</div>
+</div>
+</section>
+<!-- 2. Core Services (2x2 Grid) -->
+<section>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface mb-space-md">核心服务</h3>
+<div class="grid grid-cols-2 gap-space-md">
+<div class="bg-surface border border-border-default rounded-lg p-space-lg flex flex-col justify-between h-[100px]">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">database</span>
+                                    数据库
+                                </span>
+<span class="flex items-center gap-1.5 font-micro-badge text-micro-badge text-market-down bg-market-down/10 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-market-down"></span>正常
+                                </span>
+</div>
+<div class="font-body-md text-body-md text-on-surface font-medium tabular-nums">SQLite (WAL模式已启用)</div>
+</div>
+<div class="bg-surface border border-border-default rounded-lg p-space-lg flex flex-col justify-between h-[100px]">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                                    调度器
+                                </span>
+<span class="flex items-center gap-1.5 font-micro-badge text-micro-badge text-market-down bg-market-down/10 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-market-down"></span>运行中
+                                </span>
+</div>
+<div class="font-body-md text-body-md text-on-surface font-medium tabular-nums">下个任务 08:45 '盘前报告'</div>
+</div>
+<div class="bg-surface border border-border-default rounded-lg p-space-lg flex flex-col justify-between h-[100px]">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+                                    任务执行器
+                                </span>
+<span class="flex items-center gap-1.5 font-micro-badge text-micro-badge text-market-down bg-market-down/10 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-market-down"></span>空闲
+                                </span>
+</div>
+<div class="font-body-md text-body-md text-on-surface font-medium tabular-nums">无活动任务</div>
+</div>
+<div class="bg-surface border border-border-default rounded-lg p-space-lg flex flex-col justify-between h-[100px]">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">web</span>
+                                    PWA应用
+                                </span>
+<span class="flex items-center gap-1.5 font-micro-badge text-micro-badge text-market-down bg-market-down/10 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-market-down"></span>已安装
+                                </span>
+</div>
+<div class="font-body-md text-body-md text-on-surface font-medium tabular-nums">支持离线功能</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-2 gap-space-xl">
+<!-- 3. Data & Models Summary -->
+<section class="bg-surface border border-border-default rounded-lg p-space-xl">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface mb-space-md flex justify-between">
+                            数据与模型
+                            <span class="font-body-md text-body-md text-market-down">24h 成功率 99.2%</span>
+</h3>
+<div class="space-y-space-md">
+<div class="flex justify-between items-center py-2 border-b border-border-default">
+<span class="font-body-md text-body-md text-on-surface-variant">市场数据</span>
+<div class="flex gap-2">
+<span class="font-caption text-caption bg-surface-container-low px-2 py-1 rounded border border-border-default">2 正常</span>
+<span class="font-caption text-caption bg-risk-warning/10 text-risk-warning px-2 py-1 rounded border border-risk-warning/20">1 延迟</span>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-border-default">
+<span class="font-body-md text-body-md text-on-surface-variant">公告源</span>
+<span class="font-caption text-caption bg-surface-container-low px-2 py-1 rounded border border-border-default">2 正常</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-body-md text-body-md text-on-surface-variant">连接模型</span>
+<span class="font-caption text-caption bg-surface-container-low px-2 py-1 rounded border border-border-default">2 已连接</span>
+</div>
+</div>
+</section>
+<!-- 4. Task Stats -->
+<section class="bg-surface border border-border-default rounded-lg p-space-xl">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface mb-space-md flex justify-between">
+                            任务统计 (近50个)
+                            <span class="font-body-md text-body-md text-on-surface">成功率 98%</span>
+</h3>
+<div class="space-y-space-md">
+<div class="flex justify-between items-center py-2 border-b border-border-default">
+<span class="font-body-md text-body-md text-on-surface-variant">平均耗时</span>
+<span class="font-body-md text-body-md text-on-surface font-medium tabular-nums">1.2s</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-border-default">
+<span class="font-body-md text-body-md text-on-surface-variant">最长耗时</span>
+<span class="font-body-md text-body-md text-on-surface font-medium tabular-nums">8.4s</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-risk-warning"></span>
+                                    重试成功
+                                </span>
+<span class="font-caption text-caption text-on-surface-variant tabular-nums">1 次</span>
+</div>
+</div>
+</section>
+</div>
+<!-- 5. Resource Usage -->
+<section class="bg-surface border border-border-default rounded-lg p-space-xl">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface mb-space-md">资源使用率</h3>
+<div class="space-y-space-lg">
+<div>
+<div class="flex justify-between font-body-md text-body-md mb-2">
+<span class="text-on-surface-variant">磁盘空间 (4.2GB / 20GB)</span>
+<span class="text-on-surface font-medium tabular-nums">21%</span>
+</div>
+<div class="w-full bg-surface-container-low rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 21%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-space-lg pt-4 border-t border-border-default">
+<div>
+<div class="font-caption text-caption text-outline mb-1">WAL 大小</div>
+<div class="font-headline-h3 text-headline-h3 text-on-surface tabular-nums">128 MB</div>
+</div>
+<div>
+<div class="font-caption text-caption text-outline mb-1">内存占用</div>
+<div class="font-headline-h3 text-headline-h3 text-on-surface tabular-nums">312 MB</div>
+</div>
+<div>
+<div class="font-caption text-caption text-outline mb-1">缓存命中率</div>
+<div class="font-headline-h3 text-headline-h3 text-on-surface tabular-nums">94%</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. Advanced Diagnostics -->
+<section class="bg-surface border border-border-default rounded-lg overflow-hidden">
+<details class="group">
+<summary class="flex justify-between items-center cursor-pointer p-space-lg bg-surface hover:bg-surface-container-low transition-colors select-none font-headline-h3 text-headline-h3 text-on-surface">
+                            高级诊断信息
+                            <span class="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform duration-200">expand_more</span>
+</summary>
+<div class="p-space-lg border-t border-border-default bg-canvas/50">
+<div class="grid grid-cols-2 gap-x-space-xl gap-y-space-md font-body-md text-body-md font-mono text-sm">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">PRAGMA journal_mode</span>
+<span class="text-on-surface font-medium">wal</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">PRAGMA synchronous</span>
+<span class="text-on-surface font-medium">NORMAL</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Alembic Head</span>
+<span class="text-on-surface font-medium">abc123456def</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Python Version</span>
+<span class="text-on-surface font-medium">3.11.4</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Java Version</span>
+<span class="text-on-surface font-medium">17.0.8</span>
+</div>
+</div>
+</div>
+</details>
+</section>
+<!-- 7. Actions -->
+<section class="pt-space-xl border-t border-border-default flex flex-col items-center">
+<div class="font-caption text-caption text-outline mb-space-md font-mono">ID: diag_8a3f9c21e7b4</div>
+<div class="flex gap-space-md">
+<button class="px-space-lg py-2 bg-[#EEF2FF] text-primary border border-primary/20 rounded-md font-label-sm text-label-sm hover:bg-surface-container-low transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+                            复制诊断信息
+                        </button>
+<button class="px-space-lg py-2 bg-primary text-on-primary rounded-md font-label-sm text-label-sm hover:bg-primary-container transition-colors shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                            下载脱敏日志
+                        </button>
+</div>
+<p class="font-caption text-caption text-on-surface-variant mt-space-md text-center">
+                        日志已自动脱敏，不包含任何账户持仓或密钥信息。
+                    </p>
+</section>
+</div>
+</main>
+</div>
+</body></html>

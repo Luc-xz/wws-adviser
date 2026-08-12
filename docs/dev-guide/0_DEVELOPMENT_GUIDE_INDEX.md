@@ -28,7 +28,7 @@
 | [9_TEST_AND_CI.md](./9_TEST_AND_CI.md) | 测试分层、必测不变量、属性测试、CI 门禁 | 写任意测试与提交 PR 前 |
 | [10_MILESTONE_PLAN.md](./10_MILESTONE_PLAN.md) | Phase 0–3 工作项、退出条件、验收映射 | 排期与每次 plan-phase 前 |
 
-> 数据源供应商与模型供应商当前**未确定**：本指南凡涉及外部具体供应商处，一律以**端口契约 + 占位适配器**表达，并标注 `TODO(data-source-selection)`，待《数据源选型与质量规范》确定后填充。这是有意约束——避免在选型未定前写死字段映射、限频、认证细节。
+> 数据源供应商已确定为 **AKShare（MVP）**，模型供应商采用**通用 OpenAI-compatible 协议**（不锁定具体供应商）：本指南凡涉及外部具体供应商处，一律以**端口契约 + 适配器**表达（见 §7.1 已确认决策）。这是有意约束——避免写死字段映射、限频、认证细节，便于后续升级或切换供应商。
 
 ## 3. 术语表
 
@@ -94,11 +94,19 @@
 | 反向代理 / HTTPS | **Nginx** + 证书（原待定） | 8_SECURITY_AND_DEPLOYMENT |
 | 登录方案 | 密码 → P1 加 Passkey | 8 |
 | 数据保留 | 交易/报告永久；intraday parquet 90 天可配；日志 30 天 | 2 |
+| CSS 方案 | UnoCSS | 7_FRONTEND_AND_PWA |
+| ULID 生成库 | python-ulid（运行时生成） | 2_DATA_MODEL_AND_STORAGE |
+| E2E 浏览器矩阵 | Playwright 桌面等效环境（模拟 iOS Safari + Android Chrome） | 9_TEST_AND_CI |
+| 许可证策略 | 宽松白名单（MIT/Apache-2.0/BSD/ISC），拒绝 copyleft | 9_TEST_AND_CI |
+| **通知渠道（MVP）** | **邮件 SMTP**（587/465，云端 VPS 避开 25 封锁；企业微信/Server 酱保留可插拔接口） | PRD §20.1 / 6 / 8 |
+| **数据源供应商（MVP）** | **AKShare（免费开源）**，三端口全覆盖；升级路径 Tushare Pro（200–500 元/年，日线免费） | 5_DATA_INGESTION_AND_QUALITY §11.2 |
+| **模型供应商** | **通用 OpenAI-compatible 协议，不锁定具体供应商**；部署时配置 `base_url`+`api_key`+`model` 映射；候选推荐见 §12.2 | 6_MODEL_AND_REPORT_PIPELINE §12.2 |
+| **VPS 地域** | **国内 VPS**（数据源低延迟；OpenAI/Claude 需代理） | 8_SECURITY_AND_DEPLOYMENT |
 
-### 7.2 待确认项（供应商与参数类）
+### 7.2 运行配置项（已确认留可配，初值见各文档）
 
-| 事项 | 当前状态 | 归属文档 |
-| --- | --- | --- |
-| 数据源供应商（行情/公告/新闻） | 未定，端口契约+占位 | 5_DATA_INGESTION_AND_QUALITY |
-| 模型供应商 | OpenAI-compatible，未定具体 | 6_MODEL_AND_REPORT_PIPELINE |
-| 初始通知渠道 | 待选企业微信/Server 酱/邮件一种（Phase 1.6 前定） | 6 / 8 |
+校准阈值（`ECE_REJECT_THRESHOLD` / `WIDE_P_THRESHOLD` / 回灌降级）、时钟偏差、字段冲突容差、熔断窗口、SSE schema、OpenAPI diff 强度、任务 `max_attempts`、告警冷却、导入预览行数、登录限流、CSRF、备份加密、SQLite/Parquet 分布、金丝日期集、`downgrade -1`、离线缓存上限、图表懒加载、侧栏宽度——详见 3/4/5/6/7/8/9 各文档「运行配置项」段。
+
+### 7.3 待确认项
+
+**无。** 全部待确认项已于 2026-08-12 复核完毕并落档。

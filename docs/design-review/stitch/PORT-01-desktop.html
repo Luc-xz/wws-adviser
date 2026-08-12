@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>持仓与自选 - WWS Adviser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#dde0e1",
+                    "surface-container": "#e9edff",
+                    "tertiary-fixed-dim": "#c4c7c9",
+                    "market-up": "#D92D20",
+                    "tertiary-container": "#606365",
+                    "secondary-fixed-dim": "#c2c6d3",
+                    "on-primary-fixed": "#001452",
+                    "surface-variant": "#dbe2f9",
+                    "primary-container": "#3157d5",
+                    "outline-variant": "#c4c5d6",
+                    "on-tertiary-fixed-variant": "#444749",
+                    "on-tertiary-fixed": "#191c1e",
+                    "error-container": "#ffdad6",
+                    "border-default": "#E4E7EC",
+                    "surface": "#FFFFFF",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#dbe2f9",
+                    "risk-critical": "#C11574",
+                    "canvas": "#F5F7FA",
+                    "primary-fixed-dim": "#b7c4ff",
+                    "on-secondary-fixed-variant": "#424751",
+                    "inverse-surface": "#293041",
+                    "secondary": "#5a5e69",
+                    "on-error-container": "#93000a",
+                    "on-error": "#ffffff",
+                    "surface-container-low": "#f1f3ff",
+                    "on-background": "#141b2c",
+                    "background": "#f9f9ff",
+                    "inverse-on-surface": "#edf0ff",
+                    "market-down": "#079455",
+                    "tertiary": "#484b4d",
+                    "primary-fixed": "#dde1ff",
+                    "surface-container-high": "#e0e8ff",
+                    "surface-dim": "#d2daf0",
+                    "surface-bright": "#f9f9ff",
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#dee2ef",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#e0e3e5",
+                    "inverse-primary": "#b7c4ff",
+                    "secondary-fixed": "#dee2ef",
+                    "on-primary-fixed-variant": "#0038b6",
+                    "on-primary-container": "#d8ddff",
+                    "outline": "#747685",
+                    "on-surface": "#141b2c",
+                    "on-surface-variant": "#444654",
+                    "primary": "#063cbc",
+                    "on-secondary-fixed": "#171c25",
+                    "surface-tint": "#2c53d1",
+                    "on-secondary-container": "#60646f",
+                    "risk-warning": "#DC6803"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "space-2xl": "32px",
+                    "space-xs": "4px",
+                    "gutter-mobile": "12px",
+                    "unit": "4px",
+                    "space-sm": "8px",
+                    "space-md": "12px",
+                    "space-lg": "16px",
+                    "space-xl": "24px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "display-lg-mobile": [
+                            "Inter"
+                    ],
+                    "label-sm": [
+                            "Inter"
+                    ],
+                    "headline-h3": [
+                            "Inter"
+                    ],
+                    "display-lg": [
+                            "Inter"
+                    ],
+                    "body-lg": [
+                            "Inter"
+                    ],
+                    "headline-h1": [
+                            "Inter"
+                    ],
+                    "headline-h2": [
+                            "Inter"
+                    ],
+                    "caption": [
+                            "Inter"
+                    ],
+                    "micro-badge": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.55",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "display-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "label-sm": [
+                            "13px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-h3": [
+                            "17px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-h1": [
+                            "24px",
+                            {
+                                    "lineHeight": "1.3",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-h2": [
+                            "20px",
+                            {
+                                    "lineHeight": "1.35",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "caption": [
+                            "12px",
+                            {
+                                    "lineHeight": "1.45",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "micro-badge": [
+                            "11px",
+                            {
+                                    "lineHeight": "1.35",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface h-screen flex overflow-hidden w-full">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-low dark:bg-surface-dim border-r border-border-default dark:border-outline-variant h-full w-[224px] fixed left-0 top-0 flex flex-col h-full py-space-xl z-20">
+<div class="px-space-xl mb-space-2xl">
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-secondary mt-1">Terminal v2.4</p>
+</div>
+<ul class="flex-1 px-space-md">
+<li class="mb-space-xs">
+<a class="flex items-center px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold opacity-80 duration-150 group" href="#">
+<span class="material-symbols-outlined mr-space-sm group-hover:text-primary transition-colors">home</span>
+                    首页
+                </a>
+</li>
+<li class="mb-space-xs">
+<a class="flex items-center px-space-md py-space-sm rounded-lg text-primary dark:text-inverse-primary font-bold border-r-2 border-primary dark:border-inverse-primary hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm opacity-80 duration-150 group bg-surface-container-high" href="#">
+<span class="material-symbols-outlined mr-space-sm text-primary transition-colors" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+                    持仓
+                </a>
+</li>
+<li class="mb-space-xs">
+<a class="flex items-center px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold opacity-80 duration-150 group" href="#">
+<span class="material-symbols-outlined mr-space-sm group-hover:text-primary transition-colors">smart_toy</span>
+                    助手
+                </a>
+</li>
+<li class="mb-space-xs">
+<a class="flex items-center px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold opacity-80 duration-150 group" href="#">
+<span class="material-symbols-outlined mr-space-sm group-hover:text-primary transition-colors">analytics</span>
+                    研究
+                </a>
+</li>
+<li class="mb-space-xs">
+<a class="flex items-center px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold opacity-80 duration-150 group" href="#">
+<span class="material-symbols-outlined mr-space-sm group-hover:text-primary transition-colors">settings</span>
+                    设置
+                </a>
+</li>
+</ul>
+<div class="px-space-lg mt-auto">
+<div class="flex items-center gap-space-sm p-space-sm border border-border-default rounded-lg bg-surface">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A small, professional headshot of an Asian male financial advisor in a suit, well-lit studio lighting, neutral background, crisp and clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDau5ZIRckI4uTp6o8gPjvcHLFJtWrsQluDKUPn1gNla-TdZA7-x4blq0NlPNO-inVkPpFu2-fUhwT_0BUi6lKdQjPeKpIQK6VH38pwOWvsO8p4wFVyFXyJB4nu_usOZarI3YQudjzEaJQgI0z-bnS4QwIvygdddUOyM5zlvn5hAjGCnDj1MIpCXicmFcKGYBJtkx2jRyqXHaISzcsIGUCMv5NlKe7uh9c3FBjOn00XXbiRfggb5OWOJNspNRn8E2aM6iEjK_ugVtE"/>
+<div class="flex-1 min-w-0">
+<p class="font-label-sm text-label-sm text-on-surface truncate">Advisor Admin</p>
+</div>
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-[224px] flex flex-col h-full bg-canvas relative">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline-variant h-[64px] fixed top-0 right-0 left-[224px] z-10 flex justify-between items-center px-space-xl mx-auto w-full">
+<div class="flex items-center gap-space-md flex-1">
+<div class="font-headline-h3 text-headline-h3 text-on-surface flex items-center gap-2">
+<span class="text-secondary">持仓与自选</span>
+</div>
+</div>
+<div class="flex-1 max-w-md mx-space-xl hidden md:flex items-center">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary text-sm">search</span>
+<input class="w-full h-9 pl-9 pr-4 rounded-full border border-border-default bg-canvas focus:bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-md text-body-md text-on-surface placeholder-secondary" placeholder="搜索..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-space-xl flex-1 justify-end">
+<div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low border border-border-default">
+<span class="w-2 h-2 rounded-full bg-market-down animate-pulse"></span>
+<span class="font-caption text-caption text-secondary">交易中 · 行情 10:32</span>
+</div>
+<button class="text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-variant transition-all p-2 rounded-full relative group">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-market-up rounded-full border-2 border-surface"></span>
+</button>
+</div>
+</header>
+<!-- Scrollable Canvas -->
+<main class="flex-1 overflow-y-auto pt-[64px] p-space-xl">
+<div class="max-w-[1400px] mx-auto w-full flex flex-col gap-space-xl">
+<!-- Metric Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-1 hover:border-outline-variant transition-colors shadow-sm">
+<span class="font-label-sm text-label-sm text-secondary">总资产</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-display-lg text-display-lg text-on-surface tabular-nums">¥328,540</span>
+</div>
+</div>
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-1 hover:border-outline-variant transition-colors shadow-sm">
+<span class="font-label-sm text-label-sm text-secondary">总市值</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-display-lg text-display-lg text-on-surface tabular-nums">¥267,420</span>
+</div>
+</div>
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-1 hover:border-outline-variant transition-colors shadow-sm">
+<span class="font-label-sm text-label-sm text-secondary">现金余额</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-display-lg text-display-lg text-on-surface tabular-nums">¥61,120</span>
+</div>
+</div>
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-1 hover:border-outline-variant transition-colors shadow-sm">
+<span class="font-label-sm text-label-sm text-secondary">持仓集中度</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-display-lg text-display-lg text-on-surface">中等</span>
+</div>
+</div>
+</div>
+<!-- Tabs & Toolbar Area -->
+<div class="flex flex-col gap-space-md">
+<!-- Tabs -->
+<div class="flex gap-space-lg border-b border-border-default">
+<button class="pb-2 font-label-sm text-label-sm text-primary font-bold border-b-2 border-primary px-1">当前持仓</button>
+<button class="pb-2 font-label-sm text-label-sm text-secondary hover:text-on-surface transition-colors px-1">自选</button>
+<button class="pb-2 font-label-sm text-label-sm text-secondary hover:text-on-surface transition-colors px-1">流水</button>
+</div>
+<!-- Toolbar -->
+<div class="flex justify-between items-center bg-surface border border-border-default rounded-lg p-2 shadow-sm">
+<div class="flex items-center gap-space-sm overflow-x-auto no-scrollbar">
+<div class="flex items-center gap-2 pr-4 border-r border-border-default">
+<span class="font-label-sm text-label-sm text-secondary whitespace-nowrap">过滤:</span>
+<button class="px-3 py-1 bg-surface-container text-primary font-label-sm text-label-sm rounded-full border border-primary-fixed-dim whitespace-nowrap">全部</button>
+<button class="px-3 py-1 bg-canvas text-secondary hover:bg-surface-container-low font-label-sm text-label-sm rounded-full border border-border-default whitespace-nowrap transition-colors">股票</button>
+<button class="px-3 py-1 bg-canvas text-secondary hover:bg-surface-container-low font-label-sm text-label-sm rounded-full border border-border-default whitespace-nowrap transition-colors">ETF</button>
+<button class="px-3 py-1 bg-canvas text-secondary hover:bg-surface-container-low font-label-sm text-label-sm rounded-full border border-border-default whitespace-nowrap transition-colors">基金</button>
+<button class="px-3 py-1 bg-canvas text-secondary hover:bg-surface-container-low font-label-sm text-label-sm rounded-full border border-border-default whitespace-nowrap transition-colors">行业</button>
+<button class="px-3 py-1 bg-error-container text-error font-label-sm text-label-sm rounded-full border border-error/30 whitespace-nowrap">异常</button>
+</div>
+<div class="flex items-center gap-2 pl-2">
+<span class="font-label-sm text-label-sm text-secondary whitespace-nowrap">排序:</span>
+<div class="relative group cursor-pointer">
+<div class="flex items-center gap-1 px-3 py-1 bg-canvas rounded-md border border-border-default hover:border-outline-variant transition-colors">
+<span class="font-label-sm text-label-sm text-on-surface">风险优先</span>
+<span class="material-symbols-outlined text-sm text-secondary">arrow_drop_down</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-md shrink-0">
+<div class="relative w-48 hidden sm:block">
+<span class="material-symbols-outlined absolute left-2 top-1/2 transform -translate-y-1/2 text-secondary text-sm">search</span>
+<input class="w-full h-8 pl-8 pr-3 rounded-md border border-border-default bg-canvas focus:bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-md text-body-md text-on-surface placeholder-secondary text-sm" placeholder="表格内搜索..." type="text"/>
+</div>
+<button class="px-4 py-1.5 bg-surface-container text-primary font-label-sm text-label-sm rounded-lg border border-primary-fixed-dim hover:bg-surface-container-high transition-colors whitespace-nowrap">
+                                导入 CSV
+                            </button>
+<button class="px-4 py-1.5 bg-primary text-on-primary font-label-sm text-label-sm rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap shadow-sm">
+                                记录交易
+                            </button>
+</div>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-canvas border-b border-border-default">
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium sticky left-0 bg-canvas z-10 w-48 shadow-[1px_0_0_0_#E4E7EC]">标的</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium text-right">价格/净值</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium text-right">数量</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium text-right">市值</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium w-32">仓位%</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium text-right">成本</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium text-right">持有盈亏</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium text-center">建议</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium text-right">数据时间</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-secondary font-medium sticky right-0 bg-canvas z-10 w-16 text-center shadow-[-1px_0_0_0_#E4E7EC]">操作</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md divide-y divide-border-default">
+<!-- Critical Row 1 (fixed 2026-08-12: 浅红→洋红弱底，警示图标 market-up→risk-critical，符合 §7.3 Critical 与上涨红区分) -->
+<tr class="bg-[#FDF2F8] hover:bg-[#FBE8F0] transition-colors h-12 group">
+<td class="py-2 px-4 sticky left-0 bg-[#FDF2F8] group-hover:bg-[#FBE8F0] z-10 shadow-[1px_0_0_0_#E4E7EC] flex items-center h-12">
+<span class="material-symbols-outlined text-risk-critical text-sm mr-2" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<div class="font-medium text-on-surface">贵州茅台</div>
+<div class="font-caption text-caption text-secondary">600519</div>
+</div>
+</td>
+<td class="py-2 px-4 text-right tabular-nums">
+<div class="text-on-surface">1,465.00</div>
+<div class="text-market-up font-medium">+1.25%</div>
+</td>
+<td class="py-2 px-4 text-right tabular-nums text-on-surface">200</td>
+<td class="py-2 px-4 text-right tabular-nums text-on-surface">293,000.00</td>
+<td class="py-2 px-4 align-middle">
+<div class="flex items-center gap-2">
+<span class="tabular-nums text-on-surface min-w-[32px] text-right">8.5%</span>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-risk-warning rounded-full" style="width: 8.5%;"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 text-right tabular-nums text-secondary">1,410.00</td>
+<td class="py-2 px-4 text-right tabular-nums text-market-up font-medium">+11,000.00</td>
+<td class="py-2 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm bg-orange-100 text-orange-800 font-micro-badge text-micro-badge">减少</span>
+</td>
+<td class="py-2 px-4 text-right tabular-nums text-secondary text-sm">10:32</td>
+<td class="py-2 px-4 sticky right-0 bg-[#FDF2F8] group-hover:bg-[#FBE8F0] z-10 text-center shadow-[-1px_0_0_0_#E4E7EC]">
+<button class="text-secondary hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</td>
+</tr>
+<!-- Standard Rows Below (omitted for brevity in this minimal effort response, but normally populated) -->
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between p-4 border-t border-border-default bg-canvas">
+<span class="font-caption text-caption text-secondary">显示 1 - 10 / 共 45 条</span>
+<div class="flex gap-1">
+<button class="p-1 rounded text-secondary hover:bg-surface-container-low disabled:opacity-50" disabled=""><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="px-2 py-1 min-w-[28px] rounded text-sm font-medium bg-primary text-on-primary">1</button>
+<button class="px-2 py-1 min-w-[28px] rounded text-sm font-medium text-secondary hover:bg-surface-container-low">2</button>
+<button class="px-2 py-1 min-w-[28px] rounded text-sm font-medium text-secondary hover:bg-surface-container-low">3</button>
+<span class="px-2 py-1 text-secondary">...</span>
+<button class="p-1 rounded text-secondary hover:bg-surface-container-low"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

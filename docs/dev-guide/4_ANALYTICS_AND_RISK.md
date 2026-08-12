@@ -249,13 +249,15 @@ DRAFT
 - 模型输出数值与确定性字段冲突时不覆盖确定性字段（Advice 转 BLOCKED/重建）。
 - 任何模型文本 / 自报置信度不进入 `p`（属性测试：构造含 L4 信号的输入断言拒绝或不进凯利路径）。
 
-## 10. 待确认项
+## 10. 已确认与运行配置项
 
-| 事项 | 当前默认 | 备注 |
+> 2026-08-11 复核：校准类阈值（B 组）统一采用「运行配置 + 测试夹具」策略——初值由测试夹具给出合理默认，上线后用真实评价数据校准，不现在定死。
+
+| 事项 | 确认值/策略 | 性质 |
 | --- | --- | --- |
-| `KELLY_DISCOUNT` 配置入口 | 默认 0.20，设置页 `settings/risk` | 范围 0.10–0.25 |
-| `CALIBRATION_VALID_TD` | 60 交易日 | 可按信号类目细分（L2 滚动） |
-| `ECE_REJECT_THRESHOLD` | TODO(calibration-tuning) | 留运行配置 + 测试夹具 |
-| `WIDE_P_THRESHOLD` | TODO(calibration-tuning) | 同上 |
-| 评价窗口默认值 | 见 §8 表 | 按类目可配 |
-| 回灌触发降级阈值 | TODO(backfeed-threshold) | 连续 N 期评价差 → `DECAYED` |
+| `KELLY_DISCOUNT` 配置入口 | 默认 0.20，设置页 `settings/risk`，范围 0.10–0.25 | 已确认（PRD §20） |
+| `CALIBRATION_VALID_TD` | 60 交易日，可按信号类目细分（L2 滚动） | 运行配置 |
+| `ECE_REJECT_THRESHOLD` | 运行配置 + 测试夹具，初值待校准 | `TODO(calibration-tuning)` |
+| `WIDE_P_THRESHOLD` | 运行配置 + 测试夹具，初值待校准 | `TODO(calibration-tuning)` |
+| 评价窗口默认值 | 见 §8 表，按类目可配 | 运行配置 |
+| 回灌触发降级阈值 | 运行配置 + 测试夹具，连续 N 期评价差 → `DECAYED` | `TODO(backfeed-threshold)` |

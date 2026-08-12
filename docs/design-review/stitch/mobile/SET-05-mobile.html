@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>任务时间设置 - WWS Adviser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#c2c6d3",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed-variant": "#424751",
+                      "surface-container": "#e9edff",
+                      "outline-variant": "#c4c5d6",
+                      "on-tertiary-fixed": "#191c1e",
+                      "market-down": "#079455",
+                      "secondary-fixed": "#dee2ef",
+                      "tertiary": "#484b4d",
+                      "risk-critical": "#C11574",
+                      "primary-fixed-dim": "#b7c4ff",
+                      "on-error": "#ffffff",
+                      "surface-variant": "#dbe2f9",
+                      "inverse-surface": "#293041",
+                      "surface": "#FFFFFF",
+                      "tertiary-fixed": "#e0e3e5",
+                      "secondary": "#5a5e69",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "risk-warning": "#DC6803",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#e0e8ff",
+                      "on-primary-fixed": "#001452",
+                      "on-surface": "#141b2c",
+                      "secondary-container": "#dee2ef",
+                      "primary-container": "#3157d5",
+                      "surface-tint": "#2c53d1",
+                      "on-tertiary-container": "#dde0e1",
+                      "error": "#ba1a1a",
+                      "on-secondary-container": "#60646f",
+                      "surface-container-low": "#f1f3ff",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "border-default": "#E4E7EC",
+                      "on-secondary-fixed": "#171c25",
+                      "market-up": "#D92D20",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "inverse-primary": "#b7c4ff",
+                      "tertiary-container": "#606365",
+                      "primary-fixed": "#dde1ff",
+                      "canvas": "#F5F7FA",
+                      "inverse-on-surface": "#edf0ff",
+                      "background": "#f9f9ff",
+                      "primary": "#063cbc",
+                      "outline": "#747685",
+                      "on-primary-fixed-variant": "#0038b6",
+                      "on-primary": "#ffffff",
+                      "surface-container-highest": "#dbe2f9",
+                      "surface-bright": "#f9f9ff",
+                      "on-background": "#141b2c",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-dim": "#d2daf0",
+                      "on-primary-container": "#d8ddff",
+                      "on-surface-variant": "#444654"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "space-2xl": "32px",
+                      "space-xl": "24px",
+                      "space-lg": "16px",
+                      "space-md": "12px",
+                      "margin-mobile": "16px",
+                      "gutter-mobile": "12px",
+                      "space-sm": "8px",
+                      "unit": "4px",
+                      "space-xs": "4px"
+              },
+              "fontFamily": {
+                      "display-lg-mobile": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-h2": ["Inter"],
+                      "headline-h1": ["Inter"],
+                      "micro-badge": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "headline-h3": ["Inter"],
+                      "caption": ["Inter"]
+              },
+              "fontSize": {
+                      "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                      "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                      "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                      "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.canvas');
+            color: theme('colors.on-background');
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col md:flex-row pb-20 md:pb-0">
+<!-- Mobile TopAppBar -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 bg-surface border-b border-border-default docked full-width top-0 z-40">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">account_circle</span>
+<h1 class="font-headline-h1 text-headline-h1 font-bold text-primary">WWS Adviser</h1>
+</div>
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 ease-in-out p-2 rounded-full">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+</header>
+<!-- Desktop SideNav (Simulated for md+ layout based on Shared Components) -->
+<aside class="hidden md:flex flex-col w-64 bg-surface border-r border-border-default h-screen sticky top-0 z-40 p-4">
+<div class="flex items-center gap-2 mb-8 px-2">
+<h1 class="font-headline-h1 text-headline-h1 font-bold text-primary">WWS Adviser</h1>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">持仓</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-sm text-label-sm">助手</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm">研究</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-container text-on-primary-container font-bold transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">设置</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col p-margin-mobile md:p-space-2xl gap-space-xl max-w-5xl mx-auto w-full">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-space-md">
+<div>
+<h2 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2">任务时间设置</h2>
+<p class="font-body-md text-body-md text-secondary">SET-05 | 规范 10.25 | 当前时区: Asia/Shanghai (UTC+8)</p>
+</div>
+<div class="flex items-center gap-space-sm bg-surface px-4 py-2 rounded-lg border border-border-default shadow-sm">
+<span class="material-symbols-outlined text-market-down" style="font-variation-settings: 'FILL' 1;">timer</span>
+<div class="flex flex-col">
+<span class="font-micro-badge text-micro-badge text-secondary uppercase tracking-wider">下一任务倒计时 (开市报告)</span>
+<span class="font-headline-h2 text-headline-h2 text-on-surface" id="countdown">02:14:59</span>
+</div>
+</div>
+</div>
+<!-- Settings Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
+<!-- Card 1: Pre-market Report -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-space-md hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-space-sm">
+<div class="p-2 bg-surface-container-low rounded-lg text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined">description</span>
+</div>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">开市前报告</h3>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-default after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex-1">
+<p class="font-body-md text-body-md text-secondary mb-4">生成每日开盘前市场分析与持仓风险预警报告。</p>
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant">执行时间 (Asia/Shanghai)</label>
+<div class="flex items-center bg-canvas border border-border-default rounded-lg px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<span class="material-symbols-outlined text-secondary mr-2">schedule</span>
+<input class="bg-transparent border-none outline-none w-full font-body-lg text-body-lg text-on-surface p-0 focus:ring-0" type="time" value="08:30"/>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-border-default flex justify-between items-center">
+<span class="font-caption text-caption text-secondary">依赖: 行情数据流</span>
+<button class="font-label-sm text-label-sm text-primary hover:text-on-primary-fixed-variant">高级设置</button>
+</div>
+</div>
+<!-- Card 2: Post-market Review -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-space-md hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-space-sm">
+<div class="p-2 bg-surface-container-low rounded-lg text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined">insights</span>
+</div>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">收市后复盘</h3>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-default after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex-1">
+<p class="font-body-md text-body-md text-secondary mb-4">汇总当日交易记录，生成盈亏归因与策略偏离度分析。</p>
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant">执行时间 (Asia/Shanghai)</label>
+<div class="flex items-center bg-canvas border border-border-default rounded-lg px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<span class="material-symbols-outlined text-secondary mr-2">schedule</span>
+<input class="bg-transparent border-none outline-none w-full font-body-lg text-body-lg text-on-surface p-0 focus:ring-0" type="time" value="16:00"/>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-border-default flex justify-between items-center">
+<span class="font-caption text-caption text-secondary">依赖: 结算数据</span>
+<button class="font-label-sm text-label-sm text-primary hover:text-on-primary-fixed-variant">高级设置</button>
+</div>
+</div>
+<!-- Card 3: Auto Backup -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col gap-space-md hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-space-sm">
+<div class="p-2 bg-surface-container-low rounded-lg text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined">cloud_sync</span>
+</div>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">自动备份</h3>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-default after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex-1">
+<p class="font-body-md text-body-md text-secondary mb-4">备份用户配置、策略参数及历史研究报告至加密云端。</p>
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant">执行时间 (Asia/Shanghai)</label>
+<div class="flex items-center bg-canvas border border-border-default rounded-lg px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<span class="material-symbols-outlined text-secondary mr-2">schedule</span>
+<input class="bg-transparent border-none outline-none w-full font-body-lg text-body-lg text-on-surface p-0 focus:ring-0" type="time" value="23:30"/>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-border-default flex justify-between items-center">
+<span class="font-caption text-caption text-secondary">频次: 每日</span>
+<button class="font-label-sm text-label-sm text-primary hover:text-on-primary-fixed-variant">高级设置</button>
+</div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="flex justify-end mt-space-lg">
+<button class="bg-primary text-on-primary font-label-sm text-label-sm px-6 py-3 rounded-lg hover:bg-on-primary-fixed-variant transition-colors shadow-sm">
+                保存配置
+            </button>
+</div>
+</main>
+<!-- Mobile BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-gutter-mobile pt-2 pb-safe bg-surface border-t border-border-default bg-surface/90 backdrop-blur-md z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">持仓</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl">smart_toy</span>
+<span class="font-label-sm text-label-sm">助手</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl">analytics</span>
+<span class="font-label-sm text-label-sm">研究</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-3 py-1 scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<span class="font-label-sm text-label-sm">设置</span>
+</a>
+</nav>
+<script>
+        // Simple countdown simulator for demo purposes
+        function updateCountdown() {
+            const el = document.getElementById('countdown');
+            let [hours, minutes, seconds] = el.innerText.split(':').map(Number);
+            
+            seconds--;
+            if (seconds < 0) {
+                seconds = 59;
+                minutes--;
+                if (minutes < 0) {
+                    minutes = 59;
+                    hours--;
+                    if (hours < 0) {
+                        hours = 2; // Reset for demo
+                    }
+                }
+            }
+            
+            el.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        
+        setInterval(updateCountdown, 1000);
+    </script>
+</body></html>

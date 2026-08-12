@@ -11,6 +11,17 @@
     "pngMissing": false
   },
   {
+    "sid": "2c1d864f44834b9aaa2da936a6a3f95f",
+    "file": "AUTH-01-mobile",
+    "title": "登录 (AUTH-01)",
+    "width": "780",
+    "height": "1768",
+    "isPrimary": true,
+    "htmlSize": 9272,
+    "pngSize": 15752,
+    "pngMissing": false
+  },
+  {
     "sid": "4c1ceab8c0eb4aac8eebc416eab64dc8",
     "file": "CHAT-01-mobile",
     "title": "助手对话 (CHAT-01)",
@@ -19,6 +30,17 @@
     "isPrimary": true,
     "htmlSize": 17871,
     "pngSize": 29577,
+    "pngMissing": false
+  },
+  {
+    "sid": "3129596c43854a6495950eae4b9a1437",
+    "file": "CHAT-02-mobile",
+    "title": "建议详情 (CHAT-02)",
+    "width": "780",
+    "height": "2542",
+    "isPrimary": true,
+    "htmlSize": 12940,
+    "pngSize": 32262,
     "pngMissing": false
   },
   {
@@ -44,6 +66,17 @@
     "pngMissing": false
   },
   {
+    "sid": "366f26422b2943fcaad9f38a8852ba7d",
+    "file": "HOME-02-mobile",
+    "title": "今日行动与风险 (HOME-02)",
+    "width": "780",
+    "height": "1768",
+    "isPrimary": true,
+    "htmlSize": 15886,
+    "pngSize": 37852,
+    "pngMissing": false
+  },
+  {
     "sid": "a4bb3f0872be447dbed6588d919cc720",
     "file": "LIB-01-mobile",
     "title": "研究与报告库 (LIB-01)",
@@ -52,6 +85,28 @@
     "isPrimary": true,
     "htmlSize": 21350,
     "pngSize": 30991,
+    "pngMissing": false
+  },
+  {
+    "sid": "51c4a18f40f54565bc804ea552ee6c1c",
+    "file": "ONB-01-mobile",
+    "title": "首次配置向导 (ONB-01)",
+    "width": "780",
+    "height": "1768",
+    "isPrimary": true,
+    "htmlSize": 14875,
+    "pngSize": 47588,
+    "pngMissing": false
+  },
+  {
+    "sid": "c12a3a76cdec4321a6e80ea0f3163db3",
+    "file": "PORT-01-mobile",
+    "title": "持仓与自选 (PORT-01)",
+    "width": "780",
+    "height": "1768",
+    "isPrimary": true,
+    "htmlSize": 17113,
+    "pngSize": 29322,
     "pngMissing": false
   },
   {
@@ -77,6 +132,28 @@
     "pngMissing": false
   },
   {
+    "sid": "c91aa6c936fc469ea590f3f80e79f61a",
+    "file": "REP-02-mobile",
+    "title": "收市后复盘 (REP-02)",
+    "width": "780",
+    "height": "3260",
+    "isPrimary": true,
+    "htmlSize": 15271,
+    "pngSize": 33370,
+    "pngMissing": false
+  },
+  {
+    "sid": "27e75183c6504597bdd939a1f86f0b98",
+    "file": "REP-03-mobile",
+    "title": "研究报告 (REP-03)",
+    "width": "780",
+    "height": "2658",
+    "isPrimary": true,
+    "htmlSize": 23455,
+    "pngSize": 39393,
+    "pngMissing": false
+  },
+  {
     "sid": "a1ebc14abd7b476f9d855a108edcc167",
     "file": "RES-01-mobile",
     "title": "新建研究 (RES-01)",
@@ -88,6 +165,17 @@
     "pngMissing": false
   },
   {
+    "sid": "cdf90988f6424b0e974ee82816a61f20",
+    "file": "RES-02-mobile",
+    "title": "研究任务进度 (RES-02)",
+    "width": "780",
+    "height": "1768",
+    "isPrimary": true,
+    "htmlSize": 18004,
+    "pngSize": 42218,
+    "pngMissing": false
+  },
+  {
     "sid": "40e66dc9754b4838bccb440b690f69f4",
     "file": "SET-00-mobile",
     "title": "设置首页 (SET-00)",
@@ -96,6 +184,85 @@
     "isPrimary": true,
     "htmlSize": 14487,
     "pngSize": 24793,
+    "pngMissing": false
+  },
+  {
+    "sid": "936660ee339945f5aeb5cfc267224717",
+    "file": "SET-02-mobile",
+    "title": "数据源与质量 (SET-02)",
+    "width": "780",
+    "height": "2686",
+    "isPrimary": true,
+    "htmlSize": 19959,
+    "pngSize": 34503,
+    "pngMissing": false
+  },
+  {
+    "sid": "759056358ee640aaa5a3dd11a10b6d59",
+    "file": "SET-03-mobile",
+    "title": "模型与路由 (SET-03)",
+    "width": "780",
+    "height": "4518",
+    "isPrimary": true,
+    "htmlSize": 24392,
+    "pngSize": 20300,
+    "pngMissing": false
+  },
+  {
+    "sid": "9a931970b0a9445d828f70adf2521d7e",
+    "file": "SET-04-mobile",
+    "title": "通知与隐私 (SET-04) - 规范优化版",
+    "width": "780",
+    "height": "2938",
+    "isPrimary": true,
+    "htmlSize": 20220,
+    "pngSize": 26484,
+    "pngMissing": false,
+    "generated": true,
+    "generatedAt": "2026-08-12"
+  },
+  {
+    "sid": "af7dc0ad544e4d5182a600a7f510fded",
+    "file": "SET-05-mobile",
+    "title": "任务时间 (SET-05)",
+    "width": "780",
+    "height": "2594",
+    "isPrimary": true,
+    "htmlSize": 18892,
+    "pngSize": 28689,
+    "pngMissing": false
+  },
+  {
+    "sid": "e2b262b286bf42d4b65c28ef9eee965b",
+    "file": "SET-06-mobile",
+    "title": "安全与会话 (SET-06)",
+    "width": "780",
+    "height": "2488",
+    "isPrimary": true,
+    "htmlSize": 18972,
+    "pngSize": 32142,
+    "pngMissing": false
+  },
+  {
+    "sid": "b3d71109f1ce47099e8a4bf4795c5855",
+    "file": "SET-07-mobile",
+    "title": "存储与备份 (SET-07)",
+    "width": "780",
+    "height": "2136",
+    "isPrimary": true,
+    "htmlSize": 15612,
+    "pngSize": 37581,
+    "pngMissing": false
+  },
+  {
+    "sid": "eecde88a89334eec817ed604789db346",
+    "file": "SET-08-mobile",
+    "title": "系统状态 (SET-08)",
+    "width": "780",
+    "height": "2832",
+    "isPrimary": true,
+    "htmlSize": 18331,
+    "pngSize": 30685,
     "pngMissing": false
   },
   {
@@ -118,6 +285,17 @@
     "isPrimary": true,
     "htmlSize": 14876,
     "pngSize": 26254,
+    "pngMissing": false
+  },
+  {
+    "sid": "b76b0921bc2946de8bbf294ab73ff79b",
+    "file": "TX-03-mobile",
+    "title": "CSV 导入向导 (TX-03)",
+    "width": "780",
+    "height": "2826",
+    "isPrimary": true,
+    "htmlSize": 18432,
+    "pngSize": 23329,
     "pngMissing": false
   },
   {
@@ -224,6 +402,19 @@
     "pngSize": 29975,
     "pngMissing": false,
     "note": "中文版，比初版 6182280c 更新（含 cn 后缀通常为后续修正）"
+  },
+  {
+    "sid": "8c5a78f1fdee41f68ec877b337427109",
+    "file": "SET-04-mobile-v2",
+    "title": "通知与隐私 (SET-04)",
+    "width": "780",
+    "height": "2684",
+    "isPrimary": false,
+    "htmlSize": 23395,
+    "pngSize": 29110,
+    "pngMissing": false,
+    "generated": true,
+    "generatedAt": "2026-08-12"
   },
   {
     "sid": "9a08d6a314fe43499dc55781a7553cc9",

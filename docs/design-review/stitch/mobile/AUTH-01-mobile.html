@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>登录 - WWS Adviser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#424751",
+                        "surface-container": "#e9edff",
+                        "outline-variant": "#c4c5d6",
+                        "on-tertiary-fixed": "#191c1e",
+                        "market-down": "#079455",
+                        "secondary-fixed": "#dee2ef",
+                        "tertiary": "#484b4d",
+                        "risk-critical": "#C11574",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-surface": "#293041",
+                        "surface": "#FFFFFF",
+                        "tertiary-fixed": "#e0e3e5",
+                        "secondary": "#5a5e69",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "risk-warning": "#DC6803",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e0e8ff",
+                        "on-primary-fixed": "#001452",
+                        "on-surface": "#141b2c",
+                        "secondary-container": "#dee2ef",
+                        "primary-container": "#3157d5",
+                        "surface-tint": "#2c53d1",
+                        "on-tertiary-container": "#dde0e1",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#60646f",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "border-default": "#E4E7EC",
+                        "on-secondary-fixed": "#171c25",
+                        "market-up": "#D92D20",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "inverse-primary": "#b7c4ff",
+                        "tertiary-container": "#606365",
+                        "primary-fixed": "#dde1ff",
+                        "canvas": "#F5F7FA",
+                        "inverse-on-surface": "#edf0ff",
+                        "background": "#f9f9ff",
+                        "primary": "#063cbc",
+                        "outline": "#747685",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#dbe2f9",
+                        "surface-bright": "#f9f9ff",
+                        "on-background": "#141b2c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d2daf0",
+                        "on-primary-container": "#d8ddff",
+                        "on-surface-variant": "#444654"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-2xl": "32px",
+                        "space-xl": "24px",
+                        "space-lg": "16px",
+                        "space-md": "12px",
+                        "margin-mobile": "16px",
+                        "gutter-mobile": "12px",
+                        "space-sm": "8px",
+                        "unit": "4px",
+                        "space-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas min-h-screen flex flex-col font-sans text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-margin-mobile md:px-space-2xl pt-20 pb-10 w-full max-w-md mx-auto">
+<!-- Header Section -->
+<header class="w-full text-center mb-space-2xl flex flex-col items-center">
+<div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mb-space-lg shadow-sm">
+<span class="material-symbols-outlined text-on-primary text-3xl" style="font-variation-settings: 'FILL' 1;">
+                    query_stats
+                </span>
+</div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary tracking-tight mb-space-sm">
+                WWS Adviser
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xs mx-auto">
+                看清持仓、风险与依据，再做决定。
+            </p>
+</header>
+<!-- Login Card -->
+<div class="w-full bg-surface border border-border-default rounded-xl p-space-xl shadow-sm">
+<form action="#" class="space-y-space-lg" method="POST">
+<!-- Input Group -->
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-space-xs" for="password">
+                        访问凭证
+                    </label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-lg">
+                                lock
+                            </span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border border-border-default rounded-lg bg-surface text-on-surface font-body-md text-body-md focus:ring-2 focus:ring-primary focus:border-primary transition-colors placeholder-outline-variant" id="password" name="password" placeholder="输入安全密码以继续" required="" type="password"/>
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-label-sm text-label-sm text-on-primary bg-primary hover:bg-on-primary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors active:scale-[0.98]" type="submit">
+                    登录
+                </button>
+</form>
+</div>
+<!-- System Status Footer -->
+<footer class="mt-space-2xl w-full text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-full border border-border-default">
+<div class="w-2 h-2 rounded-full bg-market-up animate-pulse"></div>
+<span class="font-caption text-caption text-on-surface-variant">
+                    终端连接安全 • 区域节点就绪
+                </span>
+</div>
+</footer>
+</main>
+<!-- Suppressed Shell Components for Transactional View -->
+<!-- Navigation intentionally omitted per "The UX Goal: If the user is in a focused journey (Login)... hide the shell" -->
+</body></html>

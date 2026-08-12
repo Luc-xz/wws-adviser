@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WWS Adviser - Portfolio &amp; Watchlist</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#2c53d1",
+                      "primary-container": "#3157d5",
+                      "surface-container": "#e9edff",
+                      "error-container": "#ffdad6",
+                      "background": "#f9f9ff",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "surface-variant": "#dbe2f9",
+                      "on-tertiary-container": "#dde0e1",
+                      "on-primary-fixed": "#001452",
+                      "on-primary": "#ffffff",
+                      "risk-warning": "#DC6803",
+                      "secondary-fixed": "#dee2ef",
+                      "tertiary": "#484b4d",
+                      "risk-critical": "#C11574",
+                      "secondary": "#5a5e69",
+                      "primary": "#063cbc",
+                      "outline": "#747685",
+                      "border-default": "#E4E7EC",
+                      "market-up": "#D92D20",
+                      "error": "#ba1a1a",
+                      "on-background": "#141b2c",
+                      "surface-dim": "#d2daf0",
+                      "on-secondary-container": "#60646f",
+                      "secondary-fixed-dim": "#c2c6d3",
+                      "on-secondary": "#ffffff",
+                      "on-surface": "#141b2c",
+                      "surface-container-high": "#e0e8ff",
+                      "primary-fixed": "#dde1ff",
+                      "surface": "#FFFFFF",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#e0e3e5",
+                      "canvas": "#F5F7FA",
+                      "on-primary-fixed-variant": "#0038b6",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#b7c4ff",
+                      "on-surface-variant": "#444654",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-secondary-fixed-variant": "#424751",
+                      "secondary-container": "#dee2ef",
+                      "outline-variant": "#c4c5d6",
+                      "surface-container-low": "#f1f3ff",
+                      "market-down": "#079455",
+                      "on-secondary-fixed": "#171c25",
+                      "tertiary-container": "#606365",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "inverse-surface": "#293041",
+                      "inverse-on-surface": "#edf0ff",
+                      "on-primary-container": "#d8ddff",
+                      "on-error": "#ffffff",
+                      "surface-container-highest": "#dbe2f9",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#f9f9ff",
+                      "primary-fixed-dim": "#b7c4ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "space-sm": "8px",
+                      "space-xl": "24px",
+                      "space-xs": "4px",
+                      "unit": "4px",
+                      "space-md": "12px",
+                      "space-lg": "16px",
+                      "margin-mobile": "16px",
+                      "space-2xl": "32px",
+                      "gutter-mobile": "12px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-h1": [
+                              "Inter"
+                      ],
+                      "headline-h3": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "micro-badge": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-h2": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.55",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-h1": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-h3": [
+                              "17px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "micro-badge": [
+                              "11px",
+                              {
+                                      "lineHeight": "1.35",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-h2": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.35",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.45",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f3ff;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c4c5d6;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #747685;
+        }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 10;
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background: #F5F7FA;
+            z-index: 20;
+        }
+        .sticky-header-col {
+            position: sticky;
+            top: 0;
+            left: 0;
+            background: #F5F7FA;
+            z-index: 30;
+        }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="h-full w-[224px] fixed left-0 top-0 border-r border-border-default dark:border-outline-variant bg-surface-container-low dark:bg-surface-dim z-50">
+<div class="flex flex-col h-full py-space-xl">
+<!-- Brand Logo -->
+<div class="px-space-xl mb-space-2xl flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div>
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight leading-none">WWS Adviser</h1>
+<span class="font-caption text-caption text-on-surface-variant">Terminal v2.4</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col flex-1 px-space-md gap-space-xs">
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>首页</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-primary dark:text-inverse-primary font-bold border-r-2 border-primary dark:border-inverse-primary bg-surface-container hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span>持仓</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span>助手</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>研究</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>设置</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="h-[64px] fixed top-0 right-0 left-[224px] z-40 bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline-variant">
+<div class="flex justify-between items-center px-space-xl max-w-[1200px] mx-auto w-full h-full">
+<!-- Search Bar -->
+<div class="flex-1 max-w-md">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-lg border border-border-default bg-surface-container-low text-on-surface focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all font-body-md text-body-md" placeholder="Search portfolios, assets..." type="text"/>
+</div>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-space-md">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-border-default">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a financial advisor, sharp focus, neutral background, cinematic lighting, corporate style, 8k resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0h4WYqwerjuVsQu9ZP833coLtmOBO6Wf2Eq7WfFRwlaL25DUPAa6pPtvd1e8WLp9iFmW1tQsytUPsNwcT6-y1hnLmn5CFJGFy1_Hu0X8yTS4mYNdkMYDnn_Ax-vBoZ8kBSTouuFueJuRrR9P1_-E43fiqkaRHfuz5EGpbKaliZD5AKL6K2t8pldncjSdyNLpYrgo71HAOH7INkoSTaJO9ZgHJ5pGomWiJHKAp3oiCx_jJIcywGjOn1A"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[224px] mt-[64px] flex-1 p-space-2xl max-w-[1600px] mx-auto w-full overflow-x-hidden">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-space-2xl">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface tracking-tight">Portfolio &amp; Watchlist</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-space-xs">Global Market Holdings &amp; Performance Tracking</p>
+</div>
+<button class="bg-primary text-on-primary px-space-lg py-space-sm rounded-lg font-label-sm text-label-sm hover:bg-primary-container transition-colors flex items-center gap-space-sm shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Record Transaction
+            </button>
+</div>
+<!-- Summary Cards (Bento Grid Style) -->
+<div class="grid grid-cols-4 gap-space-lg mb-space-2xl">
+<!-- Total Value -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-surface-container-low rounded-full opacity-50"></div>
+<div class="flex justify-between items-start mb-space-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Total Value (USD)</span>
+<span class="material-symbols-outlined text-outline">account_balance</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">$12,450,890.00</div>
+<div class="flex items-center gap-space-xs mt-space-xs">
+<span class="material-symbols-outlined text-market-up text-[16px]">trending_up</span>
+<span class="font-label-sm text-label-sm text-market-up">+2.4%</span>
+<span class="font-caption text-caption text-on-surface-variant ml-1">vs last month</span>
+</div>
+</div>
+</div>
+<!-- Cash -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-space-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Available Cash</span>
+<span class="material-symbols-outlined text-outline">payments</span>
+</div>
+<div>
+<div class="font-headline-h1 text-headline-h1 text-on-surface">$1,245,000.00</div>
+<div class="font-caption text-caption text-on-surface-variant mt-space-xs">10% of total portfolio</div>
+</div>
+</div>
+<!-- Holdings Count -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-space-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Active Holdings</span>
+<span class="material-symbols-outlined text-outline">pie_chart</span>
+</div>
+<div>
+<div class="font-headline-h1 text-headline-h1 text-on-surface">42 <span class="font-body-md text-body-md text-on-surface-variant">Assets</span></div>
+<div class="font-caption text-caption text-on-surface-variant mt-space-xs">Across 5 Asset Classes</div>
+</div>
+</div>
+<!-- Concentration Risk -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg shadow-sm flex flex-col justify-between border-l-4 border-l-risk-warning">
+<div class="flex justify-between items-start mb-space-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Concentration Risk</span>
+<span class="material-symbols-outlined text-risk-warning">warning</span>
+</div>
+<div>
+<div class="font-headline-h2 text-headline-h2 text-on-surface">Technology (35%)</div>
+<div class="font-caption text-caption text-on-surface-variant mt-space-xs">Sector allocation exceeds target</div>
+</div>
+</div>
+</div>
+<!-- Portfolio Table Area -->
+<div class="bg-surface border border-border-default rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Table Toolbar / Filters -->
+<div class="p-space-lg border-b border-border-default bg-canvas flex justify-between items-center">
+<div class="flex gap-space-md">
+<div class="relative">
+<select class="appearance-none bg-surface border border-border-default rounded-lg pl-space-md pr-space-xl py-space-xs font-label-sm text-label-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>All Asset Types</option>
+<option>Equities</option>
+<option>Fixed Income</option>
+<option>Alternatives</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">expand_more</span>
+</div>
+<div class="relative">
+<select class="appearance-none bg-surface border border-border-default rounded-lg pl-space-md pr-space-xl py-space-xs font-label-sm text-label-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>All Industries</option>
+<option>Technology</option>
+<option>Healthcare</option>
+<option>Financials</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">expand_more</span>
+</div>
+<div class="relative">
+<select class="appearance-none bg-surface border border-border-default rounded-lg pl-space-md pr-space-xl py-space-xs font-label-sm text-label-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>Risk Level</option>
+<option>High</option>
+<option>Medium</option>
+<option>Low</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex gap-space-sm">
+<button class="w-8 h-8 rounded border border-border-default flex items-center justify-center text-on-surface hover:bg-surface-container-low transition-colors" title="Export">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button class="w-8 h-8 rounded border border-border-default flex items-center justify-center text-on-surface hover:bg-surface-container-low transition-colors" title="Settings">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+</button>
+</div>
+</div>
+<!-- Wide Table Container with Scroll -->
+<div class="overflow-x-auto custom-scrollbar w-full">
+<table class="w-full text-left border-collapse min-w-[1200px]">
+<thead>
+<tr class="font-label-sm text-label-sm text-on-surface-variant border-b border-border-default bg-canvas shadow-[0_1px_0_rgba(228,231,236,1)]">
+<th class="p-space-md font-semibold sticky-header-col min-w-[250px]">Asset Name / Code</th>
+<th class="p-space-md font-semibold text-right sticky-header">Price</th>
+<th class="p-space-md font-semibold text-right sticky-header">Change (24h)</th>
+<th class="p-space-md font-semibold text-right sticky-header">Quantity</th>
+<th class="p-space-md font-semibold text-right sticky-header">Market Value</th>
+<th class="p-space-md font-semibold text-right sticky-header">Weight %</th>
+<th class="p-space-md font-semibold text-right sticky-header">Cost Basis</th>
+<th class="p-space-md font-semibold text-right sticky-header">P/L</th>
+<th class="p-space-md font-semibold sticky-header">Data Time</th>
+<th class="p-space-md font-semibold text-center sticky-header">Action</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-on-surface">
+<!-- Row 1 -->
+<tr class="border-b border-border-default hover:bg-surface-container-lowest transition-colors group h-12">
+<td class="p-space-md sticky-col border-r border-border-default/50 group-hover:bg-surface-container-lowest transition-colors">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary font-bold font-label-sm">APPL</div>
+<div>
+<div class="font-semibold">Apple Inc.</div>
+<div class="font-caption text-caption text-on-surface-variant">Technology · Equity</div>
+</div>
+</div>
+</td>
+<td class="p-space-md text-right">
+                                $175.84 <span class="font-caption text-caption text-on-surface-variant">USD</span>
+</td>
+<td class="p-space-md text-right text-market-up font-semibold">
+                                +1.24%
+                            </td>
+<td class="p-space-md text-right">
+                                5,000.00
+                            </td>
+<td class="p-space-md text-right font-semibold">
+                                $879,200.00 <span class="font-caption text-caption text-on-surface-variant">USD</span>
+</td>
+<td class="p-space-md text-right">
+                                7.06%
+                            </td>
+<td class="p-space-md text-right text-on-surface-variant">
+                                $150.00
+                            </td>
+<td class="p-space-md text-right text-market-up font-semibold">
+                                +$129,200.00
+                            </td>
+<td class="p-space-md font-caption text-caption text-on-surface-variant">
+                                14:32:01 UTC
+                            </td>
+<td class="p-space-md text-center">
+<button class="text-primary hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-border-default hover:bg-surface-container-lowest transition-colors group h-12">
+<td class="p-space-md sticky-col border-r border-border-default/50 group-hover:bg-surface-container-lowest transition-colors">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary font-bold font-label-sm">MSFT</div>
+<div>
+<div class="font-semibold">Microsoft Corp.</div>
+<div class="font-caption text-caption text-on-surface-variant">Technology · Equity</div>
+</div>
+</div>
+</td>
+<td class="p-space-md text-right">
+                                $332.58 <span class="font-caption text-caption text-on-surface-variant">USD</span>
+</td>
+<td class="p-space-md text-right text-market-down font-semibold">
+                                -0.45%
+                            </td>
+<td class="p-space-md text-right">
+                                3,500.00
+                            </td>
+<td class="p-space-md text-right font-semibold">
+                                $1,164,030.00 <span class="font-caption text-caption text-on-surface-variant">USD</span>
+</td>
+<td class="p-space-md text-right">
+                                9.35%
+                            </td>
+<td class="p-space-md text-right text-on-surface-variant">
+                                $280.50
+                            </td>
+<td class="p-space-md text-right text-market-up font-semibold">
+                                +$182,280.00
+                            </td>
+<td class="p-space-md font-caption text-caption text-on-surface-variant">
+                                14:32:05 UTC
+                            </td>
+<td class="p-space-md text-center">
+<button class="text-primary hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-border-default hover:bg-surface-container-lowest transition-colors group h-12">
+<td class="p-space-md sticky-col border-r border-border-default/50 group-hover:bg-surface-container-lowest transition-colors">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary font-bold font-label-sm">TSLA</div>
+<div>
+<div class="font-semibold">Tesla Inc.</div>
+<div class="font-caption text-caption text-on-surface-variant">Consumer Discretionary · Equity</div>
+</div>
+<span class="px-2 py-0.5 rounded-sm bg-risk-warning/10 text-risk-warning font-micro-badge text-micro-badge ml-2">High Risk</span>
+</div>
+</td>
+<td class="p-space-md text-right">
+                                $215.10 <span class="font-caption text-caption text-on-surface-variant">USD</span>
+</td>
+<td class="p-space-md text-right text-market-down font-semibold">
+                                -2.80%
+                            </td>
+<td class="p-space-md text-right">
+                                1,200.00
+                            </td>
+<td class="p-space-md text-right font-semibold">
+                                $258,120.00 <span class="font-caption text-caption text-on-surface-variant">USD</span>
+</td>
+<td class="p-space-md text-right">
+                                2.07%
+                            </td>
+<td class="p-space-md text-right text-on-surface-variant">
+                                $250.00
+                            </td>
+<td class="p-space-md text-right text-market-down font-semibold">
+                                -$41,880.00
+                            </td>
+<td class="p-space-md font-caption text-caption text-on-surface-variant">
+                                14:31:55 UTC
+                            </td>
+<td class="p-space-md text-center">
+<button class="text-primary hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group h-12">
+<td class="p-space-md sticky-col border-r border-border-default/50 group-hover:bg-surface-container-lowest transition-colors">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary font-bold font-label-sm">US10Y</div>
+<div>
+<div class="font-semibold">US Treasury 10Y</div>
+<div class="font-caption text-caption text-on-surface-variant">Government · Fixed Income</div>
+</div>
+</div>
+</td>
+<td class="p-space-md text-right">
+                                4.25% <span class="font-caption text-caption text-on-surface-variant">YLD</span>
+</td>
+<td class="p-space-md text-right text-on-surface-variant">
+                                +0.02 bps
+                            </td>
+<td class="p-space-md text-right">
+                                20,000.00
+                            </td>
+<td class="p-space-md text-right font-semibold">
+                                $2,000,000.00 <span class="font-caption text-caption text-on-surface-variant">USD</span>
+</td>
+<td class="p-space-md text-right">
+                                16.06%
+                            </td>
+<td class="p-space-md text-right text-on-surface-variant">
+                                Par
+                            </td>
+<td class="p-space-md text-right text-on-surface-variant">
+                                --
+                            </td>
+<td class="p-space-md font-caption text-caption text-on-surface-variant">
+                                14:15:00 UTC
+                            </td>
+<td class="p-space-md text-center">
+<button class="text-primary hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination / Footer -->
+<div class="p-space-md border-t border-border-default bg-surface flex justify-between items-center">
+<span class="font-caption text-caption text-on-surface-variant">Showing 1 to 4 of 42 entries</span>
+<div class="flex gap-space-xs">
+<button class="px-space-md py-space-xs border border-border-default rounded text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm disabled:opacity-50" disabled="">Previous</button>
+<button class="px-space-md py-space-xs border border-border-default rounded bg-primary text-on-primary font-label-sm text-label-sm">1</button>
+<button class="px-space-md py-space-xs border border-border-default rounded text-on-surface hover:bg-surface-container-low font-label-sm text-label-sm">2</button>
+<button class="px-space-md py-space-xs border border-border-default rounded text-on-surface hover:bg-surface-container-low font-label-sm text-label-sm">3</button>
+<button class="px-space-md py-space-xs border border-border-default rounded text-on-surface hover:bg-surface-container-low font-label-sm text-label-sm">Next</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

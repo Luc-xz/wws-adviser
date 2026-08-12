@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CSV Import Wizard - WWS Adviser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#2c53d1",
+                        "primary-container": "#3157d5",
+                        "surface-container": "#e9edff",
+                        "error-container": "#ffdad6",
+                        "background": "#f9f9ff",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "surface-variant": "#dbe2f9",
+                        "on-tertiary-container": "#dde0e1",
+                        "on-primary-fixed": "#001452",
+                        "on-primary": "#ffffff",
+                        "risk-warning": "#DC6803",
+                        "secondary-fixed": "#dee2ef",
+                        "tertiary": "#484b4d",
+                        "risk-critical": "#C11574",
+                        "secondary": "#5a5e69",
+                        "primary": "#063cbc",
+                        "outline": "#747685",
+                        "border-default": "#E4E7EC",
+                        "market-up": "#D92D20",
+                        "error": "#ba1a1a",
+                        "on-background": "#141b2c",
+                        "surface-dim": "#d2daf0",
+                        "on-secondary-container": "#60646f",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#141b2c",
+                        "surface-container-high": "#e0e8ff",
+                        "primary-fixed": "#dde1ff",
+                        "surface": "#FFFFFF",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#e0e3e5",
+                        "canvas": "#F5F7FA",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#b7c4ff",
+                        "on-surface-variant": "#444654",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-secondary-fixed-variant": "#424751",
+                        "secondary-container": "#dee2ef",
+                        "outline-variant": "#c4c5d6",
+                        "surface-container-low": "#f1f3ff",
+                        "market-down": "#079455",
+                        "on-secondary-fixed": "#171c25",
+                        "tertiary-container": "#606365",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "inverse-surface": "#293041",
+                        "inverse-on-surface": "#edf0ff",
+                        "on-primary-container": "#d8ddff",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#dbe2f9",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "primary-fixed-dim": "#b7c4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-sm": "8px",
+                        "space-xl": "24px",
+                        "space-xs": "4px",
+                        "unit": "4px",
+                        "space-md": "12px",
+                        "space-lg": "16px",
+                        "margin-mobile": "16px",
+                        "space-2xl": "32px",
+                        "gutter-mobile": "12px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                        "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                        "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: theme('colors.canvas'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined[data-weight="fill"] { font-variation-settings: 'FILL' 1; }
+        
+        /* Custom scrollbar for data tables */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: theme('colors.outline-variant'); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.outline'); }
+    </style>
+</head>
+<body class="text-on-background h-screen flex flex-col overflow-hidden">
+<!-- Top Navigation (Simplified for focus context, overriding standard nav as per task focused journey rule) -->
+<header class="bg-surface border-b border-border-default h-[64px] flex-shrink-0 flex items-center justify-between px-space-xl">
+<div class="flex items-center gap-space-md">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors" title="Cancel Import">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div class="h-6 w-[1px] bg-border-default"></div>
+<div>
+<h1 class="font-headline-h3 text-headline-h3 text-primary">Import Transaction Data</h1>
+<p class="font-caption text-caption text-on-surface-variant">portfolio_q3_transactions_v2.csv</p>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="px-space-md py-space-sm font-label-sm text-label-sm text-on-surface-variant border border-border-default rounded-lg hover:bg-surface-container-low transition-colors">
+                Save Draft
+            </button>
+<button class="px-space-lg py-space-sm font-label-sm text-label-sm bg-primary text-on-primary rounded-lg hover:bg-on-primary-fixed-variant transition-colors shadow-sm flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+                Confirm &amp; Import
+            </button>
+</div>
+</header>
+<!-- Main Workspace -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full bg-canvas relative z-0">
+<!-- Progress Steps Header -->
+<div class="bg-surface border-b border-border-default px-space-2xl py-space-md flex-shrink-0">
+<div class="max-w-[1200px] mx-auto w-full">
+<div class="flex items-center justify-between relative">
+<!-- Connecting Line -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-border-default z-0"></div>
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-3/4 h-[2px] bg-primary z-0"></div>
+<!-- Step 1 -->
+<div class="relative z-10 flex flex-col items-center gap-space-xs bg-surface px-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+<span class="font-caption text-caption text-on-surface">Upload</span>
+</div>
+<!-- Step 2 -->
+<div class="relative z-10 flex flex-col items-center gap-space-xs bg-surface px-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+<span class="font-caption text-caption text-on-surface">Mapping</span>
+</div>
+<!-- Step 3 -->
+<div class="relative z-10 flex flex-col items-center gap-space-xs bg-surface px-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+<span class="font-caption text-caption text-on-surface">Validation</span>
+</div>
+<!-- Step 4 (Current) -->
+<div class="relative z-10 flex flex-col items-center gap-space-xs bg-surface px-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface border-2 border-primary text-primary flex items-center justify-center font-label-sm text-label-sm">
+                                4
+                            </div>
+<span class="font-caption text-caption text-primary font-bold">Conflict Resolution</span>
+</div>
+<!-- Step 5 -->
+<div class="relative z-10 flex flex-col items-center gap-space-xs bg-surface px-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface border-2 border-border-default text-outline flex items-center justify-center font-label-sm text-label-sm">
+                                5
+                            </div>
+<span class="font-caption text-caption text-outline">Confirm</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Stats Bar -->
+<div class="px-space-2xl py-space-md flex-shrink-0">
+<div class="max-w-[1200px] mx-auto w-full grid grid-cols-5 gap-space-md">
+<div class="bg-surface border border-border-default rounded-lg p-space-md flex items-center justify-between">
+<div>
+<p class="font-caption text-caption text-on-surface-variant">Total Rows</p>
+<p class="font-headline-h2 text-headline-h2 text-on-surface">1,245</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[24px]">dataset</span>
+</div>
+<div class="bg-surface border border-border-default border-l-4 border-l-market-down rounded-lg p-space-md flex items-center justify-between">
+<div>
+<p class="font-caption text-caption text-on-surface-variant">Valid</p>
+<p class="font-headline-h2 text-headline-h2 text-on-surface">1,180</p>
+</div>
+<span class="material-symbols-outlined text-market-down text-[24px]">check_circle</span>
+</div>
+<div class="bg-surface border border-border-default border-l-4 border-l-risk-warning rounded-lg p-space-md flex items-center justify-between">
+<div>
+<p class="font-caption text-caption text-on-surface-variant">Warnings</p>
+<p class="font-headline-h2 text-headline-h2 text-on-surface">42</p>
+</div>
+<span class="material-symbols-outlined text-risk-warning text-[24px]">warning</span>
+</div>
+<div class="bg-surface border border-border-default border-l-4 border-l-error rounded-lg p-space-md flex items-center justify-between bg-error-container/20">
+<div>
+<p class="font-caption text-caption text-error">Errors</p>
+<p class="font-headline-h2 text-headline-h2 text-error">15</p>
+</div>
+<span class="material-symbols-outlined text-error text-[24px]">error</span>
+</div>
+<div class="bg-surface border border-border-default border-l-4 border-l-outline rounded-lg p-space-md flex items-center justify-between">
+<div>
+<p class="font-caption text-caption text-on-surface-variant">Duplicates</p>
+<p class="font-headline-h2 text-headline-h2 text-on-surface">8</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[24px]">content_copy</span>
+</div>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="flex-1 overflow-hidden px-space-2xl pb-space-2xl">
+<div class="max-w-[1200px] mx-auto w-full h-full bg-surface border border-border-default rounded-xl flex flex-col overflow-hidden shadow-sm">
+<!-- Table Toolbar -->
+<div class="p-space-md border-b border-border-default bg-surface flex justify-between items-center">
+<div class="flex gap-space-sm">
+<button class="px-space-md py-space-xs font-label-sm text-label-sm rounded-full bg-surface-container-low text-primary border border-primary-container/30">All Rows (1,245)</button>
+<button class="px-space-md py-space-xs font-label-sm text-label-sm rounded-full bg-surface text-on-surface-variant border border-border-default hover:bg-surface-container-lowest">Errors (15)</button>
+<button class="px-space-md py-space-xs font-label-sm text-label-sm rounded-full bg-surface text-on-surface-variant border border-border-default hover:bg-surface-container-lowest">Warnings (42)</button>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="pl-8 pr-4 py-1.5 text-body-md border border-border-default rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64" placeholder="Search rows..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Table Wrapper (Scrollable) -->
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse min-w-[1000px]">
+<thead class="sticky top-0 bg-surface-container-low z-10 border-b border-border-default shadow-[0_1px_0_theme('colors.border-default')]">
+<tr>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant w-12 text-center">Row</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant w-16">Status</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant">Date <span class="text-caption font-normal text-outline ml-1">M-D-Y</span></th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant">Asset ID <span class="text-caption font-normal text-outline ml-1">ISIN/Ticker</span></th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant">Type</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant text-right">Quantity</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant text-right">Price <span class="text-caption font-normal text-outline ml-1">USD</span></th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-default bg-surface">
+<!-- Error Row -->
+<tr class="hover:bg-surface-container-lowest transition-colors bg-error-container/10">
+<td class="p-space-md font-body-md text-body-md text-on-surface-variant text-center border-l-4 border-l-error">102</td>
+<td class="p-space-md">
+<div class="w-6 h-6 rounded-full bg-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-error">error</span>
+</div>
+</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">10-24-2023</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">
+<div class="flex items-center gap-space-xs">
+                                            UNKNOWN_ID
+                                            <span class="material-symbols-outlined text-[14px] text-error">warning</span>
+</div>
+</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">BUY</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">1,500.00</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">45.20</td>
+<td class="p-space-md">
+<button class="font-label-sm text-label-sm text-primary hover:underline">Resolve</button>
+</td>
+</tr>
+<!-- Warning Row -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="p-space-md font-body-md text-body-md text-on-surface-variant text-center border-l-4 border-l-risk-warning">103</td>
+<td class="p-space-md">
+<div class="w-6 h-6 rounded-full bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-risk-warning">warning</span>
+</div>
+</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">10-24-2023</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">AAPL</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">SELL</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-risk-warning">warning</span>
+                                            -500.00
+                                        </div>
+</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">175.50</td>
+<td class="p-space-md">
+<button class="font-label-sm text-label-sm text-primary hover:underline">Review</button>
+</td>
+</tr>
+<!-- Valid Row -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="p-space-md font-body-md text-body-md text-on-surface-variant text-center border-l-4 border-l-market-down">104</td>
+<td class="p-space-md">
+<div class="w-6 h-6 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-market-down">check_circle</span>
+</div>
+</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">10-25-2023</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">MSFT</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface">DIVIDEND</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">--</td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">245.00</td>
+<td class="p-space-md">
+<button class="font-label-sm text-label-sm text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="p-space-md border-t border-border-default bg-surface flex justify-between items-center">
+<span class="font-caption text-caption text-on-surface-variant">Showing 1 to 50 of 1,245 entries</span>
+<div class="flex gap-space-xs">
+<button class="p-1 rounded text-outline hover:bg-surface-container transition-colors disabled:opacity-50" disabled=""><span class="material-symbols-outlined">chevron_left</span></button>
+<button class="w-8 h-8 rounded bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-center">1</button>
+<button class="w-8 h-8 rounded text-on-surface hover:bg-surface-container transition-colors font-label-sm text-label-sm flex items-center justify-center">2</button>
+<button class="w-8 h-8 rounded text-on-surface hover:bg-surface-container transition-colors font-label-sm text-label-sm flex items-center justify-center">3</button>
+<span class="w-8 h-8 flex items-center justify-center text-outline">...</span>
+<button class="p-1 rounded text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Side Panel: Error Context / Resolution (Collapsible conceptually) -->
+<aside class="w-[360px] bg-surface border-l border-border-default flex-shrink-0 flex flex-col z-10 shadow-[-4px_0_12px_rgba(0,0,0,0.02)]">
+<div class="p-space-lg border-b border-border-default flex items-center justify-between bg-error-container/20">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-error">error</span>
+<h2 class="font-headline-h3 text-headline-h3 text-error">Row 102 Error</h2>
+</div>
+<button class="text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-space-lg flex-1 overflow-y-auto">
+<div class="mb-space-xl">
+<h3 class="font-label-sm text-label-sm text-on-surface mb-space-xs">Issue Detected</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Unrecognized Asset ID <span class="font-mono bg-surface-container-low px-1 rounded">UNKNOWN_ID</span>. System cannot map this to a known ISIN or Ticker.</p>
+</div>
+<div class="mb-space-xl">
+<h3 class="font-label-sm text-label-sm text-on-surface mb-space-sm">Resolution Options</h3>
+<!-- Option 1 -->
+<label class="flex items-start gap-space-md p-space-md border border-primary rounded-lg bg-surface-container-low mb-space-sm cursor-pointer">
+<input checked="" class="mt-1 text-primary focus:ring-primary" name="resolution" type="radio"/>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface">Map to existing asset</span>
+<span class="block font-caption text-caption text-on-surface-variant mt-1">Search system universe to map manually.</span>
+<div class="mt-space-sm relative">
+<span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-outline text-[16px]">search</span>
+<input class="w-full pl-8 pr-3 py-1.5 text-body-md border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary bg-surface" placeholder="Search ISIN, CUSIP, Name..." type="text"/>
+</div>
+</div>
+</label>
+<!-- Option 2 -->
+<label class="flex items-start gap-space-md p-space-md border border-border-default rounded-lg hover:bg-surface-container-lowest transition-colors cursor-pointer mb-space-sm">
+<input class="mt-1 text-primary focus:ring-primary" name="resolution" type="radio"/>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface">Create new custom asset</span>
+<span class="block font-caption text-caption text-on-surface-variant mt-1">Add this as an unlisted/custom position.</span>
+</div>
+</label>
+<!-- Option 3 -->
+<label class="flex items-start gap-space-md p-space-md border border-border-default rounded-lg hover:bg-surface-container-lowest transition-colors cursor-pointer">
+<input class="mt-1 text-error focus:ring-error" name="resolution" type="radio"/>
+<div>
+<span class="block font-label-sm text-label-sm text-error">Skip this row</span>
+<span class="block font-caption text-caption text-on-surface-variant mt-1">Exclude from import process.</span>
+</div>
+</label>
+</div>
+<!-- Original Data Context -->
+<div class="mt-space-2xl pt-space-lg border-t border-border-default">
+<h3 class="font-label-sm text-label-sm text-on-surface mb-space-md">Original Row Data (Raw CSV)</h3>
+<div class="bg-surface-container px-space-md py-space-sm rounded font-mono text-caption text-on-surface-variant break-all">
+                        10-24-2023,UNKNOWN_ID,BUY,1500,45.2,USD,CLIENT_A_CASH
+                    </div>
+</div>
+</div>
+<div class="p-space-lg border-t border-border-default bg-surface flex gap-space-md">
+<button class="flex-1 py-space-sm font-label-sm text-label-sm border border-border-default rounded text-on-surface hover:bg-surface-container transition-colors">Cancel</button>
+<button class="flex-1 py-space-sm font-label-sm text-label-sm bg-primary text-on-primary rounded hover:bg-on-primary-fixed-variant transition-colors">Apply Fix</button>
+</div>
+</aside>
+</div>
+</body></html>

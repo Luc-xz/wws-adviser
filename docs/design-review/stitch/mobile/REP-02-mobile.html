@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>收市后复盘报告 (REP-02)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#424751",
+                        "surface-container": "#e9edff",
+                        "outline-variant": "#c4c5d6",
+                        "on-tertiary-fixed": "#191c1e",
+                        "market-down": "#079455",
+                        "secondary-fixed": "#dee2ef",
+                        "tertiary": "#484b4d",
+                        "risk-critical": "#C11574",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-surface": "#293041",
+                        "surface": "#FFFFFF",
+                        "tertiary-fixed": "#e0e3e5",
+                        "secondary": "#5a5e69",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "risk-warning": "#DC6803",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e0e8ff",
+                        "on-primary-fixed": "#001452",
+                        "on-surface": "#141b2c",
+                        "secondary-container": "#dee2ef",
+                        "primary-container": "#3157d5",
+                        "surface-tint": "#2c53d1",
+                        "on-tertiary-container": "#dde0e1",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#60646f",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "border-default": "#E4E7EC",
+                        "on-secondary-fixed": "#171c25",
+                        "market-up": "#D92D20",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "inverse-primary": "#b7c4ff",
+                        "tertiary-container": "#606365",
+                        "primary-fixed": "#dde1ff",
+                        "canvas": "#F5F7FA",
+                        "inverse-on-surface": "#edf0ff",
+                        "background": "#f9f9ff",
+                        "primary": "#063cbc",
+                        "outline": "#747685",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#dbe2f9",
+                        "surface-bright": "#f9f9ff",
+                        "on-background": "#141b2c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d2daf0",
+                        "on-primary-container": "#d8ddff",
+                        "on-surface-variant": "#444654"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-2xl": "32px",
+                        "space-xl": "24px",
+                        "space-lg": "16px",
+                        "space-md": "12px",
+                        "margin-mobile": "16px",
+                        "gutter-mobile": "12px",
+                        "space-sm": "8px",
+                        "unit": "4px",
+                        "space-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface font-body-md min-h-screen pb-safe">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline docked full-width top-0 flex justify-between items-center w-full px-margin-mobile h-16 z-40 relative">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="account_circle">account_circle</span>
+<h1 class="font-headline-h1 text-headline-h1 font-bold text-primary dark:text-primary-fixed-dim">WWS Adviser</h1>
+</div>
+<button class="text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant rounded-full p-2 transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-space-2xl py-space-xl grid grid-cols-4 md:grid-cols-12 gap-gutter-mobile md:gap-space-lg mb-20">
+<!-- Header / Summary Section -->
+<section class="col-span-4 md:col-span-12 mb-space-lg">
+<h2 class="font-headline-h2 text-headline-h2 mb-space-xs">收市后复盘报告 (REP-02)</h2>
+<p class="font-body-md text-on-surface-variant mb-space-lg">日期: 2023-10-27 | 遵循规范 10.18</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="bg-surface border border-border-default rounded-xl p-space-md shadow-sm">
+<p class="font-label-sm text-on-surface-variant mb-space-xs">当日盈亏</p>
+<div class="flex items-end gap-space-sm">
+<span class="font-display-lg-mobile text-display-lg-mobile text-market-up">+24,500</span>
+<span class="font-caption text-caption text-on-surface-variant mb-1">CNY</span>
+</div>
+</div>
+<div class="bg-surface border border-border-default rounded-xl p-space-md shadow-sm">
+<p class="font-label-sm text-on-surface-variant mb-space-xs">当日收益率</p>
+<div class="flex items-end gap-space-sm">
+<span class="font-display-lg-mobile text-display-lg-mobile text-market-up">+1.24%</span>
+</div>
+</div>
+<div class="bg-surface border border-border-default rounded-xl p-space-md shadow-sm">
+<p class="font-label-sm text-on-surface-variant mb-space-xs">基准差 (vs 沪深300)</p>
+<div class="flex items-end gap-space-sm">
+<span class="font-display-lg-mobile text-display-lg-mobile text-market-up">+0.45%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- P&L Contribution -->
+<section class="col-span-4 md:col-span-8 bg-surface border border-border-default rounded-xl p-space-lg shadow-sm">
+<h3 class="font-headline-h3 text-headline-h3 mb-space-md border-b border-border-default pb-space-sm">盈亏贡献 Top / Bottom</h3>
+<div class="space-y-space-md">
+<!-- Top Contributor -->
+<div class="flex justify-between items-center bg-surface-container-low p-space-sm rounded-lg border border-border-default">
+<div>
+<p class="font-label-sm text-on-surface">科技ETF (515000)</p>
+<p class="font-caption text-on-surface-variant">Top Contributor</p>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-market-up">+12,300 CNY</p>
+<p class="font-caption text-market-up">+2.8%</p>
+</div>
+</div>
+<!-- Bottom Contributor -->
+<div class="flex justify-between items-center bg-surface-container-low p-space-sm rounded-lg border border-border-default">
+<div>
+<p class="font-label-sm text-on-surface">医药ETF (512010)</p>
+<p class="font-caption text-on-surface-variant">Bottom Contributor</p>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-market-down">-3,100 CNY</p>
+<p class="font-caption text-market-down">-1.1%</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Risk Changes -->
+<section class="col-span-4 md:col-span-4 bg-surface border border-border-default rounded-xl p-space-lg shadow-sm">
+<h3 class="font-headline-h3 text-headline-h3 mb-space-md border-b border-border-default pb-space-sm">风险变化</h3>
+<ul class="space-y-space-sm">
+<li class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-risk-warning text-lg mt-0.5" data-icon="warning">warning</span>
+<div>
+<p class="font-label-sm text-on-surface">组合波动率升至 18.5%</p>
+<p class="font-caption text-on-surface-variant">接近预设上限 20%</p>
+</div>
+</li>
+<li class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5" data-icon="info">info</span>
+<div>
+<p class="font-label-sm text-on-surface">科技板块敞口过大</p>
+<p class="font-caption text-on-surface-variant">当前占比 35%，建议分散</p>
+</div>
+</li>
+</ul>
+</section>
+<!-- Strategy vs Execution -->
+<section class="col-span-4 md:col-span-12 bg-surface border border-border-default rounded-xl p-space-lg shadow-sm mt-space-md">
+<h3 class="font-headline-h3 text-headline-h3 mb-space-md border-b border-border-default pb-space-sm">建议 vs 实际操作对比</h3>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-border-default font-label-sm text-on-surface-variant bg-surface-container-low">
+<th class="py-space-sm px-space-md">标的</th>
+<th class="py-space-sm px-space-md">系统建议</th>
+<th class="py-space-sm px-space-md">实际操作</th>
+<th class="py-space-sm px-space-md">执行评估</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-on-surface">
+<tr class="border-b border-border-default">
+<td class="py-space-sm px-space-md">新能源ETF (516160)</td>
+<td class="py-space-sm px-space-md">减仓 10%</td>
+<td class="py-space-sm px-space-md">减仓 10%</td>
+<td class="py-space-sm px-space-md"><span class="bg-surface-dim text-on-surface px-2 py-1 rounded font-micro-badge">符合计划</span></td>
+</tr>
+<tr class="border-b border-border-default">
+<td class="py-space-sm px-space-md">券商ETF (512000)</td>
+<td class="py-space-sm px-space-md">加仓 5%</td>
+<td class="py-space-sm px-space-md">未操作</td>
+<td class="py-space-sm px-space-md"><span class="bg-error-container text-on-error-container px-2 py-1 rounded font-micro-badge">偏离计划</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Review Questions -->
+<section class="col-span-4 md:col-span-12 bg-surface border border-border-default rounded-xl p-space-lg shadow-sm mt-space-md">
+<h3 class="font-headline-h3 text-headline-h3 mb-space-md border-b border-border-default pb-space-sm">复盘问题</h3>
+<p class="font-body-md text-on-surface-variant mb-space-md">针对“券商ETF”偏离计划的原因分析：系统于早盘发出加仓信号，但实际交易中因盘口流动性短期枯竭未能成交，反映出算法在流动性预估模型上的偏差。</p>
+<div class="bg-surface-container-low p-space-md rounded-lg border border-border-default">
+<p class="font-label-sm text-on-surface mb-space-xs">改进建议:</p>
+<p class="font-caption text-on-surface-variant">调整算法交易的 TWAP 周期，增加对标的实时挂单深度的权重考量，以规避冲击成本过大的风险。</p>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-surface dark:bg-inverse-surface border-t border-border-default dark:border-outline bg-surface/90 backdrop-blur-md fixed bottom-0 left-0 w-full flex justify-around items-center px-gutter-mobile pt-2 pb-safe z-50 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-1">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-xl px-3 py-1 scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="analytics">analytics</span>
+<span class="font-label-sm text-label-sm mt-1">研究</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-sm text-label-sm mt-1">助手</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm mt-1">持仓</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+<span class="font-label-sm text-label-sm mt-1">设置</span>
+</a>
+</nav>
+</body></html>

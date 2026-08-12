@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WWS Adviser - 通知与隐私设置</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#424751",
+                        "surface-container": "#e9edff",
+                        "outline-variant": "#c4c5d6",
+                        "on-tertiary-fixed": "#191c1e",
+                        "market-down": "#079455",
+                        "secondary-fixed": "#dee2ef",
+                        "tertiary": "#484b4d",
+                        "risk-critical": "#C11574",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-surface": "#293041",
+                        "surface": "#FFFFFF",
+                        "tertiary-fixed": "#e0e3e5",
+                        "secondary": "#5a5e69",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "risk-warning": "#DC6803",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e0e8ff",
+                        "on-primary-fixed": "#001452",
+                        "on-surface": "#141b2c",
+                        "secondary-container": "#dee2ef",
+                        "primary-container": "#3157d5",
+                        "surface-tint": "#2c53d1",
+                        "on-tertiary-container": "#dde0e1",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#60646f",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "border-default": "#E4E7EC",
+                        "on-secondary-fixed": "#171c25",
+                        "market-up": "#D92D20",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "inverse-primary": "#b7c4ff",
+                        "tertiary-container": "#606365",
+                        "primary-fixed": "#dde1ff",
+                        "canvas": "#F5F7FA",
+                        "inverse-on-surface": "#edf0ff",
+                        "background": "#f9f9ff",
+                        "primary": "#063cbc",
+                        "outline": "#747685",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#dbe2f9",
+                        "surface-bright": "#f9f9ff",
+                        "on-background": "#141b2c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d2daf0",
+                        "on-primary-container": "#d8ddff",
+                        "on-surface-variant": "#444654"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-2xl": "32px",
+                        "space-xl": "24px",
+                        "space-lg": "16px",
+                        "space-md": "12px",
+                        "margin-mobile": "16px",
+                        "gutter-mobile": "12px",
+                        "space-sm": "8px",
+                        "unit": "4px",
+                        "space-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: theme('colors.canvas');
+            color: theme('colors.on-background');
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Toggle Switch Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: theme('colors.primary');
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: theme('colors.primary');
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: theme('colors.outline-variant');
+            transition: all 0.3s;
+        }
+        .toggle-label {
+            width: 36px;
+            height: 20px;
+            background-color: theme('colors.outline-variant');
+            border-radius: 9999px;
+            transition: all 0.3s;
+        }
+        .toggle-checkbox:focus {
+            box-shadow: none;
+            outline: 2px solid theme('colors.primary-fixed-dim');
+            outline-offset: 2px;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline');
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-24 md:pb-0 flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-border-default sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-margin-mobile h-16">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="account_circle" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="font-headline-h1 text-headline-h1 font-bold text-primary">WWS Adviser</span>
+</div>
+<!-- Desktop Nav Cluster (Hidden on mobile) -->
+<nav class="hidden md:flex items-center gap-space-lg">
+<a class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<a class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">持仓</span>
+</a>
+<a class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-sm text-label-sm">助手</span>
+</a>
+<a class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="analytics">analytics</span>
+<span class="font-label-sm text-label-sm">研究</span>
+</a>
+<!-- Active Tab: 设置 -->
+<a class="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container-low text-primary font-bold transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-sm text-label-sm">设置</span>
+</a>
+</nav>
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-colors text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="refresh">refresh</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-5xl mx-auto px-margin-mobile md:px-space-2xl py-space-xl">
+<div class="mb-space-xl">
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-space-xs">通知与隐私</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">管理您的系统通知渠道与数据展示偏好。</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- Left Column: Settings -->
+<div class="lg:col-span-8 flex flex-col gap-space-xl">
+<!-- Notification Channels Panel -->
+<section class="bg-surface rounded-xl border border-border-default overflow-hidden">
+<div class="px-space-lg py-space-md border-b border-border-default bg-surface-bright flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="campaign">campaign</span>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">通知渠道配置</h2>
+</div>
+<div class="p-space-lg flex flex-col gap-space-md">
+<!-- App Push -->
+<div class="flex items-center justify-between p-space-md rounded-lg border border-border-default hover:border-primary-fixed-dim transition-colors">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="smartphone">smartphone</span>
+</div>
+<div>
+<h3 class="font-label-sm text-label-sm text-on-surface mb-1">App 推送</h3>
+<p class="font-caption text-caption text-on-surface-variant">即时接收移动端应用内提醒</p>
+</div>
+</div>
+<div class="relative inline-block w-9 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" id="toggle_app" name="toggle_app" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer" for="toggle_app"></label>
+</div>
+</div>
+<!-- Email -->
+<div class="flex items-center justify-between p-space-md rounded-lg border border-border-default hover:border-primary-fixed-dim transition-colors">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</div>
+<div>
+<h3 class="font-label-sm text-label-sm text-on-surface mb-1">电子邮件</h3>
+<p class="font-caption text-caption text-on-surface-variant">发送详细报告至已验证邮箱</p>
+</div>
+</div>
+<div class="relative inline-block w-9 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" id="toggle_email" name="toggle_email" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer" for="toggle_email"></label>
+</div>
+</div>
+<!-- WeChat -->
+<div class="flex items-center justify-between p-space-md rounded-lg border border-border-default hover:border-primary-fixed-dim transition-colors">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-[#E5F5EC] flex items-center justify-center text-[#07C160]">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+</div>
+<div>
+<h3 class="font-label-sm text-label-sm text-on-surface mb-1">微信服务号</h3>
+<p class="font-caption text-caption text-on-surface-variant">通过绑定的微信接收核心提醒</p>
+</div>
+</div>
+<div class="relative inline-block w-9 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" id="toggle_wechat" name="toggle_wechat" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer" for="toggle_wechat"></label>
+</div>
+</div>
+</div>
+</section>
+<!-- Event Triggers Panel -->
+<section class="bg-surface rounded-xl border border-border-default overflow-hidden">
+<div class="px-space-lg py-space-md border-b border-border-default bg-surface-bright flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="notifications_active">notifications_active</span>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">事件提醒开关</h2>
+</div>
+<div class="divide-y divide-border-default">
+<!-- Report Completion -->
+<div class="p-space-lg flex items-start justify-between">
+<div class="pr-space-md">
+<h3 class="font-label-sm text-label-sm text-on-surface mb-1">报告生成完成</h3>
+<p class="font-caption text-caption text-on-surface-variant">当您的定制投资组合分析报告生成完毕时触发提醒。</p>
+</div>
+<div class="relative inline-block w-9 mr-2 mt-1 align-middle select-none transition duration-200 ease-in flex-shrink-0">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" id="event_report" name="event_report" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer" for="event_report"></label>
+</div>
+</div>
+<!-- Critical Risk -->
+<div class="p-space-lg flex items-start justify-between">
+<div class="pr-space-md">
+<div class="flex items-center gap-space-sm mb-1">
+<h3 class="font-label-sm text-label-sm text-on-surface">重大风险预警</h3>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#FFE4E8] text-risk-critical border border-[#FECDD6]">高优先级</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">持仓资产发生大幅波动或触发预设风险阈值时立即提醒。</p>
+</div>
+<div class="relative inline-block w-9 mr-2 mt-1 align-middle select-none transition duration-200 ease-in flex-shrink-0">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" id="event_risk" name="event_risk" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer" for="event_risk"></label>
+</div>
+</div>
+<!-- Research Task -->
+<div class="p-space-lg flex items-start justify-between">
+<div class="pr-space-md">
+<h3 class="font-label-sm text-label-sm text-on-surface mb-1">研究任务完成</h3>
+<p class="font-caption text-caption text-on-surface-variant">后台执行的深度研报或宏观数据收集任务完成时通知。</p>
+</div>
+<div class="relative inline-block w-9 mr-2 mt-1 align-middle select-none transition duration-200 ease-in flex-shrink-0">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" id="event_research" name="event_research" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer" for="event_research"></label>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Privacy Preview -->
+<div class="lg:col-span-4 flex flex-col gap-space-xl">
+<section class="bg-surface rounded-xl border border-border-default overflow-hidden flex flex-col h-full">
+<div class="px-space-lg py-space-md border-b border-border-default bg-surface-bright flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="visibility_off">visibility_off</span>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">隐私模式</h2>
+</div>
+<div class="relative inline-block w-9 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" id="toggle_privacy" name="toggle_privacy" onchange="togglePrivacyPreview()" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer" for="toggle_privacy"></label>
+</div>
+</div>
+<div class="p-space-lg flex-1 bg-canvas flex flex-col items-center justify-center relative">
+<div class="w-full max-w-[240px] bg-surface rounded-lg border border-border-default shadow-sm overflow-hidden p-space-md transition-all duration-300 relative z-10">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant mb-space-sm">总资产估值 (USD)</h4>
+<div class="flex items-end gap-space-sm mb-space-md" id="preview-value-container">
+<!-- Masked State -->
+<div class="font-headline-h1 text-headline-h1 font-bold text-on-surface tracking-widest" id="preview-masked">
+                                    ****.***
+                                </div>
+<!-- Unmasked State (Hidden initially) -->
+<div class="font-headline-h1 text-headline-h1 font-bold text-on-surface hidden" id="preview-unmasked">
+                                    $4,250,000
+                                </div>
+</div>
+<div class="space-y-space-sm">
+<div class="flex justify-between items-center py-1 border-b border-border-default">
+<span class="font-caption text-caption text-on-surface-variant">AAPL</span>
+<span class="font-caption text-caption font-semibold text-on-surface preview-sensitive">***</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-border-default">
+<span class="font-caption text-caption text-on-surface-variant">TSLA</span>
+<span class="font-caption text-caption font-semibold text-on-surface preview-sensitive">***</span>
+</div>
+</div>
+</div>
+<div class="mt-space-lg text-center">
+<p class="font-caption text-caption text-on-surface-variant max-w-[200px] mx-auto">
+                                开启后，截屏或公共场合展示时将自动隐藏敏感持仓数据。
+                            </p>
+</div>
+</div>
+</section>
+</div>
+</div>
+<div class="mt-space-2xl flex justify-end gap-space-md">
+<button class="px-6 py-2.5 rounded-lg border border-border-default font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-low transition-colors">
+                重置默认
+            </button>
+<button class="px-6 py-2.5 rounded-lg bg-primary font-label-sm text-label-sm text-on-primary hover:bg-on-primary-fixed-variant transition-colors shadow-sm">
+                保存设置
+            </button>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-gutter-mobile pt-2 pb-safe bg-surface border-t border-border-default bg-surface/90 backdrop-blur-md z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">持仓</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-sm text-label-sm">助手</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:text-primary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="analytics">analytics</span>
+<span class="font-label-sm text-label-sm">研究</span>
+</a>
+<!-- Active Tab: 设置 -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-3 py-1 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-sm text-label-sm">设置</span>
+</a>
+</nav>
+<script>
+        function togglePrivacyPreview() {
+            const isChecked = document.getElementById('toggle_privacy').checked;
+            const masked = document.getElementById('preview-masked');
+            const unmasked = document.getElementById('preview-unmasked');
+            const sensitiveElements = document.querySelectorAll('.preview-sensitive');
+            
+            if (isChecked) {
+                masked.classList.remove('hidden');
+                unmasked.classList.add('hidden');
+                sensitiveElements.forEach(el => {
+                    el.textContent = '***';
+                });
+            } else {
+                masked.classList.add('hidden');
+                unmasked.classList.remove('hidden');
+                sensitiveElements.forEach((el, index) => {
+                    el.textContent = index === 0 ? '1,200 shs' : '450 shs';
+                });
+            }
+        }
+    </script>
+</body></html>

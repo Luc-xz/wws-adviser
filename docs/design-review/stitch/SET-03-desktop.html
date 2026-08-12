@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WWS Adviser - 模型与任务路由</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#3157d5",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "surface-container-low": "#f1f3ff",
+                        "on-background": "#141b2c",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#edf0ff",
+                        "on-secondary-fixed-variant": "#424751",
+                        "tertiary": "#484b4d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#dbe2f9",
+                        "market-down": "#079455",
+                        "surface-tint": "#2c53d1",
+                        "surface-container": "#e9edff",
+                        "error-container": "#ffdad6",
+                        "secondary": "#5a5e69",
+                        "risk-critical": "#C11574",
+                        "on-primary-fixed": "#001452",
+                        "surface-dim": "#d2daf0",
+                        "tertiary-fixed": "#e0e3e5",
+                        "surface-variant": "#dbe2f9",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#dee2ef",
+                        "outline": "#747685",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "primary-fixed": "#dde1ff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#171c25",
+                        "on-secondary-container": "#60646f",
+                        "primary": "#063cbc",
+                        "canvas": "#F5F7FA",
+                        "surface": "#FFFFFF",
+                        "secondary-fixed": "#dee2ef",
+                        "inverse-surface": "#293041",
+                        "on-surface-variant": "#444654",
+                        "surface-bright": "#f9f9ff",
+                        "tertiary-container": "#606365",
+                        "inverse-primary": "#b7c4ff",
+                        "on-primary-container": "#d8ddff",
+                        "background": "#f9f9ff",
+                        "surface-container-high": "#e0e8ff",
+                        "market-up": "#D92D20",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#dde0e1",
+                        "risk-warning": "#DC6803",
+                        "outline-variant": "#c4c5d6",
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "border-default": "#E4E7EC",
+                        "on-surface": "#141b2c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-lg": "16px",
+                        "space-sm": "8px",
+                        "margin-mobile": "16px",
+                        "space-xs": "4px",
+                        "space-xl": "24px",
+                        "gutter-mobile": "12px",
+                        "unit": "4px",
+                        "space-md": "12px",
+                        "space-2xl": "32px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "caption": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-canvas text-on-surface font-body-md antialiased h-screen overflow-hidden flex">
+<!-- SideNavBar -->
+<aside class="h-full w-[224px] fixed left-0 top-0 bg-surface-container-low dark:bg-surface-dim border-r border-border-default dark:border-outline-variant flex flex-col py-space-xl z-20">
+<div class="px-space-lg mb-space-2xl">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary text-[28px]">query_stats</span>
+<div>
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-secondary">Terminal v2.4</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-space-xs px-space-md">
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm font-semibold">首页</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm font-semibold">持仓</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-sm text-label-sm font-semibold">助手</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm font-semibold">研究</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-primary dark:text-inverse-primary font-bold border-r-2 border-primary dark:border-inverse-primary opacity-80 duration-150 bg-surface-container" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm font-semibold">设置</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="ml-[224px] flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="h-[64px] shrink-0 bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline-variant flex justify-between items-center px-space-xl z-10 w-full">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm text-secondary">设置</span>
+<span class="material-symbols-outlined text-outline text-[16px]">chevron_right</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold">模型与任务路由</span>
+</div>
+<div class="flex items-center gap-space-lg">
+<button class="text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-variant transition-all p-2 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-fixed-dim overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-fixed-variant">person</span>
+</div>
+</div>
+</header>
+<!-- Main Scrollable Area -->
+<main class="flex-1 overflow-y-auto p-space-xl">
+<div class="max-w-[1200px] mx-auto flex flex-col gap-space-xl">
+<!-- Section 1: Model Configuration Cards -->
+<section>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+<!-- Fast Model Card -->
+<div class="bg-surface rounded-lg border border-border-default p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex justify-between items-start border-b border-border-default pb-space-sm">
+<div>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface flex items-center gap-2">快速模型 <span class="font-caption text-caption text-secondary bg-surface-container-low px-2 py-0.5 rounded">GPT-4o</span></h3>
+<p class="font-caption text-caption text-outline">OpenAI-compatible</p>
+</div>
+<span class="material-symbols-outlined text-market-down text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="grid grid-cols-1 gap-space-md">
+<div>
+<label class="font-caption text-caption text-secondary block mb-1">Base URL</label>
+<input class="w-full h-8 px-2 font-body-md text-body-md text-on-surface bg-canvas border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" type="text" value="https://api.openai.com/v1"/>
+</div>
+<div>
+<label class="font-caption text-caption text-secondary block mb-1">模型名</label>
+<input class="w-full h-8 px-2 font-body-md text-body-md text-on-surface bg-canvas border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" type="text" value="gpt-4o"/>
+</div>
+<div class="bg-canvas p-space-sm rounded border border-border-default flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-caption text-caption text-secondary">密钥来源：环境变量 <code class="font-mono bg-surface px-1 rounded text-primary">MODEL_KEY_A</code></span>
+<span class="font-micro-badge text-micro-badge bg-[#ECFDF3] text-market-down px-2 py-0.5 rounded-full border border-[#D1FADF]">已提供</span>
+</div>
+<input class="w-full h-8 px-2 font-mono text-body-md text-on-surface bg-surface border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" type="password" value="********************************"/>
+</div>
+<div class="grid grid-cols-2 gap-space-md">
+<div>
+<label class="font-caption text-caption text-secondary block mb-1">超时 (秒)</label>
+<input class="w-full h-8 px-2 font-body-md text-body-md text-on-surface bg-canvas border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors tabular-nums" type="number" value="30"/>
+</div>
+<div>
+<label class="font-caption text-caption text-secondary block mb-1 flex justify-between">
+<span>温度</span>
+<span class="tabular-nums">0.2</span>
+</label>
+<input class="w-full h-2 bg-border-default rounded-lg appearance-none cursor-pointer accent-primary mt-2" max="2" min="0" step="0.1" type="range" value="0.2"/>
+</div>
+</div>
+<!-- Advanced Settings Accordion -->
+<details class="group border border-border-default rounded bg-canvas">
+<summary class="flex justify-between items-center font-caption text-caption text-secondary cursor-pointer p-space-sm select-none hover:bg-surface-container-low transition-colors">
+                                        高级参数
+                                        <span class="material-symbols-outlined transition group-open:rotate-180">expand_more</span>
+</summary>
+<div class="p-space-sm border-t border-border-default grid grid-cols-2 gap-space-sm bg-surface">
+<div>
+<label class="font-caption text-caption text-secondary block mb-1">max_tokens</label>
+<input class="w-full h-7 px-2 font-caption text-caption text-on-surface bg-canvas border border-border-default rounded focus:border-primary outline-none tabular-nums" type="number" value="4096"/>
+</div>
+<div>
+<label class="font-caption text-caption text-secondary block mb-1">top_p</label>
+<input class="w-full h-7 px-2 font-caption text-caption text-on-surface bg-canvas border border-border-default rounded focus:border-primary outline-none tabular-nums" step="0.1" type="number" value="1.0"/>
+</div>
+</div>
+</details>
+</div>
+<div class="flex justify-between items-center mt-auto pt-space-sm border-t border-border-default">
+<span class="font-caption text-caption text-secondary flex items-center gap-1">
+                                    延迟 <span class="text-on-surface font-medium tabular-nums">420ms</span> · 支持结构化输出 <span class="text-market-down font-medium">✓</span>
+</span>
+<button class="px-4 py-1.5 bg-surface-container-low text-primary-container font-label-sm text-label-sm rounded hover:bg-surface-container transition-colors border border-primary-fixed-dim">连接测试</button>
+</div>
+</div>
+<!-- Research Model Card -->
+<div class="bg-surface rounded-lg border border-border-default p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex justify-between items-start border-b border-border-default pb-space-sm">
+<div>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface flex items-center gap-2">研究模型 <span class="font-caption text-caption text-secondary bg-surface-container-low px-2 py-0.5 rounded">Claude-3-Opus</span></h3>
+<p class="font-caption text-caption text-outline">Anthropic (OpenAI-compatible wrapper)</p>
+</div>
+<span class="material-symbols-outlined text-market-down text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="grid grid-cols-1 gap-space-md">
+<div>
+<label class="font-caption text-caption text-secondary block mb-1">Base URL</label>
+<input class="w-full h-8 px-2 font-body-md text-body-md text-on-surface bg-canvas border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" type="text" value="https://api.anthropic.com/v1/messages"/>
+</div>
+<div>
+<label class="font-caption text-caption text-secondary block mb-1">模型名</label>
+<input class="w-full h-8 px-2 font-body-md text-body-md text-on-surface bg-canvas border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" type="text" value="claude-3-opus-20240229"/>
+</div>
+<div class="bg-canvas p-space-sm rounded border border-border-default flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-caption text-caption text-secondary">密钥来源：环境变量 <code class="font-mono bg-surface px-1 rounded text-primary">MODEL_KEY_B</code></span>
+<span class="font-micro-badge text-micro-badge bg-[#ECFDF3] text-market-down px-2 py-0.5 rounded-full border border-[#D1FADF]">已提供</span>
+</div>
+<input class="w-full h-8 px-2 font-mono text-body-md text-on-surface bg-surface border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" type="password" value="********************************"/>
+</div>
+<div class="grid grid-cols-2 gap-space-md">
+<div>
+<label class="font-caption text-caption text-secondary block mb-1">超时 (秒)</label>
+<input class="w-full h-8 px-2 font-body-md text-body-md text-on-surface bg-canvas border border-border-default rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors tabular-nums" type="number" value="120"/>
+</div>
+<div>
+<label class="font-caption text-caption text-secondary block mb-1 flex justify-between">
+<span>温度</span>
+<span class="tabular-nums">0.0</span>
+</label>
+<input class="w-full h-2 bg-border-default rounded-lg appearance-none cursor-pointer accent-primary mt-2" max="2" min="0" step="0.1" type="range" value="0.0"/>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center mt-auto pt-space-sm border-t border-border-default">
+<span class="font-caption text-caption text-secondary flex items-center gap-1">
+                                    延迟 <span class="text-on-surface font-medium tabular-nums">1850ms</span> · 支持结构化输出 <span class="text-market-down font-medium">✓</span>
+</span>
+<button class="px-4 py-1.5 bg-surface-container-low text-primary-container font-label-sm text-label-sm rounded hover:bg-surface-container transition-colors border border-primary-fixed-dim">连接测试</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Task Routing Table -->
+<section class="bg-surface rounded-lg border border-border-default shadow-sm overflow-hidden">
+<div class="px-space-lg py-space-md border-b border-border-default bg-surface-bright flex justify-between items-center">
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">任务路由协议</h2>
+<button class="text-primary font-label-sm text-label-sm hover:underline">添加规则</button>
+</div>
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-canvas border-b border-border-default">
+<th class="px-space-lg py-space-sm font-caption text-caption text-secondary font-medium w-1/3">任务上下文</th>
+<th class="px-space-lg py-space-sm font-caption text-caption text-secondary font-medium w-1/3">选用模型</th>
+<th class="px-space-lg py-space-sm font-caption text-caption text-secondary font-medium w-1/3">备注说明</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-default">
+<tr class="hover:bg-surface-container-lowest transition-colors h-12">
+<td class="px-space-lg py-space-xs font-body-md text-body-md text-on-surface font-medium">盘中快速问询</td>
+<td class="px-space-lg py-space-xs">
+<select class="h-8 px-2 border border-border-default rounded bg-canvas text-body-md font-body-md text-on-surface focus:border-primary outline-none w-full max-w-[200px]">
+<option selected="">快速模型 (GPT-4o)</option>
+<option>研究模型 (Claude-3)</option>
+</select>
+</td>
+<td class="px-space-lg py-space-xs font-caption text-caption text-secondary">低延迟优先</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors h-12">
+<td class="px-space-lg py-space-xs font-body-md text-body-md text-on-surface font-medium">开市前报告</td>
+<td class="px-space-lg py-space-xs">
+<select class="h-8 px-2 border border-border-default rounded bg-canvas text-body-md font-body-md text-on-surface focus:border-primary outline-none w-full max-w-[200px]">
+<option selected="">快速模型 (GPT-4o)</option>
+<option>研究模型 (Claude-3)</option>
+</select>
+</td>
+<td class="px-space-lg py-space-xs font-caption text-caption text-secondary">标准化生成</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors h-12">
+<td class="px-space-lg py-space-xs font-body-md text-body-md text-on-surface font-medium">收市后复盘</td>
+<td class="px-space-lg py-space-xs">
+<select class="h-8 px-2 border border-border-default rounded bg-canvas text-body-md font-body-md text-on-surface focus:border-primary outline-none w-full max-w-[200px]">
+<option selected="">快速模型 (GPT-4o)</option>
+<option>研究模型 (Claude-3)</option>
+</select>
+</td>
+<td class="px-space-lg py-space-xs font-caption text-caption text-secondary">批量处理</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors h-12">
+<td class="px-space-lg py-space-xs font-body-md text-body-md text-on-surface font-medium">公司研究</td>
+<td class="px-space-lg py-space-xs">
+<select class="h-8 px-2 border border-border-default rounded bg-canvas text-body-md font-body-md text-on-surface focus:border-primary outline-none w-full max-w-[200px]">
+<option>快速模型 (GPT-4o)</option>
+<option selected="">研究模型 (Claude-3)</option>
+</select>
+</td>
+<td class="px-space-lg py-space-xs font-caption text-caption text-secondary">长上下文，推理优先</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors h-12">
+<td class="px-space-lg py-space-xs font-body-md text-body-md text-on-surface font-medium">行业研究</td>
+<td class="px-space-lg py-space-xs">
+<select class="h-8 px-2 border border-border-default rounded bg-canvas text-body-md font-body-md text-on-surface focus:border-primary outline-none w-full max-w-[200px]">
+<option>快速模型 (GPT-4o)</option>
+<option selected="">研究模型 (Claude-3)</option>
+</select>
+</td>
+<td class="px-space-lg py-space-xs font-caption text-caption text-secondary">复杂研报解析</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors h-12">
+<td class="px-space-lg py-space-xs font-body-md text-body-md text-on-surface font-medium">文档抽取</td>
+<td class="px-space-lg py-space-xs">
+<select class="h-8 px-2 border border-border-default rounded bg-canvas text-body-md font-body-md text-on-surface focus:border-primary outline-none w-full max-w-[200px]">
+<option selected="">快速模型 (GPT-4o)</option>
+<option>研究模型 (Claude-3)</option>
+</select>
+</td>
+<td class="px-space-lg py-space-xs font-caption text-caption text-secondary">结构化 JSON 输出</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Section 3: Usage & Costs Summary -->
+<section class="grid grid-cols-1 xl:grid-cols-3 gap-space-lg">
+<!-- Metrics Row -->
+<div class="xl:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-space-sm bg-surface rounded-lg border border-border-default p-space-md shadow-sm">
+<div class="flex flex-col justify-center p-space-sm border-r border-border-default last:border-0">
+<span class="font-caption text-caption text-secondary mb-1">今日调用</span>
+<span class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">142<span class="font-caption text-caption text-secondary ml-1">次</span></span>
+</div>
+<div class="flex flex-col justify-center p-space-sm border-r border-border-default last:border-0">
+<span class="font-caption text-caption text-secondary mb-1">本月调用</span>
+<span class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">3,420<span class="font-caption text-caption text-secondary ml-1">次</span></span>
+</div>
+<div class="flex flex-col justify-center p-space-sm border-r border-border-default last:border-0">
+<span class="font-caption text-caption text-secondary mb-1">今日 Token</span>
+<span class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">84.2<span class="font-caption text-caption text-secondary ml-1">K</span></span>
+</div>
+<div class="flex flex-col justify-center p-space-sm border-r border-border-default last:border-0">
+<span class="font-caption text-caption text-secondary mb-1">估算费用</span>
+<span class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums"><span class="font-caption text-caption text-secondary mr-1">¥</span>12.30</span>
+</div>
+<div class="flex flex-col justify-center p-space-sm">
+<span class="font-caption text-caption text-secondary mb-1">错误率</span>
+<div class="flex items-center gap-1">
+<span class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">0.8%</span>
+<span class="material-symbols-outlined text-market-down text-[16px]">arrow_downward</span>
+</div>
+</div>
+</div>
+<!-- Trend Chart Placeholder -->
+<div class="bg-surface rounded-lg border border-border-default p-space-md shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-center mb-space-sm">
+<h3 class="font-caption text-caption text-secondary font-medium">7日调用量趋势</h3>
+</div>
+<div class="h-[60px] w-full relative">
+<!-- Abstract decorative representation of a line chart using tailwind gradients since we can't use svg/images -->
+<div class="absolute inset-0 flex items-end justify-between px-1 gap-1">
+<div class="w-1/7 bg-primary-fixed-dim rounded-t h-[30%]"></div>
+<div class="w-1/7 bg-primary-fixed-dim rounded-t h-[40%]"></div>
+<div class="w-1/7 bg-primary-fixed-dim rounded-t h-[35%]"></div>
+<div class="w-1/7 bg-primary-fixed-dim rounded-t h-[60%]"></div>
+<div class="w-1/7 bg-primary-fixed-dim rounded-t h-[50%]"></div>
+<div class="w-1/7 bg-primary-fixed-dim rounded-t h-[80%]"></div>
+<div class="w-1/7 bg-primary-container rounded-t h-[100%]"></div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>

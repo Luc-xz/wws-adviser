@@ -270,8 +270,9 @@
                                     鉴于半导体行业近期周期性波动加剧，且您的组合在该板块暴露过高。建议减持 1.5% 的中芯国际 (0981.HK) 以锁定利润并降低整体波动率。
                                 </p>
 <div class="flex items-center gap-3">
-<button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-all active:scale-[0.98]">立即执行</button>
-<button class="px-4 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg font-label-sm text-label-sm hover:bg-secondary-container/80 transition-all">忽略</button>
+<!-- fixed 2026-08-12: "立即执行"→"查看依据"，符合 §9.8 系统不提供立即买入/卖出 -->
+<button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-all active:scale-[0.98]">查看依据</button>
+<button class="px-4 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg font-label-sm text-label-sm hover:bg-secondary-container/80 transition-all">记录操作</button>
 </div>
 </div>
 <!-- Advice Card 2 -->
@@ -514,11 +515,7 @@
 <p class="text-outline text-caption font-caption">© 2024 WWS Adviser. 所有数据延迟 15 分钟，除非另有说明。 投资有风险，决策需谨慎。</p>
 </footer>
 </main>
-<!-- FAB Suppression: This is a Dashboard/Overview, so a contextual FAB for "New Order" could be relevant -->
-<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 group">
-<span class="material-symbols-outlined" data-icon="add">add</span>
-<span class="absolute right-full mr-4 px-3 py-1.5 bg-inverse-surface text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">快速下单</span>
-</button>
+<!-- fixed 2026-08-12: 删除"快速下单"FAB，符合 §9.8 系统不提供立即买入/卖出；首页不应有下单入口 -->
 <script>
         // Micro-interaction for numbers
         document.querySelectorAll('.font-display-lg').forEach(el => {

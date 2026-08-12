@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WWS Adviser - Import Validation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#ffffff",
+                      "primary-fixed-dim": "#b7c4ff",
+                      "secondary": "#5a5e69",
+                      "inverse-surface": "#293041",
+                      "outline-variant": "#c4c5d6",
+                      "tertiary-container": "#606365",
+                      "on-secondary-fixed-variant": "#424751",
+                      "background": "#f9f9ff",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-surface-variant": "#444654",
+                      "on-primary-fixed-variant": "#0038b6",
+                      "primary": "#063cbc",
+                      "on-primary": "#ffffff",
+                      "on-secondary-container": "#60646f",
+                      "canvas": "#F5F7FA",
+                      "secondary-fixed-dim": "#c2c6d3",
+                      "on-tertiary-container": "#dde0e1",
+                      "surface-container-low": "#f1f3ff",
+                      "on-primary-container": "#d8ddff",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "surface-container": "#e9edff",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "inverse-on-surface": "#edf0ff",
+                      "tertiary-fixed": "#e0e3e5",
+                      "surface": "#FFFFFF",
+                      "risk-critical": "#C11574",
+                      "surface-container-high": "#e0e8ff",
+                      "on-tertiary": "#ffffff",
+                      "secondary-fixed": "#dee2ef",
+                      "surface-tint": "#2c53d1",
+                      "primary-container": "#3157d5",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "on-primary-fixed": "#001452",
+                      "inverse-primary": "#b7c4ff",
+                      "secondary-container": "#dee2ef",
+                      "on-secondary-fixed": "#171c25",
+                      "surface-dim": "#d2daf0",
+                      "primary-fixed": "#dde1ff",
+                      "on-error-container": "#93000a",
+                      "risk-warning": "#DC6803",
+                      "surface-variant": "#dbe2f9",
+                      "tertiary": "#484b4d",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#f9f9ff",
+                      "on-surface": "#141b2c",
+                      "market-down": "#079455",
+                      "on-background": "#141b2c",
+                      "surface-container-highest": "#dbe2f9",
+                      "border-default": "#E4E7EC",
+                      "market-up": "#D92D20",
+                      "outline": "#747685"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "space-sm": "8px",
+                      "space-md": "12px",
+                      "gutter-mobile": "12px",
+                      "unit": "4px",
+                      "space-xl": "24px",
+                      "space-xs": "4px",
+                      "space-lg": "16px",
+                      "space-2xl": "32px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "headline-h1": [
+                              "Inter"
+                      ],
+                      "headline-h2": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-h3": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "micro-badge": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.45",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-h1": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-h2": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.35",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-h3": [
+                              "17px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.55",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "micro-badge": [
+                              "11px",
+                              {
+                                      "lineHeight": "1.35",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-canvas text-on-surface font-body-md h-screen overflow-hidden flex">
+<!-- SideNavBar -->
+<nav class="h-full w-[224px] fixed left-0 top-0 border-r border-border-default dark:border-outline-variant bg-surface-container-low dark:bg-surface-dim flex flex-col py-space-xl z-20">
+<div class="px-space-lg mb-space-2xl">
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-secondary">Terminal v2.4</p>
+</div>
+<ul class="flex flex-col gap-space-sm px-space-md">
+<li>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+                    首页
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-primary dark:text-inverse-primary font-bold border-r-2 border-primary dark:border-inverse-primary bg-surface-container dark:bg-inverse-surface font-label-sm text-label-sm transition-colors Active: opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+                    持仓
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">smart_toy</span>
+                    助手
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+                    研究
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                    设置
+                </a>
+</li>
+</ul>
+</nav>
+<!-- TopNavBar -->
+<header class="h-[64px] fixed top-0 right-0 left-[224px] z-10 border-b border-border-default dark:border-outline-variant bg-surface dark:bg-inverse-surface flex justify-between items-center px-space-xl w-[calc(100%-224px)]">
+<div class="flex items-center gap-space-sm">
+<a class="text-outline hover:text-on-surface transition-colors font-body-md text-body-md" href="#">Transactions</a>
+<span class="text-outline material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-primary font-bold font-body-md text-body-md">Import CSV</span>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-all p-space-sm rounded-full Active: scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                JS
+            </div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[224px] mt-[64px] h-[calc(100vh-64px)] w-[calc(100%-224px)] flex flex-col relative">
+<div class="flex-1 overflow-y-auto pb-[80px]"> <!-- padding bottom for action bar -->
+<div class="max-w-[1200px] mx-auto p-space-xl">
+<!-- Stepper -->
+<div class="flex items-center justify-between mb-space-2xl border-b border-border-default pb-space-lg">
+<div class="flex items-center gap-space-sm text-market-down font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                        1 Upload
+                    </div>
+<div class="h-[1px] w-8 bg-border-default"></div>
+<div class="flex items-center gap-space-sm text-market-down font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                        2 Mapping
+                    </div>
+<div class="h-[1px] w-8 bg-border-default"></div>
+<div class="flex items-center gap-space-sm text-primary font-bold font-label-sm text-label-sm">
+<span class="w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs">3</span>
+                        Validation
+                    </div>
+<div class="h-[1px] w-8 bg-border-default"></div>
+<div class="flex items-center gap-space-sm text-outline font-label-sm text-label-sm">
+<span class="w-5 h-5 rounded-full border border-outline text-outline flex items-center justify-center text-xs">4</span>
+                        Conflict Resolution
+                    </div>
+<div class="h-[1px] w-8 bg-border-default"></div>
+<div class="flex items-center gap-space-sm text-outline font-label-sm text-label-sm">
+<span class="w-5 h-5 rounded-full border border-outline text-outline flex items-center justify-center text-xs">5</span>
+                        Confirm Import
+                    </div>
+<div class="h-[1px] w-8 bg-border-default"></div>
+<div class="flex items-center gap-space-sm text-outline font-label-sm text-label-sm">
+<span class="w-5 h-5 rounded-full border border-outline text-outline flex items-center justify-center text-xs">6</span>
+                        Results
+                    </div>
+</div>
+<!-- Stats Cards -->
+<div class="grid grid-cols-5 gap-space-md mb-space-xl">
+<div class="bg-surface border border-border-default rounded-lg p-space-md flex flex-col gap-space-xs">
+<div class="text-secondary font-caption text-caption flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">list_alt</span> Total
+                        </div>
+<div class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">248</div>
+</div>
+<div class="bg-surface border border-border-default rounded-lg p-space-md flex flex-col gap-space-xs">
+<div class="text-market-down font-caption text-caption flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> Valid
+                        </div>
+<div class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">230</div>
+</div>
+<div class="bg-surface border border-border-default rounded-lg p-space-md flex flex-col gap-space-xs">
+<div class="text-risk-warning font-caption text-caption flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">warning</span> Warnings
+                        </div>
+<div class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">12</div>
+</div>
+<div class="bg-surface border border-border-default rounded-lg p-space-md flex flex-col gap-space-xs">
+<div class="text-market-up font-caption text-caption flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">cancel</span> Errors
+                        </div>
+<div class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">4</div>
+</div>
+<div class="bg-surface border border-border-default rounded-lg p-space-md flex flex-col gap-space-xs">
+<div class="text-outline font-caption text-caption flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">content_copy</span> Duplicates
+                        </div>
+<div class="font-headline-h2 text-headline-h2 text-on-surface tabular-nums">2</div>
+</div>
+</div>
+<!-- Main Layout (Table + Sidebar) -->
+<div class="flex gap-space-xl h-[500px]">
+<!-- Table Area -->
+<div class="flex-1 bg-surface border border-border-default rounded-lg overflow-hidden flex flex-col">
+<div class="overflow-x-auto flex-1">
+<table class="w-full text-left whitespace-nowrap border-collapse">
+<thead class="sticky top-0 bg-surface-container-low border-b border-border-default z-10 text-secondary font-label-sm text-label-sm">
+<tr>
+<th class="p-space-sm pl-space-md w-[40px]"><input class="rounded border-border-default text-primary focus:ring-primary" type="checkbox"/></th>
+<th class="p-space-sm">Row</th>
+<th class="p-space-sm w-[40px]"></th>
+<th class="p-space-sm">Date</th>
+<th class="p-space-sm">Ticker</th>
+<th class="p-space-sm text-right">Side</th>
+<th class="p-space-sm text-right">Quantity</th>
+<th class="p-space-sm text-right">Price</th>
+<th class="p-space-sm text-right">Fees</th>
+<th class="p-space-sm text-right">Cash Impact</th>
+<th class="p-space-sm">Source</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md tabular-nums divide-y divide-border-default">
+<!-- Valid Row -->
+<tr class="h-[44px] hover:bg-canvas">
+<td class="p-space-sm pl-space-md"><input class="rounded border-border-default text-primary focus:ring-primary" type="checkbox"/></td>
+<td class="p-space-sm text-secondary">100</td>
+<td class="p-space-sm text-market-down"><span class="material-symbols-outlined text-[18px]">check_circle</span></td>
+<td class="p-space-sm">2023-10-24</td>
+<td class="p-space-sm font-semibold">AAPL</td>
+<td class="p-space-sm text-right text-market-down">Buy</td>
+<td class="p-space-sm text-right">150</td>
+<td class="p-space-sm text-right">173.50<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-right">1.50<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-right text-market-up">-26,026.50<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-secondary">IBKR</td>
+</tr>
+<!-- Warning Row -->
+<tr class="h-[44px] bg-[#FFFBEB] hover:bg-[#FEF7D9]">
+<td class="p-space-sm pl-space-md"><input class="rounded border-border-default text-primary focus:ring-primary" type="checkbox"/></td>
+<td class="p-space-sm text-secondary">101</td>
+<td class="p-space-sm text-risk-warning"><span class="material-symbols-outlined text-[18px]">warning</span></td>
+<td class="p-space-sm">2023-10-24</td>
+<td class="p-space-sm font-semibold">MSFT</td>
+<td class="p-space-sm text-right text-market-up">Sell</td>
+<td class="p-space-sm text-right">50</td>
+<td class="p-space-sm text-right">330.12<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-right">0.00<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-right text-market-down">+16,506.00<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-secondary">IBKR</td>
+</tr>
+<!-- Error Row (Active) -->
+<tr class="h-[44px] bg-[#FEF3F2] border-y-2 border-market-up relative z-0">
+<td class="p-space-sm pl-space-md"><input class="rounded border-border-default text-primary focus:ring-primary" type="checkbox"/></td>
+<td class="p-space-sm text-secondary font-bold">102</td>
+<td class="p-space-sm text-market-up"><span class="material-symbols-outlined text-[18px]">cancel</span></td>
+<td class="p-space-sm text-market-up underline decoration-dashed">24/10/2023</td>
+<td class="p-space-sm font-semibold">TSLA</td>
+<td class="p-space-sm text-right text-market-down">Buy</td>
+<td class="p-space-sm text-right">20</td>
+<td class="p-space-sm text-right text-market-up underline decoration-dashed">212.12345<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-right">2.00<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-right text-market-up">-4,244.47<span class="text-caption text-secondary ml-1">USD</span></td>
+<td class="p-space-sm text-secondary">IBKR</td>
+</tr>
+<!-- Duplicate Row -->
+<tr class="h-[44px] text-outline bg-canvas">
+<td class="p-space-sm pl-space-md"><input class="rounded border-border-default text-outline focus:ring-outline" disabled="" type="checkbox"/></td>
+<td class="p-space-sm">103</td>
+<td class="p-space-sm"><span class="material-symbols-outlined text-[18px]">content_copy</span></td>
+<td class="p-space-sm">2023-10-24</td>
+<td class="p-space-sm">GOOGL</td>
+<td class="p-space-sm text-right">Buy</td>
+<td class="p-space-sm text-right">100</td>
+<td class="p-space-sm text-right">138.20<span class="text-caption ml-1">USD</span></td>
+<td class="p-space-sm text-right">1.00<span class="text-caption ml-1">USD</span></td>
+<td class="p-space-sm text-right">-13,821.00<span class="text-caption ml-1">USD</span></td>
+<td class="p-space-sm">IBKR</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Right Sidebar: Error Details -->
+<div class="w-[360px] bg-surface border border-border-default rounded-lg flex flex-col">
+<div class="p-space-md border-b border-border-default flex items-center justify-between">
+<h3 class="font-headline-h3 text-headline-h3 font-semibold text-market-up flex items-center gap-2">
+<span class="material-symbols-outlined">error</span>
+                                Row 102 Error Details
+                            </h3>
+<button class="text-secondary hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
+</div>
+<div class="flex-1 overflow-y-auto p-space-md flex flex-col gap-space-lg">
+<div class="bg-[#FEF3F2] border border-[#FEE4E2] rounded p-space-sm text-market-up font-body-md text-body-md">
+<ul class="list-disc pl-5 space-y-1">
+<li>Date format unparseable (Expected YYYY-MM-DD).</li>
+<li>Price precision exceeds 4 decimals.</li>
+</ul>
+</div>
+<div class="flex flex-col gap-space-sm">
+<h4 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Raw Data Map</h4>
+<div class="grid grid-cols-2 gap-x-space-md gap-y-space-sm font-body-md text-body-md tabular-nums">
+<div class="text-secondary">Date:</div>
+<div class="font-mono text-market-up font-bold">24/10/2023</div>
+<div class="text-secondary">Ticker:</div>
+<div class="font-mono">TSLA</div>
+<div class="text-secondary">Side:</div>
+<div class="font-mono">Buy</div>
+<div class="text-secondary">Quantity:</div>
+<div class="font-mono">20</div>
+<div class="text-secondary">Price:</div>
+<div class="font-mono text-market-up font-bold">212.12345</div>
+</div>
+</div>
+<div class="mt-auto pt-space-md border-t border-border-default">
+<button class="w-full py-space-sm px-space-md bg-secondary-container text-primary font-label-sm text-label-sm rounded-lg hover:bg-surface-container-high transition-colors">
+                                    导出修正 CSV (Export Fixed CSV)
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Fixed Action Bar -->
+<div class="fixed bottom-0 left-[224px] right-0 h-[80px] bg-surface border-t border-border-default px-space-xl flex items-center justify-between z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<button class="py-space-sm px-space-lg border border-border-default rounded-lg text-on-surface font-label-sm text-label-sm hover:bg-canvas transition-colors">
+                上一步 (Back)
+            </button>
+<div class="flex items-center gap-space-md">
+<span class="text-secondary font-caption text-caption">跳过 2 条重复、拒绝 4 条错误<br/>(Skipping 2 duplicates, rejecting 4 errors)</span>
+<button class="py-space-sm px-space-lg bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-primary-container transition-colors shadow-sm flex flex-col items-center leading-tight">
+<span>下一步：处理冲突</span>
+<span class="font-caption text-[10px] opacity-80">Will add 230 records</span>
+</button>
+</div>
+</div>
+</main>
+</body></html>

@@ -13,7 +13,7 @@
 - 模型调用、外部数据获取**不持有 SQLite 写事务**（[1_REPO_STRUCTURE.md](./1_REPO_STRUCTURE.md) §4.2）。
 - 任务通过 `job_runs` 状态机 + 唯一键 + 租约保证幂等与可恢复；APScheduler 只入队不执行长业务。
 
-模型与数据源供应商当前未定：本文凡涉及具体供应商处一律以**端口契约 + 占位适配器**表达，标注 `TODO(model-vendor-selection)`（见索引 §2）。
+模型供应商已确认为**通用 OpenAI-compatible 协议，不锁定具体供应商**（§12.2）：Model Gateway 设计为供应商无关，部署时配置 `base_url`+`api_key`+`model` 映射，可接入 Qwen/GLM/DeepSeek/Kimi/OpenAI 等任一兼容供应商。
 
 ## 2. 模块边界与写权限
 
@@ -167,7 +167,7 @@ backend/src/wws_adviser/modules/model_gateway/prompts/
 | --- | --- |
 | PENDING → RUNNING | job_run 领取租约 |
 | RUNNING → COMPLETED | report.json + advice 落库并提交 |
-| RUNNING → PARTIAL | 数据严重缺失/降级但仍有可发布摘要（如基金净值未披露，PRD §8.6 FR-REV-001） |
+| RUNNING → PARTIAL | 数据严重缺失/降级但仍有可发布摘要（如数据源未就绪，PRD §8.6 FR-REV-001） |
 | RUNNING → FAILED | 校验 BLOCKED 且无法重建 / 不可恢复错误 |
 | COMPLETED → RENDERED | md/html 渲染成功 |
 | PARTIAL → COMPLETED | 补算任务（如净值披露后）生成新版本，旧版本保留（技术架构 §11.4） |
@@ -178,8 +178,8 @@ backend/src/wws_adviser/modules/model_gateway/prompts/
 
 ### 7.1 开市前报告（FR-REP-001/002/003）
 
-- 默认 08:45 创建业务日期任务、校验交易日；09:10 前完成。
-- 任务链：同步持仓公告/公司行动/日线/必要新闻 → 校验上一交易日完整性 → 冻结 08:45~截止快照 → 计算组合风险与候选动作 → 09:10 前发布。
+- 默认 08:30 创建业务日期任务、校验交易日；09:00 前完成。
+- 任务链：同步持仓公告/公司行动/日线/必要新闻 → 校验上一交易日完整性 → 冻结 08:30~截止快照 → 计算组合风险与候选动作 → 09:00 前发布。
 - 非交易日不自动生成，除非用户手动触发（FR-REP-003）。
 - 不等待未公开数据无限阻塞；报告必须展示检索截止时间。
 - 数据严重缺失 → 生成“数据异常摘要”，不伪装为正常建议（FR-REP-003）。
@@ -205,7 +205,7 @@ PWA POST /assistant/intraday
 ### 7.3 收市后复盘（FR-REV-001/002/003）
 
 - 默认 16:00 开始、17:00 前完成；先确认日线完整性，再算收益归因与行为偏差。
-- 公募基金净值未披露 → `PARTIAL` 报告；净值更新任务触发同一报告**新版本**，保留旧版本不覆盖（技术架构 §11.4）。
+- 数据源缺失或日线未就绪 → `PARTIAL` 报告；数据补齐任务触发同一报告**新版本**，保留旧版本不覆盖（技术架构 §11.4）。
 - 建议评价（P1，FR-REV-003）按动作类目口径版本化执行，回灌校准闭环见 [4_ANALYTICS_AND_RISK.md](./4_ANALYTICS_AND_RISK.md) §8。
 
 ### 7.4 公司/行业研究（FR-RES-001~004）
@@ -289,16 +289,47 @@ PENDING → RUNNING → COMPLETED
 - APScheduler 入队与执行器执行只通过 `job_runs` 通信；APScheduler 不直接写业务表。
 - 模板不得要求模型重算凯利/持仓/概率（lint 或模板测试断言关键词缺失）。
 
-## 12. 待确认项
+## 12. 已确认、运行配置与待确认项
 
-| 事项 | 当前默认 | 备注 |
+### 12.1 已确认 / 运行配置（2026-08-11 复核）
+
+| 事项 | 确认值/策略 | 性质 |
 | --- | --- | --- |
-| 模型供应商 | OpenAI-compatible，未定具体 | `TODO(model-vendor-selection)`，《模型与路由规范》 |
-| 快速/研究模型档位划分 | 按 `task_type` 路由 | `model_profiles.task_routes_json` |
-| 盘中有效期默认 | 10 分钟 | 可配（FR-CHAT-003） |
-| 模型一次受控修复策略 | 一次 Pydantic 自动修复后重校 | 复杂 schema 可能需放宽，留 ADR |
-| 通知渠道首选 | 待选企业微信/Server 酱/邮件一种 | `TODO(notifier-selection)`，**Phase 1.6 前定** |
-| 告警冷却窗口 | 按 `event_type` 配置 | 选型后填充 |
-| 任务 `max_attempts` 默认 | 留运行配置 | 区分报告/采集/备份 |
+| 快速/研究模型档位划分 | 按 `task_type` 路由 | 已确认（`model_profiles.task_routes_json`） |
+| 盘中有效期默认 | 10 分钟（可配，FR-CHAT-003） | 已确认（PRD §20） |
+| 模型一次受控修复策略 | **一次 Pydantic 自动修复后重校**，仍失败则拒绝/BLOCKED | 已确认；复杂 schema 需放宽时留 ADR |
+| 告警冷却窗口 | 按 `event_type` 运行配置 | 选型后填充 |
+| 任务 `max_attempts` 默认 | 运行配置，区分报告/采集/备份 | 实现时定 |
 
-> **已确认（2026-08-11）**：开市前报告 **08:30 启动、09:00 前完成**（较原 08:45/09:10 提前 15 分钟，约束隔夜采集任务须在 08:30 前就位）；收市后复盘 16:00 启动、17:00 前完成。标的范围仅 A 股 + 场内 ETF，研究/检索流水线无需覆盖场外公募基金净值披露。
+### 12.2 模型供应商（已确认 2026-08-12）
+
+**确认采用通用 OpenAI-compatible 协议，不锁定具体供应商。** `TODO(model-vendor-selection)` 关闭。
+
+2026 年主流国产模型（Qwen/GLM/DeepSeek/Kimi/文心等）均原生兼容 OpenAI `/v1/chat/completions` 协议，仅需配置 `base_url` + `api_key` + `model` 映射即可接入。Model Gateway 据此设计为**供应商无关**，具体供应商在部署时由运行配置决定，可随时切换或做多供应商故障转移。
+
+**Model Gateway 配置模型**（`model_profiles` 表，§3）：
+```
+base_url:    <供应商 OpenAI 兼容端点>
+api_key:     <运行时密钥，环境变量注入>
+task_routes: { 快速: <model_a>, 研究: <model_b> }   # 按 task_type 路由
+```
+
+**候选供应商推荐清单**（调研于 2026-08，不锁定，部署时任选/组合）：
+
+| 定位 | 推荐候选 | 优势 | 注意 |
+| --- | --- | --- | --- |
+| 国内零代理起步 | 通义 Qwen（百炼）/ 智谱 GLM | 中文金融强、梯度完整、GLM-4-Flash 免费 | 百炼单点接入多模型 |
+| 性价比主力 | DeepSeek V3.2 / R1 | 全市场最低成本（缓存命中 ¥0.2/M） | 已预告涨价；R1 需剥离 `<think>`；结构化需兜底 |
+| 长上下文研究 | Moonshot Kimi K3 | 1M 上下文（多份公告同框） | 价格高于 DeepSeek/Qwen |
+| 质量天花板 | OpenAI GPT-5 / Claude Opus 5 | 结构化 strict 最可靠、注入防护最成熟 | **需代理**、数据出境合规风险、最贵 |
+
+**工程约束**（适用于所有候选，Gateway 层统一实现）：
+- **结构化输出兜底**：除 OpenAI strict 模式外，所有候选的 JSON 输出须在 Gateway 加 Pydantic schema 校验 + 一次受控修复（§5）+ 重试，避免线上解析失败。
+- **Prompt 注入防护**：国产模型建议在 Gateway 层额外做输入清洗 + 输出过滤（§7）。
+- **推理模型处理**：R1/o 系列输出 `<think>` 思考链，Gateway 须统一剥离后再做结构化解析。
+- **价格波动缓冲**：长线成本测算留 30%–50% 缓冲，保留多供应商切换能力。
+- **国内 VPS 注意**：OpenAI/Claude 需代理且数据出境有合规风险；国内供应商（Qwen/GLM/DeepSeek/Kimi）直连、合规更清晰，MVP 首选。
+
+> **其他已确认决策（2026-08-11/12）**：
+> - 通知渠道首选确定为 **邮件 SMTP**（587/465 端口，云端 VPS 避开 25 封锁，配第三方 SMTP 服务）。`TODO(notifier-selection)` 关闭。企业微信/Server 酱保留可插拔接口。
+> - 开市前报告 **08:30 启动、09:00 前完成**（约束隔夜采集任务须在 08:30 前就位）；收市后复盘 16:00 启动、17:00 前完成。标的范围仅 A 股 + 场内 ETF，研究/检索流水线无需覆盖场外公募基金净值披露。

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>公司/行业研究报告 - WWS Adviser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#424751",
+                        "surface-container": "#e9edff",
+                        "outline-variant": "#c4c5d6",
+                        "on-tertiary-fixed": "#191c1e",
+                        "market-down": "#079455",
+                        "secondary-fixed": "#dee2ef",
+                        "tertiary": "#484b4d",
+                        "risk-critical": "#C11574",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-surface": "#293041",
+                        "surface": "#FFFFFF",
+                        "tertiary-fixed": "#e0e3e5",
+                        "secondary": "#5a5e69",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "risk-warning": "#DC6803",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e0e8ff",
+                        "on-primary-fixed": "#001452",
+                        "on-surface": "#141b2c",
+                        "secondary-container": "#dee2ef",
+                        "primary-container": "#3157d5",
+                        "surface-tint": "#2c53d1",
+                        "on-tertiary-container": "#dde0e1",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#60646f",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "border-default": "#E4E7EC",
+                        "on-secondary-fixed": "#171c25",
+                        "market-up": "#D92D20",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "inverse-primary": "#b7c4ff",
+                        "tertiary-container": "#606365",
+                        "primary-fixed": "#dde1ff",
+                        "canvas": "#F5F7FA",
+                        "inverse-on-surface": "#edf0ff",
+                        "background": "#f9f9ff",
+                        "primary": "#063cbc",
+                        "outline": "#747685",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#dbe2f9",
+                        "surface-bright": "#f9f9ff",
+                        "on-background": "#141b2c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d2daf0",
+                        "on-primary-container": "#d8ddff",
+                        "on-surface-variant": "#444654"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-2xl": "32px",
+                        "space-xl": "24px",
+                        "space-lg": "16px",
+                        "space-md": "12px",
+                        "margin-mobile": "16px",
+                        "gutter-mobile": "12px",
+                        "space-sm": "8px",
+                        "unit": "4px",
+                        "space-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .accordion-content {
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 2000px; /* Arbitrary large value */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface font-body-md min-h-screen pb-[80px] md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline flat no shadows docked full-width top-0 sticky z-50 transition-colors duration-200 ease-in-out">
+<div class="flex justify-between items-center w-full px-margin-mobile h-16">
+<div class="flex items-center gap-space-sm hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="account_circle">account_circle</span>
+</div>
+<div class="font-headline-h1 text-headline-h1 font-bold text-primary dark:text-primary-fixed-dim">
+                WWS Adviser
+            </div>
+<div class="flex items-center gap-space-sm hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="refresh">refresh</span>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-space-2xl py-space-xl grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-gutter-mobile md:gap-space-lg">
+<!-- Hero Section / Summary -->
+<section class="col-span-4 md:col-span-8 lg:col-span-12 bg-surface border border-border-default rounded-xl p-space-xl mb-space-md">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-space-lg">
+<div>
+<div class="flex items-center gap-space-sm mb-space-sm">
+<span class="font-micro-badge text-micro-badge bg-primary-container text-on-primary-container px-2 py-1 rounded">科技行业</span>
+<span class="font-caption text-caption text-secondary">NYSE: APPL</span>
+</div>
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-space-xs">Apple Inc. 深度研究报告</h1>
+<p class="font-body-md text-body-md text-secondary">聚焦AI战略转型与硬件周期拐点</p>
+</div>
+<div class="mt-space-md md:mt-0 text-right">
+<p class="font-caption text-caption text-secondary">数据截至: 2023-10-25 15:30 EST</p>
+<p class="font-caption text-caption text-secondary">分析师: 张三 (高级研究员)</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md bg-canvas rounded-lg p-space-md border border-border-default">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary mb-unit">核心结论摘要</span>
+<p class="font-body-md text-body-md text-on-surface font-medium">预计2024Q1将迎来新一轮iPhone换机周期，AI功能的集成将显著提升客单价(ASP)。</p>
+</div>
+<div class="flex flex-col border-t md:border-t-0 md:border-l border-border-default pt-space-sm md:pt-0 md:pl-space-md">
+<span class="font-label-sm text-label-sm text-secondary mb-unit">评级建议</span>
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-h2 text-headline-h2 text-market-up">增持 (Overweight)</span>
+</div>
+</div>
+<div class="flex flex-col border-t md:border-t-0 md:border-l border-border-default pt-space-sm md:pt-0 md:pl-space-md">
+<span class="font-label-sm text-label-sm text-secondary mb-unit">目标价 (12个月)</span>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-h2 text-headline-h2 text-on-surface">$215.00</span>
+<span class="font-caption text-caption text-secondary">USD</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Accordion Sections -->
+<div class="col-span-4 md:col-span-8 lg:col-span-12 flex flex-col gap-space-md">
+<!-- 财务分析 -->
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden">
+<button class="w-full flex justify-between items-center p-space-md md:p-space-lg bg-surface hover:bg-surface-container-low transition-colors text-left" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary" data-icon="bar_chart">bar_chart</span>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">财务分析 (Financials)</h2>
+</div>
+<span class="material-symbols-outlined text-secondary transform transition-transform duration-300">expand_more</span>
+</button>
+<div class="accordion-content border-t border-border-default">
+<div class="p-space-md md:p-space-lg">
+<div class="mb-space-md flex items-start gap-space-sm">
+<span class="font-micro-badge text-micro-badge bg-surface-variant text-on-surface-variant px-2 py-1 rounded whitespace-nowrap mt-1">[事实]</span>
+<p class="font-body-md text-body-md">2023Q3服务业务营收达到$21.2B，同比增长8%，占总营收比例提升至24%。毛利率维持在70%以上的高位。</p>
+</div>
+<div class="mb-space-md flex items-start gap-space-sm">
+<span class="font-micro-badge text-micro-badge bg-primary-container text-on-primary-container px-2 py-1 rounded whitespace-nowrap mt-1">[判断]</span>
+<p class="font-body-md text-body-md">服务业务的持续增长为公司提供了稳健的现金流护城河，有效对冲了硬件销售周期的波动风险。预计未来三年服务业务CAGR可达10%。</p>
+</div>
+<div class="mt-space-lg">
+<h4 class="font-label-sm text-label-sm text-secondary mb-space-sm">关键财务指标预测</h4>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-border-default">
+<th class="font-label-sm text-label-sm text-secondary p-space-sm">指标 (B USD)</th>
+<th class="font-label-sm text-label-sm text-secondary p-space-sm text-right">2023A</th>
+<th class="font-label-sm text-label-sm text-secondary p-space-sm text-right">2024E</th>
+<th class="font-label-sm text-label-sm text-secondary p-space-sm text-right">2025E</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<tr class="border-b border-border-default">
+<td class="p-space-sm text-on-surface">总营收</td>
+<td class="p-space-sm text-right">383.2</td>
+<td class="p-space-sm text-right text-market-up">395.5</td>
+<td class="p-space-sm text-right text-market-up">415.0</td>
+</tr>
+<tr class="border-b border-border-default bg-surface-container-low/30">
+<td class="p-space-sm text-on-surface">净利润</td>
+<td class="p-space-sm text-right">96.9</td>
+<td class="p-space-sm text-right text-market-up">102.3</td>
+<td class="p-space-sm text-right text-market-up">110.5</td>
+</tr>
+<tr>
+<td class="p-space-sm text-on-surface">毛利率 (%)</td>
+<td class="p-space-sm text-right">44.1%</td>
+<td class="p-space-sm text-right">44.5%</td>
+<td class="p-space-sm text-right">45.2%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 估值情景 -->
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden">
+<button class="w-full flex justify-between items-center p-space-md md:p-space-lg bg-surface hover:bg-surface-container-low transition-colors text-left" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary" data-icon="timeline">timeline</span>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">估值情景 (Valuation Scenarios)</h2>
+</div>
+<span class="material-symbols-outlined text-secondary transform transition-transform duration-300">expand_more</span>
+</button>
+<div class="accordion-content border-t border-border-default">
+<div class="p-space-md md:p-space-lg grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Bull Case -->
+<div class="bg-surface-container-low border border-market-up/30 rounded-lg p-space-md">
+<div class="flex justify-between items-center mb-space-sm">
+<span class="font-label-sm text-label-sm text-market-up">乐观情景 (Bull)</span>
+<span class="font-headline-h3 text-headline-h3">$240.00</span>
+</div>
+<div class="mb-space-sm flex items-start gap-space-sm">
+<span class="font-micro-badge text-micro-badge bg-primary-container text-on-primary-container px-1 py-0.5 rounded mt-0.5">[判断]</span>
+<p class="font-caption text-caption text-secondary">AI功能大幅提升iPhone 16换机率，服务收入增速超15%。PE倍数扩张至32x。</p>
+</div>
+</div>
+<!-- Base Case -->
+<div class="bg-canvas border border-border-default rounded-lg p-space-md">
+<div class="flex justify-between items-center mb-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface">基准情景 (Base)</span>
+<span class="font-headline-h3 text-headline-h3">$215.00</span>
+</div>
+<div class="mb-space-sm flex items-start gap-space-sm">
+<span class="font-micro-badge text-micro-badge bg-primary-container text-on-primary-container px-1 py-0.5 rounded mt-0.5">[判断]</span>
+<p class="font-caption text-caption text-secondary">硬件销售平稳增长，服务收入维持10%增速。PE倍数维持在28x历史均值。</p>
+</div>
+</div>
+<!-- Bear Case -->
+<div class="bg-error-container/20 border border-error/30 rounded-lg p-space-md">
+<div class="flex justify-between items-center mb-space-sm">
+<span class="font-label-sm text-label-sm text-error">悲观情景 (Bear)</span>
+<span class="font-headline-h3 text-headline-h3">$170.00</span>
+</div>
+<div class="mb-space-sm flex items-start gap-space-sm">
+<span class="font-micro-badge text-micro-badge bg-primary-container text-on-primary-container px-1 py-0.5 rounded mt-0.5">[判断]</span>
+<p class="font-caption text-caption text-secondary">宏观经济衰退导致消费降级，硬件换机周期延长。反垄断监管影响服务收入。PE收缩至22x。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 竞争分析 -->
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden">
+<button class="w-full flex justify-between items-center p-space-md md:p-space-lg bg-surface hover:bg-surface-container-low transition-colors text-left" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary" data-icon="query_stats">query_stats</span>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">竞争分析 (Competitive Landscape)</h2>
+</div>
+<span class="material-symbols-outlined text-secondary transform transition-transform duration-300">expand_more</span>
+</button>
+<div class="accordion-content border-t border-border-default">
+<div class="p-space-md md:p-space-lg">
+<div class="mb-space-md flex items-start gap-space-sm">
+<span class="font-micro-badge text-micro-badge bg-surface-variant text-on-surface-variant px-2 py-1 rounded whitespace-nowrap mt-1">[事实]</span>
+<p class="font-body-md text-body-md">高端智能手机市场（$800+），苹果全球份额保持在75%以上，三星位居第二约16%。在生成式AI端侧落地方面，安卓阵营（如三星S24）先于苹果推出相关功能。</p>
+</div>
+<div class="mb-space-md flex items-start gap-space-sm">
+<span class="font-micro-badge text-micro-badge bg-primary-container text-on-primary-container px-2 py-1 rounded whitespace-nowrap mt-1">[判断]</span>
+<p class="font-body-md text-body-md">尽管在AI落地节奏上略显落后，但苹果凭借其深厚的软硬件整合能力和庞大的高粘性用户生态，有望在“后发制人”中确立AI终端体验标准。</p>
+</div>
+</div>
+</div>
+</div>
+<!-- 风险点 -->
+<div class="bg-surface border border-border-default rounded-xl overflow-hidden">
+<button class="w-full flex justify-between items-center p-space-md md:p-space-lg bg-surface hover:bg-surface-container-low transition-colors text-left" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-risk-warning" data-icon="warning">warning</span>
+<h2 class="font-headline-h3 text-headline-h3 text-on-surface">风险点 (Key Risks)</h2>
+</div>
+<span class="material-symbols-outlined text-secondary transform transition-transform duration-300">expand_more</span>
+</button>
+<div class="accordion-content border-t border-border-default">
+<div class="p-space-md md:p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-start gap-space-sm p-space-sm bg-surface-container-low rounded-lg">
+<span class="material-symbols-outlined text-risk-warning mt-1" data-icon="policy">policy</span>
+<div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-unit">监管与反垄断风险</h4>
+<div class="flex items-start gap-space-xs mt-1">
+<span class="font-micro-badge text-micro-badge bg-surface-variant text-on-surface-variant px-1 rounded">[事实]</span>
+<p class="font-caption text-caption text-secondary">欧盟DMA法案要求开放第三方应用商店及侧载功能，美国司法部亦在进行相关反垄断调查。</p>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-space-sm p-space-sm bg-surface-container-low rounded-lg">
+<span class="material-symbols-outlined text-risk-critical mt-1" data-icon="public">public</span>
+<div>
+<h4 class="font-label-sm text-label-sm text-on-surface mb-unit">地缘政治与供应链风险</h4>
+<div class="flex items-start gap-space-xs mt-1">
+<span class="font-micro-badge text-micro-badge bg-primary-container text-on-primary-container px-1 rounded">[判断]</span>
+<p class="font-caption text-caption text-secondary">供应链向印度、东南亚转移的过程中，可能面临短期产能爬坡和良率问题，影响新机备货。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-gutter-mobile pt-2 pb-safe bg-surface dark:bg-inverse-surface border-t border-border-default dark:border-outline bg-surface/90 backdrop-blur-md z-50 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-1">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm mt-1">持仓</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-sm text-label-sm mt-1">助手</span>
+</a>
+<!-- Active state for Research -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-xl px-3 py-1 scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="analytics">analytics</span>
+<span class="font-label-sm text-label-sm mt-1">研究</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+<span class="font-label-sm text-label-sm mt-1">设置</span>
+</a>
+</nav>
+<script>
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('.material-symbols-outlined:last-child');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                // Close others (optional, depending on desired UX)
+                // document.querySelectorAll('.accordion-content').forEach(el => {
+                //     el.classList.remove('open');
+                //     el.previousElementSibling.querySelector('.material-symbols-outlined:last-child').style.transform = 'rotate(0deg)';
+                // });
+                
+                content.classList.add('open');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Open the first accordion by default
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstButton = document.querySelector('button[onclick="toggleAccordion(this)"]');
+            if(firstButton) {
+                toggleAccordion(firstButton);
+            }
+        });
+    </script>
+</body></html>

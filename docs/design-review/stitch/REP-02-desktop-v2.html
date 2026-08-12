@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>After-Market Review Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#2c53d1",
+                    "primary-container": "#3157d5",
+                    "surface-container": "#e9edff",
+                    "error-container": "#ffdad6",
+                    "background": "#f9f9ff",
+                    "on-tertiary-fixed-variant": "#444749",
+                    "surface-variant": "#dbe2f9",
+                    "on-tertiary-container": "#dde0e1",
+                    "on-primary-fixed": "#001452",
+                    "on-primary": "#ffffff",
+                    "risk-warning": "#DC6803",
+                    "secondary-fixed": "#dee2ef",
+                    "tertiary": "#484b4d",
+                    "risk-critical": "#C11574",
+                    "secondary": "#5a5e69",
+                    "primary": "#063cbc",
+                    "outline": "#747685",
+                    "border-default": "#E4E7EC",
+                    "market-up": "#D92D20",
+                    "error": "#ba1a1a",
+                    "on-background": "#141b2c",
+                    "surface-dim": "#d2daf0",
+                    "on-secondary-container": "#60646f",
+                    "secondary-fixed-dim": "#c2c6d3",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#141b2c",
+                    "surface-container-high": "#e0e8ff",
+                    "primary-fixed": "#dde1ff",
+                    "surface": "#FFFFFF",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#e0e3e5",
+                    "canvas": "#F5F7FA",
+                    "on-primary-fixed-variant": "#0038b6",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#b7c4ff",
+                    "on-surface-variant": "#444654",
+                    "on-tertiary-fixed": "#191c1e",
+                    "on-secondary-fixed-variant": "#424751",
+                    "secondary-container": "#dee2ef",
+                    "outline-variant": "#c4c5d6",
+                    "surface-container-low": "#f1f3ff",
+                    "market-down": "#079455",
+                    "on-secondary-fixed": "#171c25",
+                    "tertiary-container": "#606365",
+                    "tertiary-fixed-dim": "#c4c7c9",
+                    "inverse-surface": "#293041",
+                    "inverse-on-surface": "#edf0ff",
+                    "on-primary-container": "#d8ddff",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#dbe2f9",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#f9f9ff",
+                    "primary-fixed-dim": "#b7c4ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "space-sm": "8px",
+                    "space-xl": "24px",
+                    "space-xs": "4px",
+                    "unit": "4px",
+                    "space-md": "12px",
+                    "space-lg": "16px",
+                    "margin-mobile": "16px",
+                    "space-2xl": "32px",
+                    "gutter-mobile": "12px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-h1": ["Inter"],
+                    "headline-h3": ["Inter"],
+                    "display-lg-mobile": ["Inter"],
+                    "micro-badge": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-h2": ["Inter"],
+                    "caption": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                    "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                    "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                    "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { background-color: theme('colors.canvas'); color: theme('colors.on-surface'); }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-low h-full w-[224px] fixed left-0 top-0 border-r border-border-default flex flex-col py-space-xl z-20">
+<div class="px-space-xl mb-space-2xl">
+<h1 class="font-headline-h3 text-headline-h3 text-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-on-surface-variant">Terminal v2.4</p>
+</div>
+<div class="flex-1 overflow-y-auto space-y-space-xs px-space-md">
+<!-- Navigation Items -->
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">持仓</span>
+</a>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-sm text-label-sm">助手</span>
+</a>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-sm text-label-sm">研究</span>
+</a>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-secondary-fixed-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-sm text-label-sm">设置</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="bg-surface h-[64px] fixed top-0 right-0 left-[224px] z-10 border-b border-border-default">
+<div class="flex justify-between items-center px-space-xl max-w-[1200px] mx-auto w-full h-full">
+<div class="hidden font-headline-h3 text-headline-h3 text-primary tracking-tight">WWS Adviser</div>
+<!-- Contextual Breadcrumb/Header instead of Brand in top nav since side nav has it -->
+<div class="font-headline-h3 text-headline-h3 text-on-surface flex items-center gap-space-sm">
+<span class="text-on-surface-variant font-normal">研究</span>
+<span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+<span>After-Market Review (REP-02)</span>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="p-space-sm text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-[32px] h-[32px] rounded-full overflow-hidden border border-border-default">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A professional corporate headshot of a financial advisor. Soft, even studio lighting. The subject is wearing a dark navy suit against a clean, minimal white background. The mood is trustworthy and authoritative." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_JloyDRw7hkudd8PHpnix-adN3tUfWicuonT4-C3HIeRzobQD_eTnu_NWa027zBpH_G4Gp7pNyRh0LnByrP54JwQH1inpQCplLGQ8Zp9iWcPk9XkTOm2fdSkxlHAYJ8vjvd7pt3__OCVI5OvgUKZ4sdVAA9IIS6Z2mVxEousgA4w2-ITusDkhLJYtYn_B5EWcX_dJfRpUT8Bs74DhN2oXiUQLW-xc9jYK93Aa03iWOIvSvxIT7Nf-RA"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[224px] mt-[64px] p-space-2xl w-full max-w-[1200px] mx-auto">
+<!-- Report Header -->
+<div class="mb-space-xl pb-space-lg border-b border-border-default flex justify-between items-end">
+<div>
+<h2 class="font-headline-h1 text-headline-h1 mb-space-sm">Daily Performance Review</h2>
+<div class="flex gap-space-lg font-caption text-caption text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">calendar_today</span>
+<span>Business Date: Oct 24, 2023</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Cutoff: 16:30 EST</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Source: WWS Primary Ledger</span>
+</div>
+</div>
+</div>
+<button class="bg-primary text-on-primary font-label-sm text-label-sm px-space-lg py-space-sm rounded-lg flex items-center gap-space-xs hover:bg-on-primary-fixed-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                Export PDF
+            </button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-space-lg">
+<!-- P/L Summary (Col 1-4) -->
+<div class="col-span-4 bg-surface border border-border-default rounded-xl p-space-lg">
+<div class="flex justify-between items-center mb-space-md">
+<h3 class="font-headline-h3 text-headline-h3">P/L Summary</h3>
+<span class="bg-surface-container-low text-on-surface font-micro-badge text-micro-badge px-2 py-1 rounded">Net Total</span>
+</div>
+<div class="mb-space-xl">
+<div class="font-caption text-caption text-on-surface-variant mb-space-xs">Today's Realized</div>
+<div class="flex items-end gap-space-sm">
+<span class="font-display-lg text-display-lg text-market-up">+$42,850</span>
+<span class="font-caption text-caption text-on-surface-variant pb-1">USD</span>
+</div>
+<div class="font-caption text-caption text-market-up mt-space-xs flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        +1.24% vs Prev Day
+                    </div>
+</div>
+<div class="space-y-space-md">
+<div class="flex justify-between items-center border-t border-border-default pt-space-sm">
+<span class="font-body-md text-body-md text-on-surface-variant">Equities</span>
+<span class="font-label-sm text-label-sm text-market-up">+$31,200</span>
+</div>
+<div class="flex justify-between items-center border-t border-border-default pt-space-sm">
+<span class="font-body-md text-body-md text-on-surface-variant">Fixed Income</span>
+<span class="font-label-sm text-label-sm text-market-down">-$2,150</span>
+</div>
+<div class="flex justify-between items-center border-t border-border-default pt-space-sm">
+<span class="font-body-md text-body-md text-on-surface-variant">Derivatives</span>
+<span class="font-label-sm text-label-sm text-market-up">+$13,800</span>
+</div>
+</div>
+</div>
+<!-- Execution Summary (Col 5-12) -->
+<div class="col-span-8 bg-surface border border-border-default rounded-xl p-space-lg flex flex-col">
+<div class="flex justify-between items-center mb-space-md">
+<h3 class="font-headline-h3 text-headline-h3">Execution Summary</h3>
+<span class="bg-surface-container-low text-on-surface font-micro-badge text-micro-badge px-2 py-1 rounded">VWAP Performance</span>
+</div>
+<div class="grid grid-cols-3 gap-space-md mb-space-lg">
+<div class="bg-canvas p-space-md rounded-lg border border-border-default">
+<div class="font-caption text-caption text-on-surface-variant mb-unit">Total Value Traded</div>
+<div class="font-headline-h2 text-headline-h2">$12.4M</div>
+</div>
+<div class="bg-canvas p-space-md rounded-lg border border-border-default">
+<div class="font-caption text-caption text-on-surface-variant mb-unit">Slippage vs Arrival</div>
+<div class="font-headline-h2 text-headline-h2 text-market-up">+2.4 bps</div>
+</div>
+<div class="bg-canvas p-space-md rounded-lg border border-border-default">
+<div class="font-caption text-caption text-on-surface-variant mb-unit">Fill Rate</div>
+<div class="font-headline-h2 text-headline-h2">98.2%</div>
+</div>
+</div>
+<div class="flex-1 relative bg-canvas border border-border-default rounded-lg overflow-hidden flex items-center justify-center min-h-[150px]">
+<span class="text-on-surface-variant font-body-md text-body-md">[ Chart: Intra-day Execution vs VWAP Trajectory ]</span>
+</div>
+</div>
+<!-- Top/Bottom Contributors (Col 1-6) -->
+<div class="col-span-6 bg-surface border border-border-default rounded-xl p-space-lg">
+<h3 class="font-headline-h3 text-headline-h3 mb-space-md">Key Contributors</h3>
+<div class="space-y-space-lg">
+<!-- Top -->
+<div>
+<div class="font-caption text-caption text-on-surface-variant mb-space-sm uppercase tracking-wider">Top Drivers</div>
+<div class="space-y-space-sm">
+<div class="flex items-center justify-between bg-surface-container-low p-space-sm rounded border border-border-default">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-label-sm text-label-sm">AAPL</div>
+<span class="font-body-md text-body-md">Technology</span>
+</div>
+<div class="text-right">
+<div class="font-label-sm text-label-sm text-market-up">+$18,400</div>
+<div class="font-caption text-caption text-on-surface-variant">+2.1%</div>
+</div>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low p-space-sm rounded border border-border-default">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-label-sm text-label-sm">NVDA</div>
+<span class="font-body-md text-body-md">Semiconductors</span>
+</div>
+<div class="text-right">
+<div class="font-label-sm text-label-sm text-market-up">+$12,150</div>
+<div class="font-caption text-caption text-on-surface-variant">+3.4%</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom -->
+<div>
+<div class="font-caption text-caption text-on-surface-variant mb-space-sm uppercase tracking-wider">Major Detractors</div>
+<div class="space-y-space-sm">
+<div class="flex items-center justify-between bg-error-container/30 p-space-sm rounded border border-error-container">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-surface-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm">JPM</div>
+<span class="font-body-md text-body-md">Financials</span>
+</div>
+<div class="text-right">
+<div class="font-label-sm text-label-sm text-market-down">-$5,200</div>
+<div class="font-caption text-caption text-on-surface-variant">-0.8%</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Advice vs Actual (Col 7-12) -->
+<div class="col-span-6 bg-surface border border-border-default rounded-xl p-space-lg">
+<div class="flex justify-between items-center mb-space-md">
+<h3 class="font-headline-h3 text-headline-h3">Advice vs Execution</h3>
+<span class="bg-surface-container-low text-primary font-micro-badge text-micro-badge px-2 py-1 rounded border border-primary-fixed">Deviation Analysis</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-border-default text-on-surface-variant font-caption text-caption">
+<th class="pb-space-sm font-normal">Asset</th>
+<th class="pb-space-sm font-normal text-right">Advised Wgt</th>
+<th class="pb-space-sm font-normal text-right">Actual Wgt</th>
+<th class="pb-space-sm font-normal text-right">Delta</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<tr class="border-b border-border-default/50">
+<td class="py-space-sm font-label-sm text-label-sm">US Large Cap</td>
+<td class="py-space-sm text-right">45.0%</td>
+<td class="py-space-sm text-right">46.2%</td>
+<td class="py-space-sm text-right text-market-up">+1.2%</td>
+</tr>
+<tr class="border-b border-border-default/50">
+<td class="py-space-sm font-label-sm text-label-sm">Emg Markets</td>
+<td class="py-space-sm text-right">12.0%</td>
+<td class="py-space-sm text-right">10.5%</td>
+<td class="py-space-sm text-right text-market-down">-1.5%</td>
+</tr>
+<tr class="border-b border-border-default/50">
+<td class="py-space-sm font-label-sm text-label-sm">US Treasuries</td>
+<td class="py-space-sm text-right">30.0%</td>
+<td class="py-space-sm text-right">30.1%</td>
+<td class="py-space-sm text-right text-on-surface-variant">+0.1%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-space-md p-space-md bg-canvas rounded border border-border-default flex gap-space-sm items-start">
+<span class="material-symbols-outlined text-primary text-[20px]">info</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Slight overweight in US Large Cap resulted from partial execution failure in planned EM divestment due to liquidity constraints at 15:00 EST.
+                    </p>
+</div>
+</div>
+<!-- Risk Changes & Behavioral Feedback (Col 1-12 span) -->
+<div class="col-span-12 grid grid-cols-2 gap-space-lg">
+<!-- Risk -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<h3 class="font-headline-h3 text-headline-h3 mb-space-md flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-risk-warning">warning</span>
+                        Risk Profile Shifts
+                    </h3>
+<div class="space-y-space-md">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md">Portfolio VaR (95%)</span>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">1.2%</span>
+<span class="material-symbols-outlined text-outline text-[16px]">arrow_right_alt</span>
+<span class="font-label-sm text-label-sm text-risk-warning">1.4%</span>
+</div>
+</div>
+<div class="flex justify-between items-center border-t border-border-default pt-space-md">
+<span class="font-body-md text-body-md">Beta vs S&amp;P 500</span>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">1.05</span>
+<span class="material-symbols-outlined text-outline text-[16px]">arrow_right_alt</span>
+<span class="font-label-sm text-label-sm">1.08</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Behavioral Feedback -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<h3 class="font-headline-h3 text-headline-h3 mb-space-md flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary">psychology</span>
+                        Behavioral Alpha
+                    </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+                        Algorithm detected a pattern of overriding system stop-losses in tech sector positions. 
+                    </p>
+<div class="bg-surface-container-low p-space-sm rounded border border-primary/20">
+<div class="font-label-sm text-label-sm text-primary mb-unit">System Recommendation</div>
+<div class="font-body-md text-body-md">
+                            Adhere strictly to pre-set volatility bands tomorrow, particularly around AAPL earnings release.
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

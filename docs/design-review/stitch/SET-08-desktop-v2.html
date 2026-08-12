@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Status - WWS Adviser</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#2c53d1",
+                      "primary-container": "#3157d5",
+                      "surface-container": "#e9edff",
+                      "error-container": "#ffdad6",
+                      "background": "#f9f9ff",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "surface-variant": "#dbe2f9",
+                      "on-tertiary-container": "#dde0e1",
+                      "on-primary-fixed": "#001452",
+                      "on-primary": "#ffffff",
+                      "risk-warning": "#DC6803",
+                      "secondary-fixed": "#dee2ef",
+                      "tertiary": "#484b4d",
+                      "risk-critical": "#C11574",
+                      "secondary": "#5a5e69",
+                      "primary": "#063cbc",
+                      "outline": "#747685",
+                      "border-default": "#E4E7EC",
+                      "market-up": "#D92D20",
+                      "error": "#ba1a1a",
+                      "on-background": "#141b2c",
+                      "surface-dim": "#d2daf0",
+                      "on-secondary-container": "#60646f",
+                      "secondary-fixed-dim": "#c2c6d3",
+                      "on-secondary": "#ffffff",
+                      "on-surface": "#141b2c",
+                      "surface-container-high": "#e0e8ff",
+                      "primary-fixed": "#dde1ff",
+                      "surface": "#FFFFFF",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#e0e3e5",
+                      "canvas": "#F5F7FA",
+                      "on-primary-fixed-variant": "#0038b6",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#b7c4ff",
+                      "on-surface-variant": "#444654",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-secondary-fixed-variant": "#424751",
+                      "secondary-container": "#dee2ef",
+                      "outline-variant": "#c4c5d6",
+                      "surface-container-low": "#f1f3ff",
+                      "market-down": "#079455",
+                      "on-secondary-fixed": "#171c25",
+                      "tertiary-container": "#606365",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "inverse-surface": "#293041",
+                      "inverse-on-surface": "#edf0ff",
+                      "on-primary-container": "#d8ddff",
+                      "on-error": "#ffffff",
+                      "surface-container-highest": "#dbe2f9",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#f9f9ff",
+                      "primary-fixed-dim": "#b7c4ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "space-sm": "8px",
+                      "space-xl": "24px",
+                      "space-xs": "4px",
+                      "unit": "4px",
+                      "space-md": "12px",
+                      "space-lg": "16px",
+                      "margin-mobile": "16px",
+                      "space-2xl": "32px",
+                      "gutter-mobile": "12px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-h1": ["Inter"],
+                      "headline-h3": ["Inter"],
+                      "display-lg-mobile": ["Inter"],
+                      "micro-badge": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-h2": ["Inter"],
+                      "caption": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "1.55", "fontWeight": "400"}],
+                      "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "headline-h1": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                      "headline-h3": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "display-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "micro-badge": ["11px", {"lineHeight": "1.35", "fontWeight": "500"}],
+                      "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-h2": ["20px", {"lineHeight": "1.35", "fontWeight": "600"}],
+                      "caption": ["12px", {"lineHeight": "1.45", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface h-screen w-screen overflow-hidden flex font-body-md text-body-md">
+<!-- SideNavBar -->
+<nav class="h-full w-[224px] fixed left-0 top-0 border-r border-border-default dark:border-outline-variant bg-surface-container-low dark:bg-surface-dim flex flex-col py-space-xl z-20">
+<div class="px-space-xl mb-space-2xl">
+<h1 class="font-headline-h3 text-headline-h3 text-primary dark:text-inverse-primary tracking-tight">WWS Adviser</h1>
+<p class="font-caption text-caption text-on-surface-variant mt-space-xs">Terminal v2.4</p>
+</div>
+<ul class="flex-1 flex flex-col gap-space-xs">
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+                    首页
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+                    持仓
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">smart_toy</span>
+                    助手
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:text-on-surface hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors font-label-sm text-label-sm font-semibold opacity-80 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+                    研究
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-space-md px-space-xl py-space-md text-primary dark:text-inverse-primary font-bold border-r-2 border-primary dark:border-inverse-primary font-label-sm text-label-sm opacity-80 duration-150 bg-surface-container" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+                    设置
+                </a>
+</li>
+</ul>
+</nav>
+<!-- TopNavBar -->
+<header class="h-[64px] fixed top-0 right-0 left-[224px] z-10 border-b border-border-default dark:border-outline-variant bg-surface dark:bg-inverse-surface flex justify-between items-center px-space-xl">
+<div class="flex-1 max-w-md">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="w-full pl-10 pr-space-md py-2 border border-border-default rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-body-md text-on-surface bg-surface-bright" placeholder="Search resources..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-space-lg">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low transition-all rounded-full scale-95 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-label-sm overflow-hidden">
+<img alt="User Avatar" class="object-cover w-full h-full" data-alt="A professional corporate headshot of a financial adviser against a clean, bright minimalist background. The lighting is soft and studio-quality, emphasizing a modern, trustworthy appearance suitable for a high-end banking terminal avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA69nHURJlWx4HiM0ZkK_XMm1GZykoI7AVnwRg9FgadUIVpRcUbPsyE7g1SIZJAzH7pOP_H4tf8SDAETEoqoEIDNQ01DHE_qyKDlY45d6uYWYA260wk707tPq9u0tLwJQ_vZG60Q8RNdhoOAQw2MNNKao6JO-AhtH9LC91PB9aRIwF63U1a_2m7xTJWy1HxmxlaI7ZVl3gME4JDA4obLTD-N6mS5JpBtHoFf2KkTx1pcgKGSJeZSwIXQg"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[224px] mt-[64px] p-space-2xl w-full overflow-y-auto bg-canvas">
+<div class="max-w-[1440px] mx-auto flex flex-col gap-space-2xl">
+<!-- Header Section -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline-h1 text-headline-h1 text-on-surface">System Status</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-space-sm">Diagnostic Overview &amp; System Topology</p>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-caption text-caption text-on-surface-variant">Diagnostic ID: DIA-8924-XX</span>
+<button class="bg-primary text-on-primary px-space-lg py-2 rounded-lg font-label-sm text-label-sm hover:bg-on-primary-fixed-variant transition-colors flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Export Logs
+                    </button>
+</div>
+</div>
+<!-- Diagnostics Metrics Bento Grid -->
+<div class="grid grid-cols-3 gap-space-lg">
+<!-- Uptime -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col justify-between min-h-[140px] relative overflow-hidden group hover:border-primary transition-colors">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[16px] text-market-down">check_circle</span>
+                            Global Uptime
+                        </span>
+<span class="px-2 py-1 bg-market-down/10 text-market-down rounded font-micro-badge text-micro-badge">Operational</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">99.99<span class="font-caption text-caption text-on-surface-variant ml-1">%</span></div>
+<div class="font-caption text-caption text-on-surface-variant mt-1">Trailing 30 days</div>
+</div>
+</div>
+<!-- Latency -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col justify-between min-h-[140px] relative overflow-hidden group hover:border-primary transition-colors">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">speed</span>
+                            Avg Latency
+                        </span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">42<span class="font-caption text-caption text-on-surface-variant ml-1">ms</span></div>
+<div class="font-caption text-caption text-on-surface-variant mt-1">p95 API Response Time</div>
+</div>
+</div>
+<!-- Error Rate -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col justify-between min-h-[140px] relative overflow-hidden group hover:border-primary transition-colors">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[16px] text-risk-warning">warning</span>
+                            Error Rate
+                        </span>
+<span class="px-2 py-1 bg-risk-warning/10 text-risk-warning rounded font-micro-badge text-micro-badge">Monitor</span>
+</div>
+<div>
+<div class="font-display-lg text-display-lg text-on-surface">0.04<span class="font-caption text-caption text-on-surface-variant ml-1">%</span></div>
+<div class="font-caption text-caption text-on-surface-variant mt-1">Across all primary endpoints</div>
+</div>
+</div>
+</div>
+<!-- Subsystem Topology & Logs Layout -->
+<div class="grid grid-cols-12 gap-space-lg h-[600px]">
+<!-- Subsystem Topology Table -->
+<div class="col-span-8 bg-surface border border-border-default rounded-xl flex flex-col overflow-hidden">
+<div class="p-space-lg border-b border-border-default bg-surface-container-lowest flex justify-between items-center">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">Subsystem Topology</h3>
+<div class="flex gap-space-sm">
+<span class="px-2 py-1 bg-surface-container text-on-surface-variant rounded font-micro-badge text-micro-badge border border-border-default">Prod Env</span>
+<span class="px-2 py-1 bg-surface-container text-on-surface-variant rounded font-micro-badge text-micro-badge border border-border-default">US-East</span>
+</div>
+</div>
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-canvas border-b border-border-default sticky top-0">
+<tr>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant font-medium">Service</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant font-medium">Status</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant font-medium text-right">Latency</th>
+<th class="p-space-md font-label-sm text-label-sm text-on-surface-variant font-medium text-right">Throughput</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-default">
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-2 h-2 rounded-full bg-market-down"></div>
+<span class="font-body-md text-body-md text-on-surface font-medium">Market Data Feed</span>
+</div>
+</td>
+<td class="p-space-md"><span class="px-2 py-1 bg-market-down/10 text-market-down rounded font-micro-badge text-micro-badge">Healthy</span></td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">12<span class="font-caption text-caption text-on-surface-variant ml-1">ms</span></td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">14.2k<span class="font-caption text-caption text-on-surface-variant ml-1">req/s</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-2 h-2 rounded-full bg-risk-warning"></div>
+<span class="font-body-md text-body-md text-on-surface font-medium">Risk Engine</span>
+</div>
+</td>
+<td class="p-space-md"><span class="px-2 py-1 bg-risk-warning/10 text-risk-warning rounded font-micro-badge text-micro-badge">Degraded</span></td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">145<span class="font-caption text-caption text-on-surface-variant ml-1">ms</span></td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">3.8k<span class="font-caption text-caption text-on-surface-variant ml-1">req/s</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-2 h-2 rounded-full bg-market-down"></div>
+<span class="font-body-md text-body-md text-on-surface font-medium">Order Routing</span>
+</div>
+</td>
+<td class="p-space-md"><span class="px-2 py-1 bg-market-down/10 text-market-down rounded font-micro-badge text-micro-badge">Healthy</span></td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">24<span class="font-caption text-caption text-on-surface-variant ml-1">ms</span></td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">1.1k<span class="font-caption text-caption text-on-surface-variant ml-1">req/s</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-2 h-2 rounded-full bg-market-down"></div>
+<span class="font-body-md text-body-md text-on-surface font-medium">Auth Service</span>
+</div>
+</td>
+<td class="p-space-md"><span class="px-2 py-1 bg-market-down/10 text-market-down rounded font-micro-badge text-micro-badge">Healthy</span></td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">8<span class="font-caption text-caption text-on-surface-variant ml-1">ms</span></td>
+<td class="p-space-md font-body-md text-body-md text-on-surface text-right">800<span class="font-caption text-caption text-on-surface-variant ml-1">req/s</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- System Logs Glassmorphism Panel -->
+<div class="col-span-4 bg-inverse-surface border border-outline-variant rounded-xl flex flex-col overflow-hidden shadow-lg relative">
+<!-- Subtle background noise/texture effect for terminal feel -->
+<div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+<div class="p-space-md border-b border-outline/30 flex justify-between items-center bg-inverse-surface/80 backdrop-blur-sm z-10">
+<h3 class="font-label-sm text-label-sm text-inverse-primary flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+                            Live System Logs
+                        </h3>
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-error"></div>
+<div class="w-3 h-3 rounded-full bg-risk-warning"></div>
+<div class="w-3 h-3 rounded-full bg-market-down"></div>
+</div>
+</div>
+<div class="flex-1 p-space-md overflow-y-auto font-mono text-[11px] leading-relaxed text-secondary-fixed-dim bg-[#1a1f2e] z-0 flex flex-col gap-1">
+<div class="text-outline">[14:32:01.002] INFO: System health check initiated.</div>
+<div>[14:32:01.045] <span class="text-market-down">SUCCESS:</span> Market Data Feed connected to upstream provider.</div>
+<div>[14:32:02.110] INFO: Routing rules updated (v.421).</div>
+<div class="text-risk-warning">[14:32:05.442] WARN: Risk Engine latency spike detected (&gt;100ms). Triggering auto-scale event.</div>
+<div>[14:32:05.801] INFO: Provisioning additional node (node-rs-east-04).</div>
+<div>[14:32:08.220] <span class="text-market-down">SUCCESS:</span> Node provisioned. Load balancing active.</div>
+<div class="text-error">[14:32:15.001] ERROR: Auth token validation failed for user_id: 8942. Invalid signature.</div>
+<div>[14:32:15.012] INFO: Request denied. Returning 401 Unauthorized.</div>
+<div class="text-outline">[14:32:30.000] INFO: Heartbeat synced. All core services reporting.</div>
+<!-- Blinking cursor effect -->
+<div class="mt-2 text-inverse-primary animate-pulse">_</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

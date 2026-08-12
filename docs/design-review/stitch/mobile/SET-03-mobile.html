@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Model &amp; Task Routing Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#c2c6d3",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#424751",
+                        "surface-container": "#e9edff",
+                        "outline-variant": "#c4c5d6",
+                        "on-tertiary-fixed": "#191c1e",
+                        "market-down": "#079455",
+                        "secondary-fixed": "#dee2ef",
+                        "tertiary": "#484b4d",
+                        "risk-critical": "#C11574",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dbe2f9",
+                        "inverse-surface": "#293041",
+                        "surface": "#FFFFFF",
+                        "tertiary-fixed": "#e0e3e5",
+                        "secondary": "#5a5e69",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "risk-warning": "#DC6803",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e0e8ff",
+                        "on-primary-fixed": "#001452",
+                        "on-surface": "#141b2c",
+                        "secondary-container": "#dee2ef",
+                        "primary-container": "#3157d5",
+                        "surface-tint": "#2c53d1",
+                        "on-tertiary-container": "#dde0e1",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#60646f",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "border-default": "#E4E7EC",
+                        "on-secondary-fixed": "#171c25",
+                        "market-up": "#D92D20",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "inverse-primary": "#b7c4ff",
+                        "tertiary-container": "#606365",
+                        "primary-fixed": "#dde1ff",
+                        "canvas": "#F5F7FA",
+                        "inverse-on-surface": "#edf0ff",
+                        "background": "#f9f9ff",
+                        "primary": "#063cbc",
+                        "outline": "#747685",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#dbe2f9",
+                        "surface-bright": "#f9f9ff",
+                        "on-background": "#141b2c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d2daf0",
+                        "on-primary-container": "#d8ddff",
+                        "on-surface-variant": "#444654"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-2xl": "32px",
+                        "space-xl": "24px",
+                        "space-lg": "16px",
+                        "space-md": "12px",
+                        "margin-mobile": "16px",
+                        "gutter-mobile": "12px",
+                        "space-sm": "8px",
+                        "unit": "4px",
+                        "space-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "headline-h1": ["Inter"],
+                        "micro-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-h2": ["20px", { "lineHeight": "1.35", "fontWeight": "600" }],
+                        "headline-h1": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "micro-badge": ["11px", { "lineHeight": "1.35", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "1.55", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-h3": ["17px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.45", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface font-body-md min-h-screen pb-[80px] md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-border-default dark:border-outline flex justify-between items-center w-full px-margin-mobile h-16 docked full-width top-0 sticky z-40 transition-colors duration-200 ease-in-out">
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full transition-colors duration-200 ease-in-out flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_circle</span>
+</button>
+<h1 class="font-headline-h1 text-headline-h1 font-bold text-primary dark:text-primary-fixed-dim">WWS Adviser</h1>
+</div>
+<button class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant p-2 rounded-full transition-colors duration-200 ease-in-out flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">refresh</span>
+</button>
+</header>
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-space-2xl py-space-xl grid grid-cols-4 md:grid-cols-12 gap-gutter-mobile md:gap-space-xl">
+<!-- Header Section -->
+<div class="col-span-4 md:col-span-12 mb-space-lg flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div>
+<h2 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">Model &amp; Task Routing</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">Configuration and metrics for LLM routing across advisory tasks. (SET-03)</p>
+</div>
+<div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-sm rounded-lg border border-border-default">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">policy</span>
+<span class="font-label-sm text-label-sm text-primary">Compliance: Spec 10.23 Active</span>
+</div>
+</div>
+<!-- Token Usage & Costs Bento Box -->
+<div class="col-span-4 md:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-gutter-mobile md:gap-space-lg mb-space-xl">
+<!-- Cost Estimate -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col justify-between">
+<div class="flex justify-between items-start mb-space-md">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Est. Daily Cost</span>
+<span class="material-symbols-outlined text-secondary text-xl">payments</span>
+</div>
+<div>
+<div class="font-headline-h1 text-headline-h1 text-on-surface">$142.50</div>
+<div class="flex items-center gap-space-xs mt-space-xs text-market-up">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="font-caption text-caption">+12% vs avg</span>
+</div>
+</div>
+</div>
+<!-- Token Usage -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col justify-between">
+<div class="flex justify-between items-start mb-space-md">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Tokens (Today)</span>
+<span class="material-symbols-outlined text-secondary text-xl">data_usage</span>
+</div>
+<div>
+<div class="font-headline-h1 text-headline-h1 text-on-surface">2.4M</div>
+<div class="flex items-center gap-space-xs mt-space-xs text-on-surface-variant">
+<span class="font-caption text-caption">1.8M Prompt / 600K Completion</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container h-2 rounded-full mt-space-md overflow-hidden flex">
+<div class="bg-primary w-[75%] h-full rounded-r-full"></div>
+<div class="bg-tertiary-fixed w-[25%] h-full"></div>
+</div>
+</div>
+<!-- Active Models Status -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg flex flex-col justify-between">
+<div class="flex justify-between items-start mb-space-md">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">System Health</span>
+<span class="material-symbols-outlined text-market-down text-xl">check_circle</span>
+</div>
+<div class="space-y-space-md">
+<div class="flex justify-between items-center border-b border-border-default pb-space-xs">
+<span class="font-body-md text-body-md text-on-surface">OpenAI API</span>
+<span class="bg-surface-container-low text-market-down font-micro-badge text-micro-badge px-2 py-1 rounded-full border border-border-default">Operational</span>
+</div>
+<div class="flex justify-between items-center border-b border-border-default pb-space-xs">
+<span class="font-body-md text-body-md text-on-surface">Anthropic API</span>
+<span class="bg-surface-container-low text-market-down font-micro-badge text-micro-badge px-2 py-1 rounded-full border border-border-default">Operational</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface">Local Llama 3</span>
+<span class="bg-surface-container-low text-risk-warning font-micro-badge text-micro-badge px-2 py-1 rounded-full border border-border-default">High Latency</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Configuration Area -->
+<div class="col-span-4 md:col-span-8 flex flex-col gap-space-xl">
+<!-- LLM Provider Configuration -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<div class="flex items-center gap-space-sm border-b border-border-default pb-space-md mb-space-md">
+<span class="material-symbols-outlined text-primary text-2xl">dns</span>
+<h3 class="font-headline-h2 text-headline-h2 text-on-surface">Model Providers</h3>
+</div>
+<div class="space-y-space-lg">
+<!-- Provider 1 -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-canvas p-space-md rounded-lg border border-border-default">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 bg-surface rounded-full flex items-center justify-center border border-border-default shadow-sm">
+<span class="material-symbols-outlined text-on-surface">memory</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface">OpenAI</div>
+<div class="font-caption text-caption text-on-surface-variant">gpt-4-turbo, gpt-3.5-turbo</div>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs bg-surface border border-border-default px-space-sm py-space-xs rounded-md">
+<span class="material-symbols-outlined text-market-down text-sm">key</span>
+<span class="font-caption text-caption text-on-surface">Valid Key</span>
+</div>
+<button class="bg-surface border border-border-default text-on-surface font-label-sm text-label-sm px-4 py-2 rounded-lg hover:bg-surface-container-low transition-colors">Edit</button>
+</div>
+</div>
+<!-- Provider 2 -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-canvas p-space-md rounded-lg border border-border-default">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 bg-surface rounded-full flex items-center justify-center border border-border-default shadow-sm">
+<span class="material-symbols-outlined text-on-surface">smart_toy</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface">Anthropic</div>
+<div class="font-caption text-caption text-on-surface-variant">claude-3-opus, claude-3-sonnet</div>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs bg-surface border border-border-default px-space-sm py-space-xs rounded-md">
+<span class="material-symbols-outlined text-market-down text-sm">key</span>
+<span class="font-caption text-caption text-on-surface">Valid Key</span>
+</div>
+<button class="bg-surface border border-border-default text-on-surface font-label-sm text-label-sm px-4 py-2 rounded-lg hover:bg-surface-container-low transition-colors">Edit</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task Routing Configuration -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<div class="flex items-center gap-space-sm border-b border-border-default pb-space-md mb-space-md">
+<span class="material-symbols-outlined text-primary text-2xl">route</span>
+<h3 class="font-headline-h2 text-headline-h2 text-on-surface">Task Routing Maps</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-border-default">
+<th class="py-space-md px-space-sm font-label-sm text-label-sm text-on-surface-variant font-medium">Task / Context</th>
+<th class="py-space-md px-space-sm font-label-sm text-label-sm text-on-surface-variant font-medium">Primary Model</th>
+<th class="py-space-md px-space-sm font-label-sm text-label-sm text-on-surface-variant font-medium">Fallback</th>
+<th class="py-space-md px-space-sm font-label-sm text-label-sm text-on-surface-variant font-medium">Temp</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<tr class="border-b border-border-default hover:bg-canvas transition-colors">
+<td class="py-space-md px-space-sm">
+<div class="font-medium text-on-surface">Pre-market Briefing</div>
+<div class="font-caption text-caption text-on-surface-variant">Summarization &amp; Data Extraction</div>
+</td>
+<td class="py-space-md px-space-sm">
+<select class="w-full bg-surface border border-border-default rounded-md px-2 py-1 text-on-surface text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+<option selected="">claude-3-opus</option>
+<option>gpt-4-turbo</option>
+<option>claude-3-sonnet</option>
+</select>
+</td>
+<td class="py-space-md px-space-sm">
+<select class="w-full bg-surface border border-border-default rounded-md px-2 py-1 text-on-surface text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+<option>claude-3-opus</option>
+<option selected="">gpt-4-turbo</option>
+<option>claude-3-sonnet</option>
+</select>
+</td>
+<td class="py-space-md px-space-sm text-on-surface">0.2</td>
+</tr>
+<tr class="border-b border-border-default hover:bg-canvas transition-colors">
+<td class="py-space-md px-space-sm">
+<div class="font-medium text-on-surface">Investment Proposals</div>
+<div class="font-caption text-caption text-on-surface-variant">Reasoning &amp; Formatting</div>
+</td>
+<td class="py-space-md px-space-sm">
+<select class="w-full bg-surface border border-border-default rounded-md px-2 py-1 text-on-surface text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+<option>claude-3-opus</option>
+<option selected="">gpt-4-turbo</option>
+<option>claude-3-sonnet</option>
+</select>
+</td>
+<td class="py-space-md px-space-sm">
+<select class="w-full bg-surface border border-border-default rounded-md px-2 py-1 text-on-surface text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+<option selected="">claude-3-opus</option>
+<option>gpt-4-turbo</option>
+<option>claude-3-sonnet</option>
+</select>
+</td>
+<td class="py-space-md px-space-sm text-on-surface">0.4</td>
+</tr>
+<tr class="hover:bg-canvas transition-colors">
+<td class="py-space-md px-space-sm">
+<div class="font-medium text-on-surface">Client Chat (General)</div>
+<div class="font-caption text-caption text-on-surface-variant">Low latency Q&amp;A</div>
+</td>
+<td class="py-space-md px-space-sm">
+<select class="w-full bg-surface border border-border-default rounded-md px-2 py-1 text-on-surface text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+<option>claude-3-opus</option>
+<option>gpt-4-turbo</option>
+<option selected="">gpt-3.5-turbo</option>
+</select>
+</td>
+<td class="py-space-md px-space-sm">
+<select class="w-full bg-surface border border-border-default rounded-md px-2 py-1 text-on-surface text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+<option>claude-3-opus</option>
+<option>gpt-4-turbo</option>
+<option selected="">claude-3-sonnet</option>
+</select>
+</td>
+<td class="py-space-md px-space-sm text-on-surface">0.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-space-lg flex justify-end">
+<button class="bg-primary text-on-primary font-label-sm text-label-sm px-6 py-2 rounded-lg hover:bg-primary-fixed-variant transition-colors shadow-sm">Save Routing Matrix</button>
+</div>
+</div>
+</div>
+<!-- Sidebar / Secondary Metrics -->
+<div class="col-span-4 md:col-span-4 flex flex-col gap-space-lg">
+<!-- Real-time Metrics Card -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<div class="flex items-center gap-space-sm mb-space-md">
+<span class="material-symbols-outlined text-on-surface-variant">speed</span>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">Performance Specs</h3>
+</div>
+<div class="space-y-space-md">
+<div class="bg-canvas p-space-sm rounded-lg border border-border-default flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Avg Latency (GPT-4)</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">1.2s</span>
+</div>
+<div class="bg-canvas p-space-sm rounded-lg border border-border-default flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Avg Latency (Claude)</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">1.5s</span>
+</div>
+<div class="bg-canvas p-space-sm rounded-lg border border-border-default flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Error Rate (24h)</span>
+<span class="font-body-md text-body-md text-market-down font-medium">0.02%</span>
+</div>
+</div>
+</div>
+<!-- Context Window Utilization -->
+<div class="bg-surface border border-border-default rounded-xl p-space-lg">
+<div class="flex items-center gap-space-sm mb-space-md">
+<span class="material-symbols-outlined text-on-surface-variant">compress</span>
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface">Context Utilization</h3>
+</div>
+<div class="relative h-48 w-full bg-canvas rounded-lg border border-border-default flex items-end p-4 gap-2">
+<!-- Simple CSS Bar Chart for Visual Fill -->
+<div class="w-full flex justify-between items-end h-full relative">
+<div class="absolute top-0 left-0 w-full h-px bg-border-default border-dashed"></div>
+<div class="absolute top-1/2 left-0 w-full h-px bg-border-default border-dashed"></div>
+<div class="w-1/4 bg-primary-container h-[40%] rounded-t-md hover:bg-primary transition-colors cursor-pointer group relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Briefing: 40%</div>
+</div>
+<div class="w-1/4 bg-primary-container h-[85%] rounded-t-md hover:bg-primary transition-colors cursor-pointer group relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Proposals: 85%</div>
+</div>
+<div class="w-1/4 bg-primary-container h-[15%] rounded-t-md hover:bg-primary transition-colors cursor-pointer group relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Chat: 15%</div>
+</div>
+<div class="w-1/4 bg-primary-container h-[60%] rounded-t-md hover:bg-primary transition-colors cursor-pointer group relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Analysis: 60%</div>
+</div>
+</div>
+</div>
+<div class="flex justify-between mt-2 px-2">
+<span class="font-caption text-caption text-on-surface-variant">Brf</span>
+<span class="font-caption text-caption text-on-surface-variant">Prop</span>
+<span class="font-caption text-caption text-on-surface-variant">Chat</span>
+<span class="font-caption text-caption text-on-surface-variant">Anal</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-gutter-mobile pt-2 pb-safe bg-surface dark:bg-inverse-surface border-t border-border-default dark:border-outline bg-surface/90 backdrop-blur-md z-50 md:hidden scale-95 active:scale-90 transition-transform duration-150">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-sm text-label-sm mt-1">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm mt-1">持仓</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">smart_toy</span>
+<span class="font-label-sm text-label-sm mt-1">助手</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="font-label-sm text-label-sm mt-1">研究</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-xl px-3 py-1 hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-sm text-label-sm mt-1">设置</span>
+</a>
+</nav>
+</body></html>

@@ -7,7 +7,7 @@
 
 ## 1. 目的
 
-把技术架构 §8 的采集架构与 PRD §8.2/§9.4/§9.5 落为**端口契约 + 流水线阶段 + 新鲜度/冲突规则 + 契约测试方法**。外部供应商未定时一律以端口 + 占位适配器表达，标注 `TODO(data-source-selection)`（见索引 §2）。
+把技术架构 §8 的采集架构与 PRD §8.2/§9.4/§9.5 落为**端口契约 + 流水线阶段 + 新鲜度/冲突规则 + 契约测试方法**。MVP 数据源已确认为 **AKShare**（§11.2），端口契约设计保持供应商无关，便于后续升级到 Tushare 等付费源（见索引 §2）。
 
 ## 2. 端口定义（ports/，技术架构 §8.1）
 
@@ -96,11 +96,11 @@ fresh = age <= INTRADAY_FRESHNESS_THRESHOLD        # 默认 90s（命名常量�
 
 | 数据 | 阈值常量 | 默认 | 超时处理 |
 | --- | --- | --- | --- |
-| 盘中行情 | `INTRADAY_FRESHNESS_THRESHOLD` | 90 秒 | `quality_status=DELAYED` → 禁即时交易数量 → PAUSE_ADVICE |
+| 盘中行情 | `INTRADAY_FRESHNESS_THRESHOLD` | 180 秒 | `quality_status=DELAYED` → 禁即时交易数量 → PAUSE_ADVICE |
 | 日线 | `DAILY_COMPLETE` | 最近已结束交易日完整 | 报告标 `不完整` 并降低建议等级 |
 | 公告 | `ANNOUNCE_COVERAGE` | 开市前任务覆盖至报告截止 | 显示检索截止时间 |
 | 新闻 | —— | 展示发布时间与抓取时间 | 不以陈旧新闻解释即时波动 |
-| 基金净值 | `NAV_PUBLISHED` | 最新官方披露净值 | 明确净值日期，不标实时；未披露生成 `PARTIAL` 报告 |
+| ETF 净值/IIV | `NAV_PUBLISHED` | 最新官方披露净值 | 明确净值日期，不标实时；未发布生成 `PARTIAL` 报告 |
 | 财报 | `REPORT_PERIOD` | 最新正式披露期 | 不用预告替代正式值 |
 
 时钟健康：
@@ -153,7 +153,7 @@ fresh = age <= INTRADAY_FRESHNESS_THRESHOLD        # 默认 90s（命名常量�
 
 ## 9. 契约测试方法（对应技术架构 §18.1 数据源契约测试）
 
-外部供应商未定，契约测试是**绑定端口而非具体供应商**的手段：
+契约测试是**绑定端口而非具体供应商**的手段（即便 MVP 已定 AKShare，升级到 Tushare 时端口契约测试仍是回归保障）：
 
 1. **cassette 录制**：对每个端口方法，录制脱敏固定响应（移除 Cookie/Token/个人标识/受限正文），存 `tests/contract/cassettes/<port>/<scenario>.json`。
 2. **解析器测试**：用 cassette 喂适配器的 parse 阶段，断言统一 schema 字段、单位、scale（[2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §5）。
@@ -170,15 +170,33 @@ fresh = age <= INTRADAY_FRESHNESS_THRESHOLD        # 默认 90s（命名常量�
 - 文档原文按 `content_sha256` 内容寻址（[2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §9）；`documents_fts` 为外部内容表，可由原文 `REBUILD`。
 - 新闻正文可按容量/授权清理，**元数据与引用哈希必须保留**（evidence 可定位，[2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §12）。
 
-## 11. 待确认项
+## 11. 已确认、运行配置与待确认项
 
-| 事项 | 当前默认 | 备注 |
+### 11.1 已确认 / 运行配置（2026-08-11 复核）
+
+| 事项 | 确认值/策略 | 性质 |
 | --- | --- | --- |
-| 数据源供应商（行情/公告/新闻） | 未定，端口 + 占位适配器 | `TODO(data-source-selection)`，《数据源选型与质量规范》 |
-| 盘中新鲜度阈值 | **180 秒**（2026-08-11 由 90s 放宽） | `INTRADAY_FRESHNESS_THRESHOLD` 可配 |
-| 时钟偏差阈值 | `CLOCK_SKEW_THRESHOLD` TODO | 留运行配置 |
-| 字段级冲突容差表 | `FIELD_TOLERANCE[field]` TODO | 按字段（价格/状态/公司行动/财务）分别定 |
-| 熔断窗口/连续失败阈值 | 按 `<source>` 配置 | 选型后填充 |
-| 日线/净值 SQLite vs Parquet 分布 | SQLite 索引+元数据，Parquet 全量 | 见 [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §13 |
+| 盘中新鲜度阈值 | **180 秒** | 已确认（`INTRADAY_FRESHNESS_THRESHOLD` 可配） |
+| 时钟偏差阈值 | `CLOCK_SKEW_THRESHOLD`，运行配置 | `TODO(clock-skew)`，初值待运行观测 |
+| 字段级冲突容差表 | `FIELD_TOLERANCE[field]`，按字段分类运行配置 | `TODO(field-tolerance)`，选型后按字段（价格/状态/公司行动/财务）分别定 |
+| 熔断窗口/连续失败阈值 | 按 `<source>` 运行配置 | 选型后填充 |
+| 日线/净值 SQLite vs Parquet 分布 | SQLite 索引+元数据，Parquet 全量 | 运行配置，实现时按查询性能定，留 ADR（[2](./2_DATA_MODEL_AND_STORAGE.md) §13） |
 
 > 标的范围已确认仅 A 股 + 场内 ETF（PRD §20），无需覆盖场外公募基金净值 T+1 披露源；Instruments 端口与占位适配器对应简化。
+
+### 11.2 数据源供应商（已确认 2026-08-12）
+
+**MVP 数据源：AKShare（免费开源）**，`TODO(data-source-selection)` 关闭。
+
+| 端口 | MVP 实现 | 升级路径 |
+| --- | --- | --- |
+| QuoteProvider（实时行情） | AKShare 实时接口（`stock_zh_a_spot_em` 等，~500ms） | Tushare `realtime_quote`（500元/年=5000分，500次/分） |
+| BarProvider（历史日线） | AKShare 历史日线 | Tushare 日线（**免费**）+ Baostock 双备份 |
+| DocumentProvider（公告/新闻/财报） | AKShare 公告/新闻/财务爬取接口 | Tushare `fina_indicator`+`anns`+`news`（部分需单独授权） |
+
+**实现约束与风险**：
+- **合规**：AKShare 数据来自第三方财经网站爬取，定位「研究学习工具」，商用需另行获取授权。MVP 个人使用可接受，对外服务前须升级到有授权的源（Tushare/米筐）。
+- **稳定性**：非交易所直连，偶发接口失效；务必**本地缓存 + 失败降级**（源不可用时报告标注 `PARTIAL`，见技术架构 §11.4）。
+- **限频**：底层源（新浪/东财）会反爬，高频调用存在 IP 封锁风险；建议控制调用间隔 + 国内 VPS 部署（数据源服务器在国内）。
+- **升级触发条件**：稳定性不满足 SLA（开市前报告 09:00 前完成）/ 对外服务 / 需要分钟线或更全公告数据时，升级到 Tushare Pro（200–500 元/年起，日线免费）。
+- **端口设计不变**：升级仅替换适配器实现，端口契约与内部流水线不变（§2）。

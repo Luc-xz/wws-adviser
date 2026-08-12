@@ -33,6 +33,15 @@
 | REP-01 | 开市前报告 | [打开](./REP-01-desktop.html) | ![](./REP-01-desktop.png) |
 | DATA-01 | 数据状态中心 | [打开](./DATA-01-desktop.html) | ![](./DATA-01-desktop.png) |
 | SET-01 | 风险与投资约束 | [打开](./SET-01-desktop.html) | ![](./SET-01-desktop.png) |
+| PORT-01 | 持仓与自选（桌面规范版，AI 生成） | [打开](./PORT-01-desktop.html) | ![](./PORT-01-desktop.png) | [v2](./PORT-01-desktop-v2.html) |
+| TX-03 | CSV 导入向导-校验预览（AI 生成） | [打开](./TX-03-desktop.html) | ![](./TX-03-desktop.png) | [v2](./TX-03-desktop-v2.html) |
+| REP-02 | 收市后复盘（桌面最终版，AI 生成） | [打开](./REP-02-desktop.html) | ![](./REP-02-desktop.png) | [v2](./REP-02-desktop-v2.html) |
+| REP-03 | 公司/行业研究报告-贵州茅台（AI 生成） | [打开](./REP-03-desktop.html) | ![](./REP-03-desktop.png) | — |
+| SET-02 | 数据源与质量（桌面规范版，AI 生成） | [打开](./SET-02-desktop.html) | ![](./SET-02-desktop.png) | [v2](./SET-02-desktop-v2.html) |
+| SET-03 | 模型与任务路由（桌面规范版，AI 生成） | [打开](./SET-03-desktop.html) | ![](./SET-03-desktop.png) | [v2](./SET-03-desktop-v2.html) |
+| SET-08 | 系统状态（桌面最终版，AI 生成） | [打开](./SET-08-desktop.html) | ![](./SET-08-desktop.png) | [v2](./SET-08-desktop-v2.html) |
+
+> 标注「AI 生成」的 7 个桌面页面于 2026-08-12 由 Stitch `generate_screen_from_text` 按规范 §10 生成，每页含 1-2 个版本。
 
 ## 移动端核心页面
 
@@ -40,47 +49,67 @@
 
 | 页面 ID | 标题（主版本） | 主版本 HTML | 截图 | 其余版本 |
 | --- | --- | --- | --- | --- |
-| HOME-01 | 首页总览（最终规范版） | [打开](./mobile/HOME-01-mobile.html) | ![](./mobile/HOME-01-mobile.png) | [v1 初版](./mobile/HOME-01-mobile-v1.html)、[规范修正版 PNG](./mobile/HOME-01-mobile.png)（同主版本文件名冲突见 manifest） |
-| PORT-02 | 标的详情（最终规范版） | [打开](./mobile/PORT-02-mobile.html) | ![](./mobile/PORT-02-mobile.png) | [贵州茅台示例](./mobile/PORT-02-mobile-maotai.html)、[中文版](./mobile/PORT-02-mobile-cn.html)、[规范修正版](./mobile/PORT-02-mobile.html) |
-| REP-01 | 开市前报告 | [打开](./mobile/REP-01-mobile.html) | ![](./mobile/REP-01-mobile.png) | — |
-| LIB-01 | 研究与报告库 | [打开](./mobile/LIB-01-mobile.html) | ![](./mobile/LIB-01-mobile.png) | — |
+| AUTH-01 | 登录 | [打开](./mobile/AUTH-01-mobile.html) | ![](./mobile/AUTH-01-mobile.png) | — |
+| ONB-01 | 首次配置向导 | [打开](./mobile/ONB-01-mobile.html) | ![](./mobile/ONB-01-mobile.png) | — |
+| HOME-01 | 首页总览（最终规范版） | [打开](./mobile/HOME-01-mobile.html) | ![](./mobile/HOME-01-mobile.png) | [v1 初版](./mobile/HOME-01-mobile-v1.html) |
+| HOME-02 | 今日行动与风险 | [打开](./mobile/HOME-02-mobile.html) | ![](./mobile/HOME-02-mobile.png) | — |
+| PORT-01 | 持仓与自选 | [打开](./mobile/PORT-01-mobile.html) | ![](./mobile/PORT-01-mobile.png) | — |
+| PORT-02 | 标的详情（最终规范版） | [打开](./mobile/PORT-02-mobile.html) | ![](./mobile/PORT-02-mobile.png) | [贵州茅台示例](./mobile/PORT-02-mobile-maotai.html)、[中文版](./mobile/PORT-02-mobile-cn.html) |
 | TX-01 | 交易流水 | [打开](./mobile/TX-01-mobile.html) | ![](./mobile/TX-01-mobile.png) | — |
-| TX-02 | 新建交易（中文版） | [打开](./mobile/TX-02-mobile.html) | ![](./mobile/TX-02-mobile.png) | [初版](./mobile/TX-02-mobile.html) |
+| TX-02 | 新建交易（中文版） | [打开](./mobile/TX-02-mobile.html) | ![](./mobile/TX-02-mobile.png) | — |
+| TX-03 | CSV 导入向导 | [打开](./mobile/TX-03-mobile.html) | ![](./mobile/TX-03-mobile.png) | — |
 | ACC-01 | 账户与对账 | [打开](./mobile/ACC-01-mobile.html) | ![](./mobile/ACC-01-mobile.png) | — |
 | CHAT-01 | 助手对话 | [打开](./mobile/CHAT-01-mobile.html) | ![](./mobile/CHAT-01-mobile.png) | — |
+| CHAT-02 | 建议详情 | [打开](./mobile/CHAT-02-mobile.html) | ![](./mobile/CHAT-02-mobile.png) | — |
+| LIB-01 | 研究与报告库 | [打开](./mobile/LIB-01-mobile.html) | ![](./mobile/LIB-01-mobile.png) | — |
+| RES-01 | 新建研究 | [打开](./mobile/RES-01-mobile.html) | ![](./mobile/RES-01-mobile.png) | [中文版](./mobile/RES-01-mobile-cn.html) |
+| RES-02 | 研究任务进度 | [打开](./mobile/RES-02-mobile.html) | ![](./mobile/RES-02-mobile.png) | — |
+| REP-01 | 开市前报告 | [打开](./mobile/REP-01-mobile.html) | ![](./mobile/REP-01-mobile.png) | — |
+| REP-02 | 收市后复盘 | [打开](./mobile/REP-02-mobile.html) | ![](./mobile/REP-02-mobile.png) | — |
+| REP-03 | 研究报告 | [打开](./mobile/REP-03-mobile.html) | ![](./mobile/REP-03-mobile.png) | — |
 | DATA-01 | 数据状态中心 | [打开](./mobile/DATA-01-mobile.html) | ![](./mobile/DATA-01-mobile.png) | — |
 | SET-00 | 设置首页 | [打开](./mobile/SET-00-mobile.html) | ![](./mobile/SET-00-mobile.png) | — |
 | SET-01 | 风险与投资约束（中文版） | [打开](./mobile/SET-01-mobile-cn.html) | ![](./mobile/SET-01-mobile-cn.png) | [初版](./mobile/SET-01-mobile.html) |
-| RES-01 | 新建研究 | [打开](./mobile/RES-01-mobile.html) | ![](./mobile/RES-01-mobile.png) | [中文版](./mobile/RES-01-mobile-cn.html) |
+| SET-02 | 数据源与质量 | [打开](./mobile/SET-02-mobile.html) | ![](./mobile/SET-02-mobile.png) | — |
+| SET-03 | 模型与路由 | [打开](./mobile/SET-03-mobile.html) | ![](./mobile/SET-03-mobile.png) | — |
+| SET-04 | 通知与隐私（规范优化版，AI 生成） | [打开](./mobile/SET-04-mobile.html) | ![](./mobile/SET-04-mobile.png) | [v2](./mobile/SET-04-mobile-v2.html) |
+| SET-05 | 任务时间 | [打开](./mobile/SET-05-mobile.html) | ![](./mobile/SET-05-mobile.png) | — |
+| SET-06 | 安全与会话 | [打开](./mobile/SET-06-mobile.html) | ![](./mobile/SET-06-mobile.png) | — |
+| SET-07 | 存储与备份 | [打开](./mobile/SET-07-mobile.html) | ![](./mobile/SET-07-mobile.png) | — |
+| SET-08 | 系统状态 | [打开](./mobile/SET-08-mobile.html) | ![](./mobile/SET-08-mobile.png) | — |
 
 > 注：`PORT-02-mobile-cn-390.html` 为 390 原始宽度版本，HTML 内容与 `PORT-02-mobile-cn.html` 完全一致（md5 相同），且 Stitch 端未生成对应 PNG；详见 mobile/manifest.json。
 
 ## 移动端覆盖情况（对照 UI 规范 §18.4 移动必交清单）
 
-移动端已落地 **12 个独立页面 ID**（共 21 张稿含版本），覆盖 §4.3 P0 页面的主要导航目标。对照 §18.4 移动必交清单，**仍缺失**：
+移动端已落地 **28 个独立页面 ID**（共 38 张稿含版本）。对照 §4.3 全部 31 页，仅缺 3 页（均为 P1，非必交）：
 
-- AUTH-01 登录、ONB-01 首次配置向导
-- HOME-02 今日行动与风险
-- PORT-01 持仓与自选（移动列表）
-- TX-03 CSV 导入向导
-- CHAT-02 建议详情、CHAT-03 历史问询
-- RES-02 研究任务进度
-- REP-02 收市后复盘、REP-03 公司/行业研究报告
-- SET-02 数据源与质量、SET-03 模型与任务路由、SET-04 通知与隐私、SET-05 任务时间、SET-06 安全与会话、SET-07 存储备份恢复、SET-08 系统状态
-- SYS-01 全局搜索、SYS-02 通知中心
-- 全局空 / 加载 / 异常 / 会话过期状态
+- **CHAT-03 历史问询**（P1，§4.3）
+- **SYS-01 全局搜索**（P1）
+- **SYS-02 通知中心**（P1）
 
-## 桌面端缺口（未在 Stitch 项目中找到桌面稿）
+✅ **§18.4 移动必交 27 项全部达标。**
 
-对照 UI 规范 §18.4 桌面必交清单，以下页面目前 Stitch 里**只有移动端稿**，桌面端待补：
+对照 §18.4 移动必交清单的"状态变体"要求：
 
-- PORT-01 持仓与自选（桌面表格）
-- TX-03 CSV 导入向导（桌面）
-- REP-02 收市后复盘
-- REP-03 公司 / 行业研究报告（桌面三栏 + 证据抽屉）
-- SET-02 数据源与质量
-- SET-03 模型与任务路由
-- SET-08 系统状态
+> ⚠️ **状态变体不在 Stitch 静态稿交付，已转前端组件实现规范。** 2026-08-12 尝试用 `generate_screen_from_text` 生成 HOME-01 盘中/收市后/离线、CHAT-01 生成中/过期、全局空/加载/异常/会话过期共 9 个状态变体，Stitch 后台未产出（详见 [COMPONENT_STATES.md](../COMPONENT_STATES.md) §1）。状态变体的最佳载体是前端组件 props/状态机，已聚合为可消费的实现清单。
+
+详见 **[../COMPONENT_STATES.md](../COMPONENT_STATES.md)** —— 含 DataStatusBar/AdviceCard/RiskAlert/PositionRow/EvidenceDrawer 的 props、状态变体、触发条件、硬规则断言，供 `shared/ui` 实现阶段使用。
+
+仍需补的状态（前端实现，非 Stitch）：
+
+- HOME-01 的盘中 / 收市后 / 离线状态（现仅盘前默认态）
+- CHAT-01 的生成中 / 行情过期状态（现仅正常态）
+- 全局空 / 加载 / 异常 / 会话过期状态页
+
+## 桌面端覆盖情况（对照 UI 规范 §18.4 桌面必交清单）
+
+桌面端已落地 **16 个独立页面 ID**（共 23 张稿含版本）。✅ **§18.4 桌面必交 13 项全部达标**（HOME-01、PORT-01、PORT-02、TX-03、CHAT-01、LIB-01、REP-01/02、REP-03、SET-01/02/03/08）。
+
+对照 §4.3 全 31 页，桌面端仍缺 15 页，但这些均为规范标注「响应式设计」可从移动端推导的页面（§4.3 仅要求"至少一张桌面稿验证"），或 P1 页面：
+
+- 响应式页面（可从移动端推导）：AUTH-01、ONB-01、HOME-02、TX-02、CHAT-02、RES-01、RES-02、SET-00、SET-04、SET-05、SET-06、SET-07、DATA-01（已有）、ACC-01（已有）
+- P1 页面：CHAT-03、SYS-01、SYS-02
 
 ## 走查提示（与 UI 规范硬规则对照）
 

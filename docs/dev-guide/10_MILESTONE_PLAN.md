@@ -13,7 +13,7 @@
 
 - **退出条件是硬门槛**：未全绿不进下一 Phase（PRD §17 退出条件、§18 上线门槛、技术架构 §25）。
 - 工作项可拆为 `gsd:plan-phase` 任务，每任务原子提交（索引 §6）。
-- 外部供应商未定项在该 Phase 内以端口 + 占位适配器交付，标 `TODO(data-source-selection)` / `TODO(model-vendor-selection)` / `TODO(notifier-selection)`，不阻塞退出。
+- 外部供应商已全部确认（§8.2）：数据源 AKShare（MVP）、模型通用 OpenAI-compatible、通知邮件 SMTP、VPS 国内。各 Phase 按端口 + 适配器交付，不阻塞退出。
 
 ## 2. Phase 0：工程基础骨架
 
@@ -48,7 +48,7 @@
 | 1.3 | Documents 公告/少量新闻 + 内容寻址 + FTS5 | [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §7 | AC-02 |
 | 1.4 | 确定性组合指标（成本/盈亏/归因）+ 风险规则（硬上限截断骨架） | [4_ANALYTICS_AND_RISK.md](./4_ANALYTICS_AND_RISK.md) | AC-04 |
 | 1.5 | 开市前/收市后报告流水线（`analysis_snapshot` 冻结、可复现、降级路径） | [6_MODEL_AND_REPORT_PIPELINE.md](./6_MODEL_AND_REPORT_PIPELINE.md) §4 §8 | AC-02/04 |
-| 1.6 | Model Gateway（结构化输出 + 后置校验 + 一次受控修复）+ 一个通知渠道（`TODO(notifier-selection)`） | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §3 §5 §10 | AC-06 |
+| 1.6 | Model Gateway（结构化输出 + 后置校验 + 一次受控修复）+ 邮件 SMTP 通知渠道（已确认） | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §3 §5 §10 | AC-06 |
 | 1.7 | 首页/持仓页/开市前报告/收市后复盘移动端页面 + SSE/轮询兜底 | [7_FRONTEND_AND_PWA.md](./7_FRONTEND_AND_PWA.md) | AC-08 |
 | 1.8 | 连续 10 个交易日运行验证（PRD §17 阶段 1 退出） | 全局运行 | AC-02/04 |
 
@@ -120,13 +120,23 @@ Phase 3 完成后逐项核：
 - [ ] 数据源使用符合授权与服务条款（供应商确定后复核）。
 - [ ] 技术架构 §25 MVP 架构验收清单 16 项全绿。
 
-## 8. 待确认项
+## 8. 运行配置与待确认项
 
-| 事项 | 当前默认 | 备注 |
+### 8.1 运行配置 / 条件触发（2026-08-11 复核）
+
+| 事项 | 确认策略 | 备注 |
 | --- | --- | --- |
 | Phase 4 触发与范围 | 仅占位 | 达 [技术架构 §21](../TECHNICAL_ARCHITECTURE.md) 触发条件再立 ADR |
-| 通知渠道首选 | 待选企业微信/Server 酱/邮件一种 | `TODO(notifier-selection)`，Phase 1.6 前定 |
-| 数据源供应商 | 未定，端口+占位 | `TODO(data-source-selection)`，《数据源选型与质量规范》 |
-| 模型供应商 | OpenAI-compatible，未定具体 | `TODO(model-vendor-selection)`，《模型与路由规范》 |
 | 成功指标观察窗 | 连续 20 交易日 | PRD §4.2，Phase 1 后启动观察 |
 | 连续 10 交易日验证起点 | Phase 1.8 | 单实例手动起算并记审计 |
+
+### 8.2 供应商选型（全部已确认 2026-08-12）
+
+| 事项 | 确认决策 | 影响 Phase |
+| --- | --- | --- |
+| 数据源供应商 | **AKShare（免费开源）**，端口+适配器；升级路径 Tushare Pro | Phase 1.2（采集适配器） |
+| 模型供应商 | **通用 OpenAI-compatible**，不锁定；部署时配置 `base_url`+`api_key`+`model` | Phase 1.6（Model Gateway） |
+| 通知渠道 | **邮件 SMTP**（587/465） | Phase 1.6 |
+| VPS 地域 | **国内 VPS** | Phase 2（部署） |
+
+> **全部 `TODO(*)-selection` 标记已关闭**。原 Phase 1.6 前"通知渠道必须定"的约束已解除。数据源 MVP 用 AKShare 免费起步，对外服务或 SLA 不满足时升级 Tushare（端口不变）。
