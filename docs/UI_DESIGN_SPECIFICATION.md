@@ -309,6 +309,13 @@
 | `color.status.warning` | `#DC6803` | 风险提醒、观察 |
 | `color.status.critical` | `#C11574` | 严重风险，区别于上涨红 |
 | `color.status.disabled` | `#667085` | 暂停、过期、不可用 |
+| `color.status.online` | `#0D9488` | 数据源在线/连接健康，**区别于下跌绿** |
+| `color.action.hold` | `#475467` | 保持建议（中性 slate） |
+| `color.action.watch` | `#DC6803` | 观察建议（琥珀） |
+| `color.action.conditionalAdd` | `#3157D5` | 条件式增加（靛蓝） |
+| `color.action.reduce` | `#C2410C` | 减少建议（深橙，区别于 watch） |
+| `color.action.exitWatch` | `#C11574` | 退出观察（洋红） |
+| `color.action.pause` | `#667085` | 暂停建议（灰） |
 | `color.overlay` | `rgba(16,24,40,.48)` | Modal 遮罩 |
 
 ### 7.2 深色模式颜色
@@ -331,14 +338,22 @@
 | `color.market.flat` | `#98A2B3` | 平盘 |
 | `color.status.warning` | `#FEC84B` | 警告 |
 | `color.status.critical` | `#FAA7E0` | 严重风险 |
+| `color.status.online` | `#2DD4BF` | 在线/健康（teal，区别于下跌绿，待对比度验证） |
+| `color.action.hold` | `#98A2B3` | 保持 |
+| `color.action.watch` | `#FEC84B` | 观察 |
+| `color.action.conditionalAdd` | `#8098F9` | 条件式增加 |
+| `color.action.reduce` | `#FB923C` | 减少（待对比度验证） |
+| `color.action.exitWatch` | `#FAA7E0` | 退出观察 |
+| `color.action.pause` | `#98A2B3` | 暂停 |
 
-深色稿需单独检查对比度，不可机械反相。图表网格、边框和小字号辅助文字必须在真实手机亮度下可读。
+深色稿需单独检查对比度，不可机械反相。图表网格、边框和小字号辅助文字必须在真实手机亮度下可读。**`color.status.success`/`color.status.info` 的深色值暂缺**，需在 Phase 0.4 前端落地时按真实机型补齐并验证对比度；新增 `action.*` 与 `status.online` 深色值为初定，同样需验证。
 
 ### 7.3 颜色使用硬规则
 
 - 中国市场约定：上涨红、下跌绿；设置页允许未来扩展配色，但 MVP 固定此约定。
 - 红/绿旁必须同时显示 `+/-`、箭头、文字或图标，不能只靠颜色。
-- 行动建议不使用市场红绿：减少用橙色、观察用琥珀、条件式增加用靛蓝、退出观察用洋红、暂停用灰色。
+- 行动建议**必须使用 `color.action.*` token**：保持=slate、观察=琥珀、条件式增加=靛蓝、减少=深橙、退出观察=洋红、暂停=灰；六色彼此可辨，**禁止用 `color.market.*` 表达行动语义**（这是设计稿审核发现的系统性违规，根因是行动色未入 token，见 [REVIEW_REPORT.md](./design-review/REVIEW_REPORT.md) §2.2 违规 D）。
+- 在线/健康/连接状态**必须使用 `color.status.online`**，**禁止复用 `color.market.down`（下跌绿）**（审核违规 A：任务完成、数据源 ACTIVE、连接正常曾统一误用下跌绿，根因是缺少 online token）。
 - 高风险洋红用于风险，不和上涨红混用。
 - 大面积背景不使用高饱和红绿。
 
