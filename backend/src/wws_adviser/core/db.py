@@ -8,7 +8,7 @@ from collections.abc import Iterator
 
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from wws_adviser.core.config import Settings
 
@@ -48,6 +48,10 @@ def check_db_writable(engine: Engine) -> bool:
 
 def make_session_factory(engine: Engine) -> sessionmaker[Session]:
     return sessionmaker(bind=engine, expire_on_commit=False, class_=Session)
+
+
+class Base(DeclarativeBase):
+    """所有 ORM 模型的共享基类（波2 起 modules/*/models.py 继承）。"""
 
 
 def session_scope(factory: sessionmaker[Session]) -> Iterator[Session]:

@@ -1,6 +1,7 @@
-"""FastAPI 应用装配：路由、错误处理、request_id 中间件。
+"""FastAPI 应用装配：路由、错误处理、CSRF + request_id 中间件。
 
-lifespan 由 main.py 注入（含启动校验）；create_app 不含 lifespan，便于测试。
+中间件注册顺序（先注册=内层，后注册=外层）：csrf 先注册（内层），request_id 后注册
+（外层）——这样 request_id 先执行设置 contextvar，csrf 内层返回 Problem Details 时能带上。
 """
 
 from collections.abc import Awaitable, Callable
@@ -9,10 +10,11 @@ from uuid import uuid4
 
 from fastapi import FastAPI, Request, Response
 
-from wws_adviser.api.errors import register_exception_handlers
+from wws_adviser.api.errors import problem, register_exception_handlers
 from wws_adviser.api.routes import health
 from wws_adviser.core.config import Settings
 from wws_adviser.core.logging import request_id_var
+from wws_adviser.modules.identity.api import router as identity_router
 
 
 def create_app(
@@ -29,6 +31,24 @@ def create_app(
 
     register_exception_handlers(app)
     app.include_router(health.router)
+    app.include_router(identity_router)
+
+    write_methods = frozenset({"POST", "PUT", "PATCH", "DELETE"})
+
+    @app.middleware("http")
+    async def csrf_middleware(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        # 登录建立 session 前豁免；其余写操作校验 double-submit CSRF token
+        if (
+            request.method in write_methods
+            and not request.url.path.startswith("/api/v1/auth/login")
+        ):
+            cookie_tok = request.cookies.get("csrf_token")
+            header_tok = request.headers.get("x-csrf-token")
+            if not cookie_tok or cookie_tok != header_tok:
+                return problem("FORBIDDEN", "CSRF 校验失败", status=403)
+        return await call_next(request)
 
     @app.middleware("http")
     async def request_id_middleware(

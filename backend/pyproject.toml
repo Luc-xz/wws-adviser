@@ -39,10 +39,28 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "UP"]
-# 层级隔离（domain.py 禁框架 import，见 1_REPO_STRUCTURE.md §3 硬规则）
-# 在波2 引入 modules/*/domain.py 后，用 TID251 (banned-api) + per-file-ignores 配置：
-# domain.py 禁 fastapi/sqlalchemy/httpx/SDK；其余文件放行。
+select = ["E", "F", "W", "I", "B", "UP", "TID251"]
+# 层级隔离：domain.py 禁框架 import（1_REPO_STRUCTURE.md §3）。banned-api 全局生效，
+# 通过 per-file-ignores 在非 domain 文件放行。
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"fastapi" = { msg = "domain 层禁用 FastAPI；仅 api 层可用" }
+"sqlalchemy" = { msg = "domain 层禁用 SQLAlchemy；仅 models/repository/service 可用" }
+"httpx" = { msg = "domain 层禁用 httpx" }
+
+[tool.ruff.lint.per-file-ignores]
+# domain.py 不在此列 → TID251 生效（禁框架）；其余文件允许使用框架
+"src/wws_adviser/api/**/*.py" = ["TID251"]
+"src/wws_adviser/core/**/*.py" = ["TID251"]
+"src/wws_adviser/main.py" = ["TID251"]
+"src/wws_adviser/modules/*/models.py" = ["TID251"]
+"src/wws_adviser/modules/*/repository.py" = ["TID251"]
+"src/wws_adviser/modules/*/service.py" = ["TID251"]
+"src/wws_adviser/modules/*/schemas.py" = ["TID251"]
+"src/wws_adviser/modules/*/api.py" = ["TID251"]
+"src/wws_adviser/modules/*/cli.py" = ["TID251"]
+"migrations/**/*.py" = ["TID251"]
+"tests/**/*.py" = ["TID251"]
 
 [tool.mypy]
 python_version = "3.12"

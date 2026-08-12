@@ -35,3 +35,11 @@ class OperationError(DomainError):
     code = "INTERNAL_ERROR"
     status = 500
     title = "操作失败"
+
+
+class MissingIdempotencyKeyError(DomainError):
+    """请求缺少 Idempotency-Key 头（写操作幂等保证）。"""
+
+    code = "MISSING_IDEMPOTENCY_KEY"
+    status = 400
+    title = "缺少幂等键"

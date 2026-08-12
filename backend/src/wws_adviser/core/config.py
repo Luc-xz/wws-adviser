@@ -19,6 +19,13 @@ class Settings(BaseModel):
     data_dir: Path = Path("./data")
     session_secret: str = "dev-insecure-secret-change-in-prod"
     log_level: str = "INFO"
+    # 波2 运行配置（见 ADR-0010）
+    session_ttl_days: int = 14
+    reauth_window_minutes: int = 15
+    login_rate_limit_max: int = 5
+    login_rate_limit_window_seconds: int = 300
+    job_lease_ttl_seconds: int = 300
+    job_max_attempts: int = 3
 
     @property
     def is_prod(self) -> bool:
@@ -75,4 +82,12 @@ def load_settings(
             else "dev-insecure-secret-change-in-prod"
         ),
         log_level=os.environ.get("WWSE_LOG_LEVEL", "INFO"),
+        session_ttl_days=int(os.environ.get("WWSE_SESSION_TTL_DAYS", "14")),
+        reauth_window_minutes=int(os.environ.get("WWSE_REAUTH_WINDOW_MIN", "15")),
+        login_rate_limit_max=int(os.environ.get("WWSE_LOGIN_RATE_LIMIT_MAX", "5")),
+        login_rate_limit_window_seconds=int(
+            os.environ.get("WWSE_LOGIN_RATE_LIMIT_WINDOW_SEC", "300")
+        ),
+        job_lease_ttl_seconds=int(os.environ.get("WWSE_JOB_LEASE_TTL_SEC", "300")),
+        job_max_attempts=int(os.environ.get("WWSE_JOB_MAX_ATTEMPTS", "3")),
     )

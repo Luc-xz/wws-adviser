@@ -16,6 +16,7 @@ from wws_adviser.api.app import create_app
 from wws_adviser.core.config import Settings, load_settings
 from wws_adviser.core.db import create_app_engine, make_session_factory
 from wws_adviser.core.logging import setup_logging
+from wws_adviser.core.scheduler import create_scheduler
 from wws_adviser.core.worker_guard import enforce_single_worker
 
 _logger = logging.getLogger(__name__)
@@ -54,10 +55,19 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.engine = engine
     app.state.session_factory = make_session_factory(engine)
     app.state.scheduler_lock = acquire_scheduler_lock(settings)
+    scheduler = None
+    if app.state.scheduler_lock is not None:
+        scheduler = create_scheduler(engine, settings)
+        scheduler.start()
+        app.state.scheduler = scheduler
+        _logger.info("APScheduler 已启动（仅入队 job_runs，不执行业务）")
+    else:
+        _logger.warning("未获 scheduler 锁，APScheduler 未启动（API 继续服务）")
     _logger.info("WWS Adviser 启动完成（env=%s）", settings.env)
-    # TODO 波2: 启动 APScheduler（仅入队 job_runs，不执行业务）
     yield
-    # 优雅关闭
+    # 优雅关闭：先停 scheduler（不等待长任务，长任务靠 lease 过期重领），再释放锁
+    if scheduler is not None:
+        scheduler.shutdown(wait=False)
     scheduler_lock: IO[str] | None = getattr(app.state, "scheduler_lock", None)
     if scheduler_lock is not None:
         scheduler_lock.close()

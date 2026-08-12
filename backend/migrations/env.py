@@ -9,6 +9,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from wws_adviser.core.config import load_settings
+from wws_adviser.core.db import Base
 
 config = context.config
 
@@ -16,8 +17,8 @@ _settings = load_settings()
 _settings.data_dir.mkdir(parents=True, exist_ok=True)
 config.set_main_option("sqlalchemy.url", _settings.db_url)
 
-# Phase 0：无 ORM metadata。波2 改为各模块 models 的 Base.metadata。
-target_metadata = None
+# 各模块 models 的 Base.metadata（波2 起接入 ORM；autogenerate 可用）
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
