@@ -18,6 +18,13 @@ from wws_adviser.core.db import create_app_engine, make_session_factory
 from wws_adviser.core.logging import setup_logging
 from wws_adviser.core.scheduler import create_scheduler
 from wws_adviser.core.worker_guard import enforce_single_worker
+from wws_adviser.infrastructure.data_sources.stub_bar import StubBarProvider
+from wws_adviser.infrastructure.data_sources.stub_document import StubDocumentProvider
+from wws_adviser.infrastructure.data_sources.stub_nav import StubNAVProvider
+from wws_adviser.infrastructure.data_sources.stub_quote import StubQuoteProvider
+from wws_adviser.infrastructure.models.stub_model import StubModelPort
+from wws_adviser.infrastructure.notifications.stub_notifier import StubNotifierPort
+from wws_adviser.infrastructure.storage.local_object_store import LocalObjectStore
 
 _logger = logging.getLogger(__name__)
 
@@ -54,6 +61,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     engine = create_app_engine(settings)
     app.state.engine = engine
     app.state.session_factory = make_session_factory(engine)
+    # 端口适配器（Phase 0 stub；唯一构造点，见 1_REPO_STRUCTURE §5）
+    app.state.quote_provider = StubQuoteProvider(env=settings.env)
+    app.state.bar_provider = StubBarProvider(env=settings.env)
+    app.state.nav_provider = StubNAVProvider(env=settings.env)
+    app.state.document_provider = StubDocumentProvider(env=settings.env)
+    app.state.model_port = StubModelPort(env=settings.env)
+    app.state.notifier = StubNotifierPort(env=settings.env)
+    app.state.object_store = LocalObjectStore(settings.data_dir)
     app.state.scheduler_lock = acquire_scheduler_lock(settings)
     scheduler = None
     if app.state.scheduler_lock is not None:

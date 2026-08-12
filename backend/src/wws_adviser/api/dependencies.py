@@ -1,6 +1,7 @@
 """依赖注入：唯一允许构造基础设施对象的地方（见 1_REPO_STRUCTURE.md §5）。
 
-engine / session_factory 在 lifespan 创建并挂到 app.state；本模块从 app.state 取出注入。
+engine / session_factory / 端口适配器在 lifespan 创建并挂到 app.state；本模块从
+app.state 取出注入。service 通过依赖注入接收端口，不在内部 import 具体适配器。
 """
 
 from collections.abc import Iterator
@@ -13,6 +14,7 @@ from wws_adviser.core.config import Settings
 from wws_adviser.modules.identity import service as identity_service
 from wws_adviser.modules.identity.domain import AuthenticationError
 from wws_adviser.modules.identity.models import User
+from wws_adviser.ports.market_data import QuoteProvider
 
 
 def get_session(request: Request) -> Iterator[Session]:
@@ -35,3 +37,7 @@ def get_current_user(request: Request, db: Annotated[Session, Depends(get_sessio
     if user is None:
         raise AuthenticationError("未登录")
     return user
+
+
+def get_quote_provider(request: Request) -> QuoteProvider:
+    return cast(QuoteProvider, request.app.state.quote_provider)

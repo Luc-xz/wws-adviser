@@ -1,0 +1,19 @@
+{
+  "port": "QuoteProvider",
+  "scenario": "quote_ok",
+  "recorded_at": "2026-08-12T00:00:00+00:00",
+  "sanitized": true,
+  "response": {
+    "source": "stub",
+    "source_url": "stub://quote/600519",
+    "market_time": "2026-08-12T10:30:00+08:00",
+    "fetched_at": "2026-08-12T10:30:01+08:00",
+    "received_at": "2026-08-12T10:30:01+08:00",
+    "source_delay_class": "realtime",
+    "price": "100.00",
+    "change_pct": "1.23",
+    "volume": "10000",
+    "amount": "1000000.00",
+    "bid_ask": null
+  }
+}
