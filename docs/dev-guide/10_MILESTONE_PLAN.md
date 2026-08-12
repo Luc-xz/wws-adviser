@@ -30,12 +30,14 @@
 
 **退出条件**：
 
-- [ ] 手机可安装 PWA 并安全登录（AC-08 安装子集）。
-- [ ] 服务持久化数据，`/health/ready` 在 DB 可写时绿，不可写时 fail。
-- [ ] 基础任务可入队、领取、租约到期可重领（[6](./6_MODEL_AND_REPORT_PIPELINE.md) §7）。
-- [ ] 端口 + 占位适配器可跑通一条 stub 数据→领域→API 闭环。
-- [ ] CI 静态 + 单元 + 迁移门禁全绿（[9_TEST_AND_CI.md](./9_TEST_AND_CI.md) §7）。
-- [ ] 备份骨架能产出一致性副本（不进模型/通知，AC-09 子集）。
+- [x] 手机可安装 PWA 并安全登录（AC-08 安装子集）。✅ 波4（06172ef）：PWA manifest+SW build 生成 + AUTH-01 登录连后端 `/api/v1/auth/login`
+- [x] 服务持久化数据，`/health/ready` 在 DB 可写时绿，不可写时 fail。✅ 波1（b2c0876）：`/health/ready` 检查 DB 可写 + 迁移已应用，不可写/未迁移返 503
+- [x] 基础任务可入队、领取、租约到期可重领（[6](./6_MODEL_AND_REPORT_PIPELINE.md) §7）。✅ 波2（ebaab7f）：job_runs + UNIQUE 幂等 + 条件 UPDATE CAS 领取 + lease 过期重领（测试覆盖）
+- [x] 端口 + 占位适配器可跑通一条 stub 数据→领域→API 闭环。✅ 波3（8b407b8）：`GET /api/v1/market-data/quotes/{code}` 经 stub QuoteProvider→parse_quote→API，前端 HomeOverview 亦调通
+- [x] CI 静态 + 单元 + 迁移门禁全绿（[9_TEST_AND_CI.md](./9_TEST_AND_CI.md) §7）。✅ 波1–5：ruff+mypy strict / pytest（66 测试）/ migrate-check 本地全绿；波5 CI yaml 含前后端门禁（CI 绿需 push 触发）
+- [x] 备份骨架能产出一致性副本（不进模型/通知，AC-09 子集）。✅ 波1+5：`core/backup.py` Online Backup API + `scripts/backup_drill.py` 演练（backup→restore→表一致）
+
+> **Phase 0 完成声明（2026-08-12）**：六个退出条件全部满足，工程基础骨架就绪，可进入 Phase 1（持仓—报告闭环）。
 
 ## 3. Phase 1：持仓—报告闭环（MVP 核心）
 

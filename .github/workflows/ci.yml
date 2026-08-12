@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  backend:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,17 +21,45 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "11"
+
+      - name: Install (backend + frontend)
         run: make install
 
-      - name: Lint (ruff + mypy)
+      - name: Backend lint (ruff + mypy)
         run: make lint
 
-      - name: Unit tests
+      - name: Backend unit tests
         run: make test-unit
 
-      - name: Integration tests
+      - name: Backend integration tests
         run: make test-integration
 
       - name: Migration empty-db check
         run: make migrate-check
+
+      - name: Generate API types (OpenAPI export + frontend types)
+        run: make gen-api
+
+      - name: Frontend lint (eslint + vue-tsc)
+        run: cd frontend && pnpm lint
+
+      - name: Frontend test (vitest)
+        run: cd frontend && pnpm test
+
+      - name: Frontend build (vue-tsc + vite + PWA)
+        run: cd frontend && pnpm build
+
+      - name: Backup drill
+        run: |
+          tmp=$(mktemp -d)
+          WWSE_DATA_DIR=$tmp uv --directory backend run alembic upgrade head
+          WWSE_DATA_DIR=$tmp uv --directory backend run python scripts/backup_drill.py

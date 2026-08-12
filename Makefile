@@ -5,8 +5,9 @@ BACKEND := uv run --directory backend
 
 .PHONY: install lint test test-unit test-integration test-contract migrate migrate-check dev backup-dry replay
 
-install:                   ## uv sync（后端依赖）
+install:                   ## uv sync（后端）+ pnpm install（前端）
 	cd backend && uv sync
+	cd frontend && pnpm install
 
 lint:                      ## ruff + mypy
 	$(BACKEND) ruff check src tests
@@ -32,8 +33,10 @@ migrate-check:             ## 空库可建校验（CI 用临时空库）
 dev:                       ## 本地开发：单 worker + 热重载
 	$(BACKEND) uvicorn wws_adviser.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
 
-backup-dry:                ## 备份演练（波5）
-	@echo "TODO 波5: scripts/backup_dry_run.py"
+backup-dry:                ## 备份恢复演练（临时库迁移→backup→restore→verify）
+	@tmp=$$(mktemp -d); \
+	WWSE_DATA_DIR=$$tmp $(BACKEND) alembic upgrade head; \
+	WWSE_DATA_DIR=$$tmp $(BACKEND) python scripts/backup_drill.py
 
 gen-api:                   ## 导出后端 OpenAPI + 前端类型生成
 	cd backend && uv run python scripts/export_openapi.py
