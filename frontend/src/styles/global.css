@@ -1,0 +1,18 @@
+:root {
+  font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei",
+    "Noto Sans CJK SC", system-ui, sans-serif;
+  color: #101828;
+  background-color: #f5f7fa;
+}
+
+body {
+  margin: 0;
+}
+
+/* ENFORCEMENT_CONTRACT §2.2：全局 tabular-nums 兜底（数字等宽） */
+table,
+.num,
+[data-num] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}

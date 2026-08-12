@@ -35,5 +35,9 @@ dev:                       ## 本地开发：单 worker + 热重载
 backup-dry:                ## 备份演练（波5）
 	@echo "TODO 波5: scripts/backup_dry_run.py"
 
+gen-api:                   ## 导出后端 OpenAPI + 前端类型生成
+	cd backend && uv run python scripts/export_openapi.py
+	cd frontend && pnpm gen:api
+
 replay:                    ## 金丝雀报告回放（波5）
 	@echo "TODO 波5: scripts/replay_canary.py"
