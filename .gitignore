@@ -1,3 +1,25 @@
 .claude
 .omc
 .zcode
+
+# Python / uv
+backend/.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+
+# 运行数据（见 1_REPO_STRUCTURE.md §2）
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# 本地环境
+.env
+.env.local

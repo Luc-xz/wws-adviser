@@ -136,7 +136,7 @@
 
 ## 6. 整改建议
 
-> **修复状态（2026-08-12 更新）：** 本节属于**设计 token 层**的 P0/P1 项已落地——新增 `color.action.*` 六 token 与 `color.status.online`，并强化 UI §7.3 硬规则，决策记录见 [ADR-0009](../adr/0009-action-and-online-color-tokens.md)；前端组件层的强制断言已规格化为 [COMPONENT_TEST_CONTRACTS.md](./COMPONENT_TEST_CONTRACTS.md)，Phase 0.4 起 translate 为 vitest 红灯测试。下方"按 §11 验收清单"表保留为前端实现 Checklist。§2.2 对违规的描述为审核时点快照，保留作问题记录，不就地改写。
+> **修复状态（2026-08-12 更新）：** 本节属于**设计 token 层**的 P0/P1 项已落地——新增 `color.action.*` 六 token 与 `color.status.online`，并强化 UI §7.3 硬规则，决策记录见 [ADR-0009](../adr/0009-action-and-online-color-tokens.md)；前端组件层的强制断言见下方 [ENFORCEMENT_CONTRACT.md](./ENFORCEMENT_CONTRACT.md)。下方"按 §11 验收清单"表保留为前端实现 Checklist。§2.2 对违规的描述为审核时点快照，保留作问题记录，不就地改写。
 
 ### 推荐路径：以前端组件代码强制约束（而非逐张修 Stitch 稿）
 

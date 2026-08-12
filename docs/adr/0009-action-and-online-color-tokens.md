@@ -2,7 +2,7 @@
 
 > 状态：Accepted
 > 日期：2026-08-12
-> 关联：[UI §7.1 / §7.3](../UI_DESIGN_SPECIFICATION.md) · [REVIEW_REPORT §2.2](../design-review/REVIEW_REPORT.md) · [COMPONENT_STATES §3.1](../design-review/COMPONENT_STATES.md) · [COMPONENT_TEST_CONTRACTS](../design-review/COMPONENT_TEST_CONTRACTS.md)
+> 关联：[UI §7.1 / §7.3](../UI_DESIGN_SPECIFICATION.md) · [REVIEW_REPORT §2.2](../design-review/REVIEW_REPORT.md) · [COMPONENT_STATES §3.1](../design-review/COMPONENT_STATES.md) · [ENFORCEMENT_CONTRACT](../design-review/ENFORCEMENT_CONTRACT.md)
 
 ## 上下文
 
@@ -30,7 +30,7 @@
 ## 正负影响
 
 **正向：**
-- 行动色与在线色可在前端组件 + vitest 断言层强制（见 [COMPONENT_TEST_CONTRACTS.md](../design-review/COMPONENT_TEST_CONTRACTS.md)），违规在 CI 阶段被拦截。
+- 行动色与在线色可在前端组件 + vitest 断言层强制（见 [ENFORCEMENT_CONTRACT.md](../design-review/ENFORCEMENT_CONTRACT.md)），违规在 CI 阶段被拦截。
 - 修复 A 股约定反向违规（正盈利涂绿、下跌涂红），消除金融语义色歧义。
 - Stitch 稿的既有违规无需逐张改——前端按 token 渲染即自动纠正。
 

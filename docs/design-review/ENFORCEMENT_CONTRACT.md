@@ -5,6 +5,8 @@
 > **配套：** [COMPONENT_STATES.md](./COMPONENT_STATES.md) 定义"组件有哪些状态"，本文定义"如何强制状态做对"。
 > **落位前提：** 本文代码模板在 `frontend/` 骨架建起后移入对应位置即可生效（骨架尚未生成，见仓库根只有 docs/）。
 > **工具链：** UnoCSS（§7-329 确认）+ Vitest + ESLint + vue-tsc
+> **色值权威：** token 色值以 [UI §7.1](../UI_DESIGN_SPECIFICATION.md) + [ADR-0009](../adr/0009-action-and-online-color-tokens.md) 为准；本文是代码落点（uno.config.ts 模板）。`online` 用 teal `#0D9488`（视觉可辨，从根上消除"下跌绿误作在线"违规 A），**不与 `market-down` 同值**。
+> **本文已吸收** 原 `COMPONENT_TEST_CONTRACTS.md`（契约 ID 体系 `TC-XXX-NN`、token ΔE 断言、AC 验收映射见 §7），后者已删除，本文为唯一前端强制契约。
 
 ---
 
@@ -30,25 +32,26 @@ Stitch 稿违规的根因是**缺这套 token**，导致设计师用 `market-dow
 
 ```ts
 // frontend/uno.config.ts —— 新增 token（红色 = 违规重灾区）
+// 色值以 UI §7.1 + ADR-0009 为准
 theme: {
   colors: {
     // —— 系统状态（解决"下跌绿误作成功/在线"，REVIEW_REPORT §2.2-A）——
-    success:        '#079455',  // 注意：与 market-down 同值但语义独立，未来可分色
+    success:        '#067647',  // 任务完成（对齐 UI §7.1，区别于 market-down #079455）
     'success-container': '#E6F6EC',
-    online:         '#079455',  // 在线/连接正常（替代误用的 market-down）
-    'online-container':  '#E6F6EC',
+    online:         '#0D9488',  // 在线/连接正常 —— teal，视觉可辨于 market-down（ADR-0009）
+    'online-container':  '#CCFBF1',  // teal 弱背景
     // —— 行动色族（解决"同一减少三色"，REVIEW_REPORT §2.2-D）——
     'action-hold':    '#475467',  // Slate，保持
-    'action-watch':   '#DC6803',  // 琥珀，观察（=risk-warning 同值，但语义独立）
-    'action-add':     '#3157D5',  // 靛蓝，条件式增加（=primary-container）
-    'action-reduce':  '#C2410C',  // 深橙，减少（与 watch 琥珀区分）
+    'action-watch':   '#DC6803',  // 琥珀，观察（与 risk-warning 同值，语义独立）
+    'action-add':     '#3157D5',  // 靛蓝，条件式增加（=primary）
+    'action-reduce':  '#C2410C',  // 深橙，减少（与 watch 琥珀可辨）
     'action-exit':    '#C11574',  // 洋红，退出观察（=risk-critical 同值）
-    'action-pause':   '#747685',  // 灰，暂停建议
+    'action-pause':   '#667085',  // 灰，暂停建议（对齐 UI §7.1）
   }
 }
 ```
 
-> **关键设计：** 即使两个 token 当前同值（如 success 与 market-down 都是 #079455），也必须分开命名——这样 lint 能按**语义**拦截（`text-market-down` 用在非行情处即报错），且未来调色不互相影响。
+> **关键设计：** 即便某些 token 当前与它者同值或接近（如 `action-watch`=`risk-warning`、`action-exit`=`risk-critical`），也必须分开命名——这样 lint 能按**语义**拦截（`text-market-down` 用在非行情处即报错），且未来调色互不影响。`online` 特例：刻意选 teal `#0D9488` 与 `market-down` `#079455` 拉开视觉距离（ADR-0009 决策），因为"在线/健康"与"下跌"一旦同色，lint 规则的漏洞或新人绕过都会让违规 A 重现——视觉可辨是更彻底的防线。
 
 ### 1.3 Token 使用硬规则（对应 §7.3）
 
@@ -300,4 +303,53 @@ describe('§9 组件硬规则', () => {
 
 ---
 
-*本契约与 [COMPONENT_STATES.md](./COMPONENT_STATES.md)（状态定义）、[REVIEW_REPORT.md](./REVIEW_REPORT.md)（问题清单）配套。三文档闭环：问题在哪 → 状态有哪些 → 代码怎么强制做对。*
+## 7. 契约追溯（吸收自原 COMPONENT_TEST_CONTRACTS）
+
+> 本节把原 `COMPONENT_TEST_CONTRACTS.md` 的契约 ID 体系、token ΔE 断言、AC 验收映射并入，使 §4 的 vitest 断言可被编号追溯。
+
+### 7.1 断言契约 ID 体系
+
+§4 的 vitest 用例按 `TC-<组件>-NN` 编号，作为 `it()` 标题前缀，便于追溯到验收场景（AC）：
+
+| 前缀 | 组件 | §4 对应断言 |
+|---|---|---|
+| `TC-ADV` | AdviceCard | pause 不渲染数量 / expired 透明度+Badge / 六色可辨 / 无"立即执行"违规文案 |
+| `TC-DSB` | DataStatusBar | 4 态全覆盖 |
+| `TC-RA` | RiskAlert | critical 含 impact+action |
+| `TC-PG` | 页面级（HOME/CHAT） | 空账户不渲染 ¥0 / 离线刷新 disabled / 过期→PAUSE |
+| `TC-GS` | 全局状态 | 无全屏 Spinner / 空风险平静无庆祝动画 |
+| `TC-NUM` | 数字格式 | U+2212 负号 / em-dash 空值 |
+| `TC-TOKEN` | 色彩层 | 见 §7.2 |
+
+### 7.2 token ΔE 可辨性断言（色彩层，独立于组件测试）
+
+这是 [ADR-0009](../adr/0009-action-and-online-color-tokens.md) 的 enforce 点。token→色值映射单独用一份样式/配置（uno.config.ts）承载，用专门的色彩断言守住，**不混进组件逻辑测试**。
+
+```ts
+// frontend/src/styles/__tests__/tokens.test.ts
+import { describe, it, expect } from 'vitest'
+// 色差计算用 colord 的 CIEDE2000 或等价实现
+
+describe('TC-TOKEN 色彩可辨性', () => {
+  it('TC-TOKEN-01 action.* 六色两两 ΔE2000 ≥ 12（防 reduce/watch 撞色）', () => { /* ... */ })
+  it('TC-TOKEN-02 online #0D9488 vs market-down #079455 ΔE2000 ≥ 12（违规 A 防御）', () => { /* ... */ })
+  it('TC-TOKEN-03 risk-critical #C11574 vs market-up #D92D20 ΔE2000 ≥ 12（违规 C 防御）', () => { /* ... */ })
+  it('TC-TOKEN-04 组件 mount 产物中行动语义节点 class 命名空间属 action-*，无 market-*', () => { /* ... */ })
+})
+```
+
+> ΔE 阈值 12 为初定，Phase 0.4 落地时用真实色卡校准后固化为命名常量。
+
+### 7.3 与 AC 验收映射
+
+| 断言组 | 对应验收 | Phase |
+|---|---|---|
+| TC-ADV pause / TC-PG 过期 | AC-03（过期行情停止给具体数量）、AC-07（PAUSE 红线） | 2 |
+| TC-DSB | AC-02（数据质量可见）、AC-03 | 1/2 |
+| TC-RA / TC-TOKEN-03 | AC-04（风险规则可见） | 1 |
+| TC-PG / TC-GS | AC-08（PWA 体验） | 0/3 |
+| TC-TOKEN-* | REVIEW_REPORT §6 P0/P1 整改 | 0.4 起 |
+
+---
+
+*本契约与 [COMPONENT_STATES.md](./COMPONENT_STATES.md)（状态定义）、[REVIEW_REPORT.md](./REVIEW_REPORT.md)（问题清单）、[ADR-0009](../adr/0009-action-and-online-color-tokens.md)（token 决策）配套。四文档闭环：问题在哪 → 状态有哪些 → 代码怎么强制做对 → 决策为何这么定。*

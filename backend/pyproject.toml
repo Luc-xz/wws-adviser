@@ -1,0 +1,55 @@
+[project]
+name = "wws-adviser"
+version = "0.1.0"
+description = "WWS Adviser — 个人投资顾问（FastAPI 模块化单体）"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sqlalchemy>=2.0",
+    "alembic>=1.14",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "apscheduler>=3.10",
+    "httpx>=0.28",
+    "polars>=1.0",
+    "argon2-cffi>=23.1",
+    "python-ulid>=3.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "hypothesis>=6.115",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wws_adviser"]
+
+[tool.ruff]
+src = ["src", "tests"]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+# 层级隔离（domain.py 禁框架 import，见 1_REPO_STRUCTURE.md §3 硬规则）
+# 在波2 引入 modules/*/domain.py 后，用 TID251 (banned-api) + per-file-ignores 配置：
+# domain.py 禁 fastapi/sqlalchemy/httpx/SDK；其余文件放行。
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["src/wws_adviser"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q"
