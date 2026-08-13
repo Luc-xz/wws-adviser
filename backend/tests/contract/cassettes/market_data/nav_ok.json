@@ -1,0 +1,16 @@
+{
+  "port": "NAVProvider",
+  "scenario": "nav_ok",
+  "recorded_at": "2026-08-13T00:00:00+00:00",
+  "sanitized": true,
+  "response": {
+    "source": "stub",
+    "source_url": "stub://nav/159915",
+    "market_time": "2026-08-13T15:00:00+08:00",
+    "fetched_at": "2026-08-13T15:00:01+08:00",
+    "received_at": "2026-08-13T15:00:01+08:00",
+    "source_delay_class": "end_of_day",
+    "nav": "1.234567",
+    "published_at": "2026-08-13"
+  }
+}

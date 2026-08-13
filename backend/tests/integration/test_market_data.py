@@ -11,6 +11,6 @@ def test_quote_closed_loop_returns_stub_data(migrated_client) -> None:
     body = r.json()
     assert body["code"] == "600519"
     assert body["source"] == "stub"  # 数据来自 stub 适配器，证明端口抽象生效
-    assert body["price"] == "100.00"
-    assert body["change_pct"] == "1.23"
+    assert body["price"] == "100.0000"  # 波2：parse_quote 按 price_scale=4 校正
+    assert body["change_pct"] == "1.2300"
     assert body["market_time"]

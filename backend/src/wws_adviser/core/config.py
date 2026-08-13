@@ -26,6 +26,12 @@ class Settings(BaseModel):
     login_rate_limit_window_seconds: int = 300
     job_lease_ttl_seconds: int = 300
     job_max_attempts: int = 3
+    # 波2 行情采集运行配置（5_DATA_INGESTION_AND_QUALITY.md §5/§13）
+    market_data_source: str = "stub"  # stub | akshare（akshare 需装 optional extra）
+    # TODO(Phase2): 盘中新鲜度门禁实际生效；日线口径波2 已用 DAILY 规则
+    intraday_freshness_threshold_seconds: int = 180
+    clock_skew_threshold_seconds: int = 5  # TODO(clock-skew): NTP 偏移校验未实现
+    nav_published_freshness_hours: int = 24
 
     @property
     def is_prod(self) -> bool:
@@ -90,4 +96,10 @@ def load_settings(
         ),
         job_lease_ttl_seconds=int(os.environ.get("WWSE_JOB_LEASE_TTL_SEC", "300")),
         job_max_attempts=int(os.environ.get("WWSE_JOB_MAX_ATTEMPTS", "3")),
+        market_data_source=os.environ.get("WWSE_MARKET_DATA_SOURCE", "stub"),
+        intraday_freshness_threshold_seconds=int(
+            os.environ.get("WWSE_INTRADAY_FRESHNESS_SEC", "180")
+        ),
+        clock_skew_threshold_seconds=int(os.environ.get("WWSE_CLOCK_SKEW_SEC", "5")),
+        nav_published_freshness_hours=int(os.environ.get("WWSE_NAV_FRESHNESS_HOURS", "24")),
     )

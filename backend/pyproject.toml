@@ -18,6 +18,11 @@ dependencies = [
     "python-multipart>=0.0.9",
 ]
 
+[project.optional-dependencies]
+# 行情真实数据源（重依赖：pandas/numpy/JS 引擎）。`uv sync` 默认不装；
+# 启用：uv sync --extra akshare 并设 WWSE_MARKET_DATA_SOURCE=akshare。
+akshare = ["akshare>=1.18"]
+
 [dependency-groups]
 dev = [
     "ruff>=0.8",

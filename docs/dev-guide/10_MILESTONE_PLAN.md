@@ -67,6 +67,7 @@
 > **波次进度**（退出条件全部留待波8 整体核验，逐波只记交付）：
 >
 > - **波1（1.1）✅ 2026-08-13**：持仓/交易基础层交付。新增 `instruments`、`portfolio` 两模块（domain/models/repository/schemas/service/api）+ 迁移 `0003_portfolio`（instruments/accounts/transactions）。金额按定标整数分存储、price/quantity 无损 decimal 串；指纹去重（sha256，量化保证 `100`≡`100.000000`）；CSV 导入预览（`batch_id` 串起确认）+ 确认两阶段、错误行预览拒绝、跨路径（导入/手工）幂等。端点：`/api/v1/instruments*`、`/accounts`、`/transactions*`（含 `/import`、`/import/confirm`）。门禁全绿：ruff/mypy strict（76 文件）/pytest 99 passed/migrate-check/backup-dry（9 表一致）/前端 gen:api+lint+build。AC-01 由 `test_csv_import_*`、`test_manual_transaction_*` 直接覆盖。position_snapshots（avg_cost/PnL）随波4 引入。
+> - **波2（1.2）✅ 2026-08-13**：行情采集（日线/净值为主）交付。扩展 `market_data` 模块（+models/repository + service 采集流水线 + domain parse_bars/parse_nav/质量/新鲜度骨架）+ 迁移 `0004_market_data`（trading_calendar/market_records/nav_records）+ `infrastructure/storage/parquet_store.py`（polars 分区原子写/读）。日线采集：fetch→parse（OHLC 合法性校验）→Parquet 主存 + SQLite 元数据索引 upsert（UNIQUE 去重）→质量状态（日线口径 OK/MISSING/DELAYED）。端点：`/api/v1/market/{bars,nav,quality,state}` + `*/refresh`（ops，需 Idempotency-Key）。AKShare 列为 optional extra + 懒加载适配器脚手架（`rows_to_*` 纯函数单测，真实调用留待国内 VPS 实录）；stub 默认、闭环可测。门禁全绿：ruff/mypy strict（82 文件）/pytest 116 passed/migrate-check/backup-dry（12 表一致）/前端 gen:api+lint。盘中 180s TTL/状态机（Phase 2.1）、data_conflicts（Phase 3.3）、clock-skew/熔断（TODO）本轮留白。
 
 ## 4. Phase 2：盘中与凯利
 

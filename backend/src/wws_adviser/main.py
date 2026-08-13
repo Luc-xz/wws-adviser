@@ -64,10 +64,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     engine = create_app_engine(settings)
     app.state.engine = engine
     app.state.session_factory = make_session_factory(engine)
-    # 端口适配器（Phase 0 stub；唯一构造点，见 1_REPO_STRUCTURE §5）
-    app.state.quote_provider = StubQuoteProvider(env=settings.env)
-    app.state.bar_provider = StubBarProvider(env=settings.env)
-    app.state.nav_provider = StubNAVProvider(env=settings.env)
+    # 端口适配器（唯一构造点，见 1_REPO_STRUCTURE §5）。行情数据源按配置选 akshare/stub；
+    # akshare 为 optional extra，适配器模块懒加载 akshare（未装也能导入，调用时才需）。
+    if settings.market_data_source == "akshare":
+        from wws_adviser.infrastructure.data_sources.akshare_bar import AKShareBarProvider
+        from wws_adviser.infrastructure.data_sources.akshare_nav import AKShareNAVProvider
+        from wws_adviser.infrastructure.data_sources.akshare_quote import AKShareQuoteProvider
+
+        app.state.quote_provider = AKShareQuoteProvider(env=settings.env)
+        app.state.bar_provider = AKShareBarProvider(env=settings.env)
+        app.state.nav_provider = AKShareNAVProvider(env=settings.env)
+        _logger.info("行情数据源：akshare（真实调用需安装 optional extra）")
+    else:
+        app.state.quote_provider = StubQuoteProvider(env=settings.env)
+        app.state.bar_provider = StubBarProvider(env=settings.env)
+        app.state.nav_provider = StubNAVProvider(env=settings.env)
     app.state.document_provider = StubDocumentProvider(env=settings.env)
     app.state.model_port = StubModelPort(env=settings.env)
     app.state.notifier = StubNotifierPort(env=settings.env)

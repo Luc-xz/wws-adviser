@@ -14,7 +14,7 @@ from wws_adviser.core.config import Settings
 from wws_adviser.modules.identity import service as identity_service
 from wws_adviser.modules.identity.domain import AuthenticationError
 from wws_adviser.modules.identity.models import User
-from wws_adviser.ports.market_data import QuoteProvider
+from wws_adviser.ports.market_data import BarProvider, NAVProvider, QuoteProvider
 
 
 def get_session(request: Request) -> Iterator[Session]:
@@ -41,3 +41,11 @@ def get_current_user(request: Request, db: Annotated[Session, Depends(get_sessio
 
 def get_quote_provider(request: Request) -> QuoteProvider:
     return cast(QuoteProvider, request.app.state.quote_provider)
+
+
+def get_bar_provider(request: Request) -> BarProvider:
+    return cast(BarProvider, request.app.state.bar_provider)
+
+
+def get_nav_provider(request: Request) -> NAVProvider:
+    return cast(NAVProvider, request.app.state.nav_provider)
