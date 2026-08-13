@@ -15,7 +15,9 @@ from wws_adviser.api.routes import health
 from wws_adviser.core.config import Settings
 from wws_adviser.core.logging import request_id_var
 from wws_adviser.modules.identity.api import router as identity_router
+from wws_adviser.modules.instruments.api import router as instruments_router
 from wws_adviser.modules.market_data.api import router as market_data_router
+from wws_adviser.modules.portfolio.api import router as portfolio_router
 
 
 def create_app(
@@ -34,6 +36,8 @@ def create_app(
     app.include_router(health.router)
     app.include_router(identity_router)
     app.include_router(market_data_router)
+    app.include_router(instruments_router)
+    app.include_router(portfolio_router)
 
     write_methods = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 

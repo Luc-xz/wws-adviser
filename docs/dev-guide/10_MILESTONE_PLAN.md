@@ -64,6 +64,10 @@
 - [ ] 公告源失败时报告标记不完整（AC-02）。
 - [ ] 备份恢复演练通过，账本哈希/持仓一致，密钥不进普通备份（AC-09）。
 
+> **波次进度**（退出条件全部留待波8 整体核验，逐波只记交付）：
+>
+> - **波1（1.1）✅ 2026-08-13**：持仓/交易基础层交付。新增 `instruments`、`portfolio` 两模块（domain/models/repository/schemas/service/api）+ 迁移 `0003_portfolio`（instruments/accounts/transactions）。金额按定标整数分存储、price/quantity 无损 decimal 串；指纹去重（sha256，量化保证 `100`≡`100.000000`）；CSV 导入预览（`batch_id` 串起确认）+ 确认两阶段、错误行预览拒绝、跨路径（导入/手工）幂等。端点：`/api/v1/instruments*`、`/accounts`、`/transactions*`（含 `/import`、`/import/confirm`）。门禁全绿：ruff/mypy strict（76 文件）/pytest 99 passed/migrate-check/backup-dry（9 表一致）/前端 gen:api+lint+build。AC-01 由 `test_csv_import_*`、`test_manual_transaction_*` 直接覆盖。position_snapshots（avg_cost/PnL）随波4 引入。
+
 ## 4. Phase 2：盘中与凯利
 
 **对应**：PRD §17 阶段 2 · 技术架构 §24 Phase 2 · 验收 AC-03/07 · 风险/降级自动测试门槛 PRD §18。

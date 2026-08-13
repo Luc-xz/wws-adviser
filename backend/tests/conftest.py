@@ -32,7 +32,9 @@ def db_session(tmp_path):
     from wws_adviser.core.db import Base, create_app_engine, make_session_factory
     from wws_adviser.modules.audit import models as _audit_models  # noqa: F401
     from wws_adviser.modules.identity import models as _identity_models  # noqa: F401
+    from wws_adviser.modules.instruments import models as _instruments_models  # noqa: F401
     from wws_adviser.modules.jobs import models as _jobs_models  # noqa: F401
+    from wws_adviser.modules.portfolio import models as _portfolio_models  # noqa: F401
 
     s = Settings(env="test", data_dir=tmp_path)
     engine = create_app_engine(s)
@@ -59,7 +61,9 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.modules.audit import models as _a  # noqa: F401
     from wws_adviser.modules.identity import domain  # noqa: F401
     from wws_adviser.modules.identity import models as identity_models
+    from wws_adviser.modules.instruments import models as _i  # noqa: F401
     from wws_adviser.modules.jobs import models as _j  # noqa: F401
+    from wws_adviser.modules.portfolio import models as _p  # noqa: F401
 
     settings = Settings(env="test", data_dir=tmp_path)
     engine = create_app_engine(settings)
