@@ -14,7 +14,9 @@ from wws_adviser.core.config import Settings
 from wws_adviser.modules.identity import service as identity_service
 from wws_adviser.modules.identity.domain import AuthenticationError
 from wws_adviser.modules.identity.models import User
+from wws_adviser.ports.document_source import DocumentProvider
 from wws_adviser.ports.market_data import BarProvider, NAVProvider, QuoteProvider
+from wws_adviser.ports.object_store import ObjectStore
 
 
 def get_session(request: Request) -> Iterator[Session]:
@@ -49,3 +51,11 @@ def get_bar_provider(request: Request) -> BarProvider:
 
 def get_nav_provider(request: Request) -> NAVProvider:
     return cast(NAVProvider, request.app.state.nav_provider)
+
+
+def get_document_provider(request: Request) -> DocumentProvider:
+    return cast(DocumentProvider, request.app.state.document_provider)
+
+
+def get_object_store(request: Request) -> ObjectStore:
+    return cast(ObjectStore, request.app.state.object_store)

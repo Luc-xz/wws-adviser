@@ -28,6 +28,7 @@ class Settings(BaseModel):
     job_max_attempts: int = 3
     # 波2 行情采集运行配置（5_DATA_INGESTION_AND_QUALITY.md §5/§13）
     market_data_source: str = "stub"  # stub | akshare（akshare 需装 optional extra）
+    document_source: str = "stub"  # stub | akshare（公告/新闻，同 market_data 选源模式）
     # TODO(Phase2): 盘中新鲜度门禁实际生效；日线口径波2 已用 DAILY 规则
     intraday_freshness_threshold_seconds: int = 180
     clock_skew_threshold_seconds: int = 5  # TODO(clock-skew): NTP 偏移校验未实现
@@ -97,6 +98,7 @@ def load_settings(
         job_lease_ttl_seconds=int(os.environ.get("WWSE_JOB_LEASE_TTL_SEC", "300")),
         job_max_attempts=int(os.environ.get("WWSE_JOB_MAX_ATTEMPTS", "3")),
         market_data_source=os.environ.get("WWSE_MARKET_DATA_SOURCE", "stub"),
+        document_source=os.environ.get("WWSE_DOCUMENT_SOURCE", "stub"),
         intraday_freshness_threshold_seconds=int(
             os.environ.get("WWSE_INTRADAY_FRESHNESS_SEC", "180")
         ),

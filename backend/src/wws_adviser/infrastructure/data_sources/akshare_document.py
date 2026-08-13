@@ -1,0 +1,72 @@
+"""AKShare 公告/新闻适配器（DocumentProvider）——脚手架。
+
+akshare 懒加载（重依赖，optional extra）。真实公告接口选定（如 stock_notice_report 等
+经 cninfo/巨潮）与实录留待国内 VPS；`rows_to_document_ref` 为纯函数，可单测（无 pandas/网络）。
+"""
+
+import asyncio
+from datetime import datetime
+from typing import Any
+
+from wws_adviser.core.time import now_utc_iso
+from wws_adviser.ports.document_source import DocumentRef, DocumentScope, RawDocument
+from wws_adviser.ports.market_data import SourceDelayClass
+
+
+def rows_to_document_ref(
+    rows: list[dict[str, Any]], *, source: str = "akshare"
+) -> list[DocumentRef]:
+    """akshare 公告 DF 记录（中文列名）→ list[DocumentRef]。纯函数，可单测。
+
+    兼容常见列名：公告标题/标题、公告时间/日期、网址/url、公告类型/类型。
+    """
+    out: list[DocumentRef] = []
+    for r in rows:
+        title = str(r.get("公告标题", r.get("标题", "")))
+        if not title:
+            continue
+        published = str(r.get("公告时间", r.get("日期", "")))[:10]
+        url = str(r.get("网址", r.get("url", "")))
+        kind = str(r.get("公告类型", r.get("类型", "announcement"))).lower() or "announcement"
+        out.append(
+            DocumentRef(
+                source_url=url or f"akshare://announcement/{title}",
+                kind=kind,
+                title=title,
+                published_at=published,
+            )
+        )
+    return out
+
+
+class AKShareDocumentProvider:
+    def __init__(self, *, env: str = "dev") -> None:
+        self._env = env
+
+    async def discover(
+        self, scope: DocumentScope, since: datetime
+    ) -> list[DocumentRef]:
+        if scope.instrument is None:
+            return []
+        import akshare as ak  # type: ignore[import-not-found]
+
+        df = await asyncio.to_thread(ak.stock_notice_report, symbol=scope.instrument.code)
+        rows: list[dict[str, Any]] = list(df.to_dict("records"))
+        return rows_to_document_ref(rows)
+
+    async def download(self, ref: DocumentRef) -> RawDocument:
+        now = now_utc_iso()
+        # MVP：公告正文需按 source_url 抓取（akshare 无直接正文接口），此处返回标题占位
+        body = ref.title
+        return RawDocument(
+            source="akshare",
+            source_url=ref.source_url,
+            market_time=now,
+            fetched_at=now,
+            received_at=now,
+            source_delay_class=SourceDelayClass.DELAYED,
+            kind=ref.kind,
+            title=ref.title,
+            content=body.encode("utf-8"),
+            text=body,
+        )

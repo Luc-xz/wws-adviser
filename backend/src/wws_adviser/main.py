@@ -29,6 +29,18 @@ from wws_adviser.infrastructure.storage.local_object_store import LocalObjectSto
 _logger = logging.getLogger(__name__)
 
 
+def _build_document_provider(settings: Settings) -> object:
+    """文档数据源选源：akshare（需 optional extra，懒加载）或 stub。"""
+    if settings.document_source == "akshare":
+        from wws_adviser.infrastructure.data_sources.akshare_document import (
+            AKShareDocumentProvider,
+        )
+
+        _logger.info("文档数据源：akshare（真实调用需安装 optional extra）")
+        return AKShareDocumentProvider(env=settings.env)
+    return StubDocumentProvider(env=settings.env)
+
+
 def acquire_scheduler_lock(settings: Settings) -> IO[str] | None:
     """非阻塞获取 scheduler 文件锁；失败/平台不支持仅告警，不阻断 API。
 
@@ -79,7 +91,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.quote_provider = StubQuoteProvider(env=settings.env)
         app.state.bar_provider = StubBarProvider(env=settings.env)
         app.state.nav_provider = StubNAVProvider(env=settings.env)
-    app.state.document_provider = StubDocumentProvider(env=settings.env)
+    app.state.document_provider = _build_document_provider(settings)
     app.state.model_port = StubModelPort(env=settings.env)
     app.state.notifier = StubNotifierPort(env=settings.env)
     app.state.object_store = LocalObjectStore(settings.data_dir)

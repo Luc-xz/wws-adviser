@@ -31,6 +31,7 @@ def db_session(tmp_path):
     """已建表（Base.metadata.create_all）的 DB session，供 service 层测试。"""
     from wws_adviser.core.db import Base, create_app_engine, make_session_factory
     from wws_adviser.modules.audit import models as _audit_models  # noqa: F401
+    from wws_adviser.modules.documents import models as _documents_models  # noqa: F401
     from wws_adviser.modules.identity import models as _identity_models  # noqa: F401
     from wws_adviser.modules.instruments import models as _instruments_models  # noqa: F401
     from wws_adviser.modules.jobs import models as _jobs_models  # noqa: F401
@@ -40,6 +41,9 @@ def db_session(tmp_path):
     s = Settings(env="test", data_dir=tmp_path)
     engine = create_app_engine(s)
     Base.metadata.create_all(engine)
+    from wws_adviser.modules.documents.repository import create_fts_if_missing
+
+    create_fts_if_missing(engine)  # FTS5 虚拟表不在 ORM metadata，需单独建
     factory = make_session_factory(engine)
     session = factory()
     try:
@@ -60,6 +64,7 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.core.time import now_utc_iso
     from wws_adviser.main import lifespan
     from wws_adviser.modules.audit import models as _a  # noqa: F401
+    from wws_adviser.modules.documents import models as _docs  # noqa: F401
     from wws_adviser.modules.identity import domain  # noqa: F401
     from wws_adviser.modules.identity import models as identity_models
     from wws_adviser.modules.instruments import models as _i  # noqa: F401
@@ -70,6 +75,9 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     settings = Settings(env="test", data_dir=tmp_path)
     engine = create_app_engine(settings)
     Base.metadata.create_all(engine)
+    from wws_adviser.modules.documents.repository import create_fts_if_missing
+
+    create_fts_if_missing(engine)
     factory = make_session_factory(engine)
     with factory() as db:
         db.add(
