@@ -45,7 +45,10 @@ def acquire_scheduler_lock(settings: Settings) -> IO[str] | None:
         return None
     lock_file = open(settings.scheduler_lock_path, "w")  # noqa: SIM115
     try:
-        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)  # type: ignore[attr-defined]
+        # getattr 规避 attr-defined 检查：fcntl 是 unix-only，typeshed stub 在 Linux/Windows
+        # 加载行为不同（Linux 加载→attr 已知，Windows 不加载→attr 未知），用 getattr 统一为 Any。
+        _flock = getattr(fcntl, "flock")  # noqa: B009
+        _flock(lock_file.fileno(), getattr(fcntl, "LOCK_EX") | getattr(fcntl, "LOCK_NB"))  # noqa: B009
         return lock_file
     except OSError:
         _logger.warning("scheduler.lock 已被持有，不启动调度线程（API 继续服务）")
