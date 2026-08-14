@@ -92,6 +92,11 @@ def get_user_account(db: DBSession, user_id: str) -> Account:
     return _get_user_account(db, user_id)
 
 
+def get_account_by_id(db: DBSession, account_id: str) -> Account | None:
+    """公开入口：按 id 取账户。供 reports（冻结快照）等跨模块用。"""
+    return repository.get_account_by_id(db, account_id)
+
+
 def list_position_snapshots(
     db: DBSession,
     *,
