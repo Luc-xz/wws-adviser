@@ -136,3 +136,24 @@ def upsert_calendar_row(db: DBSession, row: TradingCalendar) -> None:
 
 def get_calendar(db: DBSession, day: date | str) -> TradingCalendar | None:
     return db.get(TradingCalendar, day if isinstance(day, str) else day.isoformat())
+
+
+def latest_market_record_any_source(
+    db: DBSession, instrument_id: str
+) -> MarketRecord | None:
+    """最新日线（跨 source，取 business_date 最大）——估值用。"""
+    return db.scalar(
+        select(MarketRecord)
+        .where(MarketRecord.instrument_id == instrument_id)
+        .order_by(MarketRecord.business_date.desc())
+        .limit(1)
+    )
+
+
+def latest_nav_record_any_source(db: DBSession, instrument_id: str) -> NavRecord | None:
+    return db.scalar(
+        select(NavRecord)
+        .where(NavRecord.instrument_id == instrument_id)
+        .order_by(NavRecord.nav_date.desc())
+        .limit(1)
+    )

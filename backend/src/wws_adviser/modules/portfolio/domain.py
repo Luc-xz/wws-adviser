@@ -97,6 +97,120 @@ def decimal_str(value: Decimal) -> str:
     return format(value, "f")
 
 
+# —— 移动加权平均成本法（MWAC）持仓/盈亏计算（波4，确定性核心）——
+
+
+class PositionError(DomainError):
+    """持仓计算错误（如卖空导致数量为负）。"""
+
+    code = "CONFLICT"
+    status = 409
+    title = "持仓计算错误"
+
+
+@dataclass
+class TxnInput:
+    """compute_positions 的输入（由 service 从 ORM Transaction 转换，保持 domain 零 ORM 依赖）。"""
+
+    instrument_id: str
+    kind: TransactionKind
+    direction: Direction
+    quantity: Decimal
+    price: Decimal
+    fee: Decimal
+    tax: Decimal
+    trade_at: str
+
+
+@dataclass
+class PositionState:
+    """单标的回放状态。avg_cost 由 cost_basis/qty 派生（MWAC）。"""
+
+    qty: Decimal = Decimal(0)
+    cost_basis: Decimal = Decimal(0)
+    realized_pnl: Decimal = Decimal(0)
+
+    @property
+    def avg_cost(self) -> Decimal:
+        return self.cost_basis / self.qty if self.qty > 0 else Decimal(0)
+
+
+@dataclass(frozen=True)
+class PositionsResult:
+    positions: dict[str, PositionState]
+    cash: Decimal
+
+
+def _apply_txn(positions: dict[str, PositionState], t: TxnInput) -> Decimal:
+    """对 positions 应用一笔交易，返回现金增量（正=现金入，负=现金出）。规则见波4 计划表。"""
+    st = positions.setdefault(t.instrument_id, PositionState())
+    amount = t.quantity * t.price
+    if t.kind in (TransactionKind.BUY, TransactionKind.SUBSCRIBE):
+        st.qty += t.quantity
+        st.cost_basis += amount + t.fee + t.tax
+        return -(amount + t.fee + t.tax)
+    if t.kind in (TransactionKind.SELL, TransactionKind.REDEEM):
+        avg = st.avg_cost
+        new_qty = st.qty - t.quantity
+        if new_qty < 0:
+            raise PositionError(f"卖出数量超过持仓：{t.instrument_id} {t.trade_at}")
+        st.realized_pnl += t.quantity * (t.price - avg) - t.fee - t.tax
+        st.cost_basis -= t.quantity * avg
+        st.qty = new_qty
+        if st.qty == 0:
+            st.cost_basis = Decimal(0)
+        return amount - t.fee - t.tax
+    if t.kind is TransactionKind.DIVIDEND:
+        # 现金分红 = 已实现收益（不动持仓数量与成本）
+        net = amount - t.fee - t.tax
+        st.realized_pnl += net
+        return net
+    if t.kind is TransactionKind.SPLIT:
+        # 送股/拆股 = 零成本增数（摊薄 avg_cost），不动现金
+        st.qty += t.quantity
+        return Decimal(0)
+    if t.kind is TransactionKind.FEE:
+        return -(t.fee + t.tax)
+    if t.kind is TransactionKind.ADJUST:
+        # 现金调整（IN）：现金入，不动持仓
+        return amount - t.fee - t.tax
+    raise PositionError(f"未知交易类型：{t.kind}")
+
+
+def compute_positions(txns: list[TxnInput], *, initial_cash: Decimal) -> PositionsResult:
+    """按 trade_at 排序回放交易 → 每标的 PositionState + 账户现金。纯函数、确定性。
+
+    输入需已按 (trade_at, 序) 排序（调用方保证）；本函数对其做稳定排序以防万一。
+    """
+    positions: dict[str, PositionState] = {}
+    cash = initial_cash
+    for t in sorted(txns, key=lambda x: x.trade_at):
+        cash += _apply_txn(positions, t)
+    return PositionsResult(positions=positions, cash=cash)
+
+
+def compute_position_series(txns: list[TxnInput]) -> list[tuple[str, PositionState]]:
+    """逐笔回放，返回 (trade_at, 该笔后累计 PositionState) 序列（供快照重建）。
+
+    传入单标的的交易时，序列即该标的每个 trade_at 的累计持仓快照。
+    """
+    positions: dict[str, PositionState] = {}
+    series: list[tuple[str, PositionState]] = []
+    for t in sorted(txns, key=lambda x: x.trade_at):
+        _apply_txn(positions, t)
+        st = positions[t.instrument_id]
+        series.append(
+            (
+                t.trade_at,
+                PositionState(
+                    qty=st.qty, cost_basis=st.cost_basis, realized_pnl=st.realized_pnl
+                ),
+            )
+        )
+    return series
+
+
+
 # —— 指纹（防重复导入，2_DATA_MODEL §6.2）——
 
 

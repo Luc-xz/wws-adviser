@@ -21,16 +21,22 @@ from wws_adviser.modules.portfolio.domain import (
     Direction,
     ImportPreviewExpiredError,
     ParsedRow,
+    PositionsResult,
     RowError,
     TransactionKind,
+    TxnInput,
     compute_fingerprint,
+    compute_position_series,
+    compute_positions,
+    decimal_str,
     decode_cursor,
     encode_cursor,
+    from_scaled_int,
     kind_to_direction,
     parse_csv_rows,
     to_scaled_int,
 )
-from wws_adviser.modules.portfolio.models import Account, Transaction
+from wws_adviser.modules.portfolio.models import Account, PositionSnapshot, Transaction
 
 # 单进程暂存：idempotency_key -> {fingerprint: ParsedRow}
 _import_staging: dict[str, dict[str, ParsedRow]] = {}
@@ -79,6 +85,24 @@ def _get_user_account(db: DBSession, user_id: str) -> Account:
     if not accounts:
         raise AccountNotFoundError("用户尚未创建账户，请先创建账户")
     return accounts[0]
+
+
+def get_user_account(db: DBSession, user_id: str) -> Account:
+    """公开入口：取用户（唯一）账户。供 analytics 等跨模块用。"""
+    return _get_user_account(db, user_id)
+
+
+def list_position_snapshots(
+    db: DBSession,
+    *,
+    account_id: str,
+    instrument_id: str | None = None,
+    limit: int = 100,
+) -> list[PositionSnapshot]:
+    """持仓快照历史（供 analytics /positions/history）。"""
+    return repository.list_snapshots(
+        db, account_id=account_id, instrument_id=instrument_id, limit=limit
+    )
 
 
 # —— Account ——
@@ -193,6 +217,7 @@ def record_transaction(
         request_id=request_id,
     )
     db.commit()
+    rebuild_snapshots(db, account_id=account.id, instrument_id=instrument_id)
     return txn
 
 
@@ -245,6 +270,78 @@ def delete_transaction(
         request_id=request_id,
     )
     db.commit()
+    rebuild_snapshots(db, account_id=account.id, instrument_id=txn.instrument_id)
+
+
+# —— 持仓快照重建（波4）——
+
+COST_METHOD_VERSION = "MWAC_v1"
+SNAPSHOT_ALGO_VERSION = "v1"
+
+
+def _to_txn_input(row: Transaction) -> TxnInput:
+    return TxnInput(
+        instrument_id=row.instrument_id,
+        kind=TransactionKind(row.kind),
+        direction=Direction(row.direction),
+        quantity=Decimal(row.quantity),
+        price=Decimal(row.price),
+        fee=from_scaled_int(row.fee_minor, row.fee_scale),
+        tax=from_scaled_int(row.tax_minor, row.tax_scale),
+        trade_at=row.trade_at,
+    )
+
+
+def rebuild_snapshots(
+    db: DBSession, *, account_id: str, instrument_id: str | None = None
+) -> None:
+    """重建持仓快照：删该账户（或指定标的）全部快照 → 回放交易 → 逐 trade_at 落快照。
+
+    market_value/unrealized/weight 留空（由 analytics 叠加行情估值时填）。
+    """
+    inst_ids = [instrument_id] if instrument_id else repository.list_instrument_ids(db, account_id)
+    now = now_utc_iso()
+    for inst_id in inst_ids:
+        rows = repository.list_transactions(
+            db, account_id=account_id, instrument_id=inst_id, limit=100000
+        )
+        repository.delete_snapshots_for_instrument(db, account_id, inst_id)
+        series = compute_position_series([_to_txn_input(r) for r in rows])
+        for trade_at, st in series:
+            repository.upsert_snapshot(
+                db,
+                PositionSnapshot(
+                    id=new_id(),
+                    account_id=account_id,
+                    instrument_id=inst_id,
+                    business_date=trade_at,
+                    quantity=decimal_str(st.qty),
+                    available_qty=decimal_str(st.qty),
+                    avg_cost_minor=to_scaled_int(st.avg_cost),
+                    realized_pnl_minor=to_scaled_int(st.realized_pnl),
+                    unrealized_pnl_minor=None,
+                    market_value_minor=None,
+                    weight=None,
+                    cost_method_version=COST_METHOD_VERSION,
+                    snapshot_algo_version=SNAPSHOT_ALGO_VERSION,
+                    created_at=now,
+                    updated_at=now,
+                    version=1,
+                ),
+            )
+    db.commit()
+
+
+def get_position_state(db: DBSession, account_id: str) -> PositionsResult:
+    """当前持仓状态（确定性回放）：返回每标的 PositionState + 账户现金。"""
+    account = repository.get_account_by_id(db, account_id)
+    initial = (
+        from_scaled_int(account.initial_cash_minor, account.initial_cash_scale)
+        if account is not None and account.initial_cash_minor is not None
+        else Decimal(0)
+    )
+    rows = repository.list_transactions(db, account_id=account_id, limit=100000)
+    return compute_positions([_to_txn_input(r) for r in rows], initial_cash=initial)
 
 
 # —— CSV 导入 ——
@@ -289,6 +386,7 @@ def import_confirm(
     existing = repository.get_existing_fingerprints(db, account.id, fingerprints)
     created = 0
     skipped = 0
+    touched_instruments: set[str] = set()
     for fp in fingerprints:
         if fp in existing:
             skipped += 1
@@ -315,6 +413,7 @@ def import_confirm(
             note=None,
         )
         repository.add_transaction(db, txn)
+        touched_instruments.add(instrument.id)
         created += 1
         audit_service.append_event(
             db,
@@ -326,6 +425,8 @@ def import_confirm(
         )
     db.commit()
     _import_staging.pop(batch_id, None)
+    for inst_id in touched_instruments:
+        rebuild_snapshots(db, account_id=account.id, instrument_id=inst_id)
     return {"created": created, "skipped": skipped}
 
 

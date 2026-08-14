@@ -1,4 +1,4 @@
-"""Portfolio ORM：accounts、transactions（波1，2_DATA_MODEL §6.2）。
+"""Portfolio ORM：accounts、transactions、position_snapshots（波1+波4，2_DATA_MODEL §6.2）。
 
 金额（cash/fee/tax）存定标整数分 + *_scale 列；price/quantity 存无损 decimal 字符串。
 position_snapshots / pending_transactions / reconciliation_adjustments 随后续波次引入。
@@ -62,3 +62,41 @@ class Transaction(Base):
     created_at: Mapped[str] = mapped_column(sa.Text, nullable=False)
     updated_at: Mapped[str] = mapped_column(sa.Text, nullable=False)
     version: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=1)
+
+
+class PositionSnapshot(Base):
+    """持仓快照（MWAC，波4）。金额定标整数分；quantity/weight 无损 decimal 串。"""
+
+    __tablename__ = "position_snapshots"
+    __table_args__ = (
+        sa.UniqueConstraint(
+            "account_id", "instrument_id", "business_date", name="uq_position_snapshots_key"
+        ),
+        sa.Index("ix_position_snapshots_account_date", "account_id", "business_date"),
+    )
+
+    id: Mapped[str] = mapped_column(sa.String(26), primary_key=True)
+    account_id: Mapped[str] = mapped_column(
+        sa.String(26), sa.ForeignKey("accounts.id"), nullable=False
+    )
+    instrument_id: Mapped[str] = mapped_column(
+        sa.String(26), sa.ForeignKey("instruments.id"), nullable=False
+    )
+    business_date: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    quantity: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    available_qty: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    avg_cost_minor: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=0)
+    avg_cost_scale: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=2)
+    realized_pnl_minor: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=0)
+    realized_pnl_scale: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=2)
+    unrealized_pnl_minor: Mapped[int | None] = mapped_column(sa.Integer)
+    unrealized_pnl_scale: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=2)
+    market_value_minor: Mapped[int | None] = mapped_column(sa.Integer)
+    market_value_scale: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=2)
+    weight: Mapped[str | None] = mapped_column(sa.Text)
+    cost_method_version: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    snapshot_algo_version: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    created_at: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    updated_at: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    version: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=1)
+

@@ -29,6 +29,12 @@ class Settings(BaseModel):
     # 波2 行情采集运行配置（5_DATA_INGESTION_AND_QUALITY.md §5/§13）
     market_data_source: str = "stub"  # stub | akshare（akshare 需装 optional extra）
     document_source: str = "stub"  # stub | akshare（公告/新闻，同 market_data 选源模式）
+    # 波4 风险硬上限默认（PRD FR-ANL-002；/settings/risk 持久化 + PATCH 留后续小波次）
+    risk_single_cap: float = 0.30  # 单标的最大仓位
+    risk_industry_cap: float = 0.40  # 单行业最大仓位
+    risk_cash_floor: float = 0.10  # 最低现金比例
+    risk_top_n: int = 5
+    risk_top_n_concentration: float = 0.60  # 前 N 大持仓集中度
     # TODO(Phase2): 盘中新鲜度门禁实际生效；日线口径波2 已用 DAILY 规则
     intraday_freshness_threshold_seconds: int = 180
     clock_skew_threshold_seconds: int = 5  # TODO(clock-skew): NTP 偏移校验未实现
@@ -99,6 +105,11 @@ def load_settings(
         job_max_attempts=int(os.environ.get("WWSE_JOB_MAX_ATTEMPTS", "3")),
         market_data_source=os.environ.get("WWSE_MARKET_DATA_SOURCE", "stub"),
         document_source=os.environ.get("WWSE_DOCUMENT_SOURCE", "stub"),
+        risk_single_cap=float(os.environ.get("WWSE_RISK_SINGLE_CAP", "0.30")),
+        risk_industry_cap=float(os.environ.get("WWSE_RISK_INDUSTRY_CAP", "0.40")),
+        risk_cash_floor=float(os.environ.get("WWSE_RISK_CASH_FLOOR", "0.10")),
+        risk_top_n=int(os.environ.get("WWSE_RISK_TOP_N", "5")),
+        risk_top_n_concentration=float(os.environ.get("WWSE_RISK_TOP_N_CONC", "0.60")),
         intraday_freshness_threshold_seconds=int(
             os.environ.get("WWSE_INTRADAY_FRESHNESS_SEC", "180")
         ),

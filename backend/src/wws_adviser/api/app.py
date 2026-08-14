@@ -14,6 +14,7 @@ from wws_adviser.api.errors import problem, register_exception_handlers
 from wws_adviser.api.routes import health
 from wws_adviser.core.config import Settings
 from wws_adviser.core.logging import request_id_var
+from wws_adviser.modules.analytics.api import analytics_router, positions_router
 from wws_adviser.modules.documents.api import router as documents_router
 from wws_adviser.modules.identity.api import router as identity_router
 from wws_adviser.modules.instruments.api import router as instruments_router
@@ -42,6 +43,8 @@ def create_app(
     app.include_router(instruments_router)
     app.include_router(documents_router)
     app.include_router(portfolio_router)
+    app.include_router(positions_router)
+    app.include_router(analytics_router)
 
     write_methods = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 

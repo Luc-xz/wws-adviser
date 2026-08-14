@@ -6,6 +6,7 @@
 
 from dataclasses import dataclass
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 from sqlalchemy import select
@@ -218,6 +219,30 @@ def query_nav(
     end: str | None = None,
 ) -> list[dict[str, str]]:
     return parquet_store.read_nav(data_dir, instrument_id=instrument_id, start=start, end=end)
+
+
+@dataclass(frozen=True)
+class LatestPrice:
+    """最新估值价（日线 close 或基金 nav，跨 source 取最新）。"""
+
+    price: Decimal
+    business_date: str
+    source: str
+
+
+def latest_price(db: DBSession, instrument_id: str) -> LatestPrice | None:
+    """取最新 close（跨 source）；无日线则取最新 nav。供 analytics 估值用。"""
+    rec = repository.latest_market_record_any_source(db, instrument_id)
+    if rec is not None and rec.close:
+        return LatestPrice(
+            price=Decimal(rec.close), business_date=rec.business_date, source=rec.source
+        )
+    nav = repository.latest_nav_record_any_source(db, instrument_id)
+    if nav is not None:
+        return LatestPrice(
+            price=Decimal(nav.nav), business_date=nav.nav_date, source=nav.source
+        )
+    return None
 
 
 def market_quality(
