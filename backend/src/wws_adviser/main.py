@@ -6,6 +6,7 @@ lifespan 顺序（见 1_REPO_STRUCTURE.md §5、§7）：
 """
 
 import logging
+import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import IO
@@ -77,6 +78,43 @@ def _build_notifier(settings: Settings) -> object:
     return StubNotifierPort(env=settings.env)
 
 
+def _start_executor_worker(app: FastAPI, settings: Settings) -> threading.Thread:
+    """执行器常驻线程（6_MODEL §8.1：APScheduler 只入队，执行器领取 job_runs）。
+
+    持 scheduler 锁的进程启动（单实例去重）；循环领取报告任务并执行（含通知）。
+    测试环境不启动（tests 直接调用 run_due_jobs）。
+    """
+    import asyncio
+
+    from wws_adviser.modules.reports import executor as reports_executor
+
+    stop_event = threading.Event()
+
+    def loop() -> None:
+        while not stop_event.wait(settings.executor_poll_seconds):
+            try:
+                with app.state.session_factory() as db:
+                    asyncio.run(
+                        reports_executor.run_due_jobs(
+                            db,
+                            settings,
+                            settings.data_dir,
+                            model_port=getattr(app.state, "model_port", None),
+                            notifier=getattr(app.state, "notifier", None),
+                        )
+                    )
+            except Exception:  # noqa: BLE001 — 工作线程边界：单轮失败仅记日志续跑
+                _logger.exception("执行器单轮处理失败（将继续）")
+
+    t = threading.Thread(target=loop, name="report-executor", daemon=True)
+    t.start()
+    _logger.info("执行器线程已启动（每 %ss 轮询 job_runs）", settings.executor_poll_seconds)
+    stop_events = getattr(app.state, "_executor_stops", [])
+    stop_events.append(stop_event)
+    app.state._executor_stops = stop_events  # noqa: SLF001 — lifespan 关闭信令
+    return t
+
+
 def acquire_scheduler_lock(settings: Settings) -> IO[str] | None:
     """非阻塞获取 scheduler 文件锁；失败/平台不支持仅告警，不阻断 API。
 
@@ -133,16 +171,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.object_store = LocalObjectStore(settings.data_dir)
     app.state.scheduler_lock = acquire_scheduler_lock(settings)
     scheduler = None
+    executor_started = False
     if app.state.scheduler_lock is not None:
         scheduler = create_scheduler(engine, settings)
         scheduler.start()
         app.state.scheduler = scheduler
         _logger.info("APScheduler 已启动（仅入队 job_runs，不执行业务）")
+        if settings.env != "test":
+            _start_executor_worker(app, settings)  # 领取执行（报告+通知），波8 常驻
+            executor_started = True
     else:
         _logger.warning("未获 scheduler 锁，APScheduler 未启动（API 继续服务）")
     _logger.info("WWS Adviser 启动完成（env=%s）", settings.env)
     yield
-    # 优雅关闭：先停 scheduler（不等待长任务，长任务靠 lease 过期重领），再释放锁
+    # 优雅关闭：先停执行器与 scheduler（长任务靠 lease 过期重领），再释放锁
+    if executor_started:
+        for stop_event in getattr(app.state, "_executor_stops", []):
+            stop_event.set()
     if scheduler is not None:
         scheduler.shutdown(wait=False)
     scheduler_lock: IO[str] | None = getattr(app.state, "scheduler_lock", None)

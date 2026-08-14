@@ -1,0 +1,26 @@
+# 单容器部署（8_SECURITY §9.2：云端 VPS 单容器；宿主 Nginx 终结 HTTPS，仅开 443）
+# 用法：deploy/env.sh（由 env.example 复制填写）→ docker compose up -d
+services:
+  wws:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: wws-adviser:${WWS_TAG:?需 WWS_TAG（git commit，禁 latest）}
+    env_file: ./env.sh
+    volumes:
+      - wws-data:/data
+    ports:
+      - "127.0.0.1:8000:8000" # 仅本机回环，由宿主 Nginx 反代；不直接公网暴露
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=5)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options: { max-size: "50m", max-file: "5" }
+
+volumes:
+  wws-data:

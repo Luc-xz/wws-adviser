@@ -80,4 +80,11 @@ def create_app(
         response.headers["X-Request-ID"] = rid
         return response
 
+    # 同源静态（技术架构 §17.1）：配置了 WWSE_STATIC_DIR 且目录存在时挂载 PWA 产物
+    # （最后挂载 → API 路由优先匹配；html=True 提供 SPA 入口回退）。开发用 vite dev/proxy 不配。
+    if settings.static_dir is not None and settings.static_dir.is_dir():
+        from fastapi.staticfiles import StaticFiles
+
+        app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="pwa")
+
     return app

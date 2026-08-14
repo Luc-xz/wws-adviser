@@ -54,6 +54,9 @@ class Settings(BaseModel):
     smtp_to_addr: str = ""
     smtp_use_tls: bool = True
     notification_privacy_mode: bool = True  # 锁屏通知不含标的/金额/动作
+    # 波8 部署：同源静态（PWA dist；空=不挂载，开发用 vite dev/proxy）；执行器轮询间隔
+    static_dir: Path | None = None
+    executor_poll_seconds: int = 30
     # TODO(Phase2): 盘中新鲜度门禁实际生效；日线口径波2 已用 DAILY 规则
     intraday_freshness_threshold_seconds: int = 180
     clock_skew_threshold_seconds: int = 5  # TODO(clock-skew): NTP 偏移校验未实现
@@ -147,6 +150,10 @@ def load_settings(
         smtp_use_tls=os.environ.get("WWSE_SMTP_USE_TLS", "1") not in ("0", "false", "no"),
         notification_privacy_mode=os.environ.get("WWSE_NOTIFY_PRIVACY", "1")
         not in ("0", "false", "no"),
+        static_dir=Path(os.environ["WWSE_STATIC_DIR"])
+        if os.environ.get("WWSE_STATIC_DIR")
+        else None,
+        executor_poll_seconds=int(os.environ.get("WWSE_EXECUTOR_POLL_SEC", "30")),
         intraday_freshness_threshold_seconds=int(
             os.environ.get("WWSE_INTRADAY_FRESHNESS_SEC", "180")
         ),
