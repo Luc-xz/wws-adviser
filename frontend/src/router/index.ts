@@ -20,6 +20,20 @@ const router = createRouter({
       component: () => import("@/features/portfolio/pages/Portfolio.vue"),
       meta: { requiresAuth: true },
     },
+    // REP-01/REP-02 报告详情（开市前/收市后共用，按 report_type 区分）
+    {
+      path: "/reports/:id",
+      name: "report-detail",
+      component: () => import("@/features/reports/pages/ReportDetail.vue"),
+      meta: { requiresAuth: true },
+    },
+    // DATA-01 数据状态中心（DataStatusBar 跳转目标）
+    {
+      path: "/data-status",
+      name: "data-status",
+      component: () => import("@/features/data/pages/DataStatus.vue"),
+      meta: { requiresAuth: true },
+    },
     // CHAT-01 助手首页/对话
     {
       path: "/assistant",

@@ -63,7 +63,7 @@ onMounted(() => session.fetchSession());
   font-size: 14px;
 }
 .nav a.router-link-active {
-  color: #3157d5;
+  color: var(--color-primary);
   font-weight: 600;
 }
 .content {

@@ -1,8 +1,9 @@
-<!-- AUTH-01 登录（连后端 /api/v1/auth/login） -->
+<!-- AUTH-01 登录（typed client → /api/v1/auth/login） -->
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import client from "@/api/client";
 import { useSessionStore } from "@/stores/session";
 
 const username = ref("");
@@ -17,26 +18,23 @@ async function onSubmit(): Promise<void> {
   error.value = "";
   loading.value = true;
   try {
-    const r = await fetch("/api/v1/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Idempotency-Key": crypto.randomUUID(),
-      },
-      credentials: "same-origin",
-      body: JSON.stringify({ username: username.value, password: password.value }),
+    const { data, error: err } = await client.POST("/api/v1/auth/login", {
+      params: { header: { "Idempotency-Key": crypto.randomUUID() } },
+      body: { username: username.value, password: password.value },
     });
-    if (r.ok) {
-      const data = (await r.json()) as { user_id_hash: string };
+    if (!err && data) {
       session.setAuthenticated(data.user_id_hash);
       const redirect = (route.query.redirect as string) || "/";
       router.push(redirect);
-    } else if (r.status === 401) {
-      error.value = "用户名或密码错误"; // 不泄露账号是否存在
-    } else if (r.status === 429) {
-      error.value = "尝试过多，请稍后再试";
     } else {
-      error.value = "服务暂不可用";
+      const status = (err as unknown as { status?: number })?.status;
+      if (status === 401) {
+        error.value = "用户名或密码错误"; // 不泄露账号是否存在
+      } else if (status === 429) {
+        error.value = "尝试过多，请稍后再试";
+      } else {
+        error.value = "服务暂不可用";
+      }
     }
   } catch {
     error.value = "网络错误，请检查连接";

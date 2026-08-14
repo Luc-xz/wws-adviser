@@ -13,6 +13,7 @@
     "gen:api": "openapi-typescript ./openapi.json -o ./src/api/generated/types.ts"
   },
   "dependencies": {
+    "@tanstack/vue-query": "^5.101.4",
     "@vueuse/core": "^11.3.0",
     "decimal.js": "^10.4.3",
     "openapi-fetch": "^0.13.0",

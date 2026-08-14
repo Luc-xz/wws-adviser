@@ -32,8 +32,9 @@ export default defineConfig({
             options: { cacheName: "assets" },
           },
           {
-            // intraday/行情/建议：Network Only（实时数据不缓存）
-            urlPattern: /\/api\/v1\/(?:market-data|assistant|advice)/,
+            // /api 全部 Network Only（doc7 §5）：持仓/资产/风险/报告当前值不经 SW 缓存；
+            // 离线报告私有缓存（按 user+report+version）是 Phase 3.4
+            urlPattern: /\/api\//,
             handler: "NetworkOnly",
           },
         ],

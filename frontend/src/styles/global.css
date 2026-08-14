@@ -3,6 +3,8 @@
     "Noto Sans CJK SC", system-ui, sans-serif;
   color: #101828;
   background-color: #f5f7fa;
+  /* 语义 token（uno.config theme 同源；CSS 侧引用避免裸 hex） */
+  --color-primary: #3157d5;
 }
 
 body {

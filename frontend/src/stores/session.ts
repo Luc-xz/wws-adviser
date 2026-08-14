@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import client from "@/api/client";
 
 export const useSessionStore = defineStore("session", () => {
   const userIdHash = ref<string | null>(null);
@@ -7,9 +8,8 @@ export const useSessionStore = defineStore("session", () => {
 
   async function fetchSession(): Promise<void> {
     try {
-      const r = await fetch("/api/v1/auth/session", { credentials: "same-origin" });
-      if (r.ok) {
-        const data = (await r.json()) as { user_id_hash: string };
+      const { data, error } = await client.GET("/api/v1/auth/session");
+      if (!error && data) {
         userIdHash.value = data.user_id_hash;
         isAuthenticated.value = true;
       } else {
