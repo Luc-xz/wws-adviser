@@ -127,8 +127,9 @@ async def generate_report(
         raise DomainError(f"未知报告类型：{body.report_type}") from None
     bd = body.business_date or business_date().isoformat()
     job = executor.enqueue_report_job(db, settings, report_type=rt, business_date=bd)
+    model_port = getattr(request.app.state, "model_port", None)
     try:
-        result = service.generate_report(
+        result = await service.generate_report(
             db,
             settings=settings,
             data_dir=settings.data_dir,
@@ -137,6 +138,7 @@ async def generate_report(
             business_date=bd,
             job_run_id=job.id,
             manual=True,
+            model_port=model_port,
         )
         return GenerateResponse(
             job_run_id=job.id,

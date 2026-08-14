@@ -41,6 +41,42 @@ def _build_document_provider(settings: Settings) -> object:
     return StubDocumentProvider(env=settings.env)
 
 
+def _build_model_port(settings: Settings) -> object:
+    """模型选源：openai-compatible（httpx，凭据经 env 引用）或 stub。"""
+    if settings.model_source == "openai" and settings.model_base_url:
+        from wws_adviser.infrastructure.models.openai_model import OpenAICompatibleModelPort
+
+        _logger.info("模型源：openai-compatible %s", settings.model_base_url)
+        return OpenAICompatibleModelPort(
+            base_url=settings.model_base_url,
+            model_name=settings.model_name,
+            key_ref=settings.model_api_key_ref,
+            timeout=settings.model_timeout,
+            temperature=settings.model_temperature,
+            env=settings.env,
+        )
+    return StubModelPort(env=settings.env)
+
+
+def _build_notifier(settings: Settings) -> object:
+    """通知选源：smtp（stdlib smtplib，凭据经 env 引用）或 stub。"""
+    if settings.notifier_source == "smtp" and settings.smtp_host:
+        from wws_adviser.infrastructure.notifications.smtp_notifier import SMTPNotifierPort
+
+        _logger.info("通知渠道：smtp %s:%s", settings.smtp_host, settings.smtp_port)
+        return SMTPNotifierPort(
+            host=settings.smtp_host,
+            port=settings.smtp_port,
+            user=settings.smtp_user,
+            key_ref=settings.smtp_key_ref,
+            from_addr=settings.smtp_from_addr,
+            to_addr=settings.smtp_to_addr,
+            use_tls=settings.smtp_use_tls,
+            env=settings.env,
+        )
+    return StubNotifierPort(env=settings.env)
+
+
 def acquire_scheduler_lock(settings: Settings) -> IO[str] | None:
     """非阻塞获取 scheduler 文件锁；失败/平台不支持仅告警，不阻断 API。
 
@@ -92,8 +128,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.bar_provider = StubBarProvider(env=settings.env)
         app.state.nav_provider = StubNAVProvider(env=settings.env)
     app.state.document_provider = _build_document_provider(settings)
-    app.state.model_port = StubModelPort(env=settings.env)
-    app.state.notifier = StubNotifierPort(env=settings.env)
+    app.state.model_port = _build_model_port(settings)
+    app.state.notifier = _build_notifier(settings)
     app.state.object_store = LocalObjectStore(settings.data_dir)
     app.state.scheduler_lock = acquire_scheduler_lock(settings)
     scheduler = None

@@ -35,6 +35,7 @@ from wws_adviser.modules.reports.domain import (
     render_markdown,
 )
 from wws_adviser.modules.reports.models import AnalysisSnapshot, Report, ReportEvidence
+from wws_adviser.ports.model import ModelPort
 
 
 class NotTradingDayError(DomainError):
@@ -122,7 +123,7 @@ def _account_user_id(db: DBSession, account_id: str) -> str:
     return account.user_id
 
 
-def generate_report(
+async def generate_report(
     db: DBSession,
     *,
     settings: Settings,
@@ -132,8 +133,13 @@ def generate_report(
     business_date: str,
     job_run_id: str | None = None,
     manual: bool = False,
+    model_port: ModelPort | None = None,
 ) -> GenerateResult:
-    """生成一份报告（同 type+date 幂等：已有同版报告则直接返回）。"""
+    """生成一份报告（同 type+date 幂等：已有同版报告则直接返回）。
+
+    波6：模型段在冻结+确定性计算后、文件写之前执行（事务外，AC-06 降级）。
+    model_port 缺省（None）→ 不做模型调用（纯确定性报告，等价模型关闭）。
+    """
     account = portfolio_service.get_user_account(db, user_id)
 
     # 交易日校验：非交易日自动生成拒绝（手动触发放行，FR-REP-003）
@@ -151,6 +157,7 @@ def generate_report(
     snap = freeze_snapshot(
         db, account_id=account.id, report_type=report_type, business_date=business_date
     )
+    db.commit()  # 快照独立成事务（幂等不可变）；此后模型调用期间无打开写事务（6_MODEL §3.2）
 
     # —— 确定性计算（波4 analytics；引用已冻结，可复现）——
     valuation = analytics_service.valuate(db, user_id)
@@ -176,6 +183,56 @@ def generate_report(
     if not docs_for_holdings:
         flags.append("documents_unavailable")
 
+    # —— 模型解释段（波6；事务外调用，AC-06：失败→降级标记，报告照常出确定性内容）——
+    model_section: dict[str, object] | None = None
+    prompt_version = PROMPT_VERSION
+    if model_port is not None:
+        from wws_adviser.modules.model_gateway import service as gateway_service
+        from wws_adviser.ports.model import ModelTaskType
+
+        masked_ctx = gateway_service.build_masked_context(
+            report_type=report_type.value,
+            business_date=business_date,
+            summary={
+                "cash_ratio": _dec(summary.cash_ratio),
+                "pnl_total": _dec(summary.pnl_total),
+                "concentration": _dec(summary.concentration),
+            },
+            risk=[
+                {"rule": b.rule, "level": b.level, "actual": _dec(b.actual)}
+                for b in risk
+            ],
+            positions=[
+                {"code": p.code, "weight": _dec(p.weight), "freshness": p.freshness}
+                for p in held
+            ],
+            snapshot_refs={"trade_cutoff_at": snap.trade_cutoff_at, "frozen_at": snap.frozen_at},
+        )
+        det_summary = {
+            "pnl_total": _dec(summary.pnl_total),
+            "cash_ratio": _dec(summary.cash_ratio),
+        }
+        evidence_whitelist = [d.id for d in docs_for_holdings]
+        model_result = await gateway_service.call_model(
+            db,
+            settings,
+            model_port,
+            task_type=ModelTaskType(report_type.value),
+            job_run_id=job_run_id,
+            context=masked_ctx,
+            deterministic_summary=det_summary,
+            evidence_whitelist=evidence_whitelist,
+        )
+        if model_result.ok and model_result.content is not None:
+            model_section = {
+                "summary": model_result.content.get("summary", ""),
+                "prompt_version": model_result.prompt_version,
+                "attempts": model_result.attempt,
+            }
+            prompt_version = model_result.prompt_version
+        else:
+            flags.append("model_unavailable")
+
     status = ReportStatus.PARTIAL if flags else ReportStatus.COMPLETED
 
     # —— 组装 report.json ——
@@ -187,7 +244,7 @@ def generate_report(
             "report_type": report_type.value,
             "business_date": business_date,
             "schema_version": SCHEMA_VERSION,
-            "prompt_version": PROMPT_VERSION,
+            "prompt_version": prompt_version,
             "portfolio_version": PORTFOLIO_VERSION,
             "risk_ruleset_version": RISK_RULESET_VERSION,
             "signals_version": SIGNALS_VERSION,
@@ -243,6 +300,8 @@ def generate_report(
             "cash": _dec(attribution.cash),
         },
     }
+    if model_section is not None:
+        report_json["model"] = model_section
     markdown = render_markdown(report_json)
 
     # —— 原子写文件（data/reports/<date>/<report_id>/）——
@@ -280,7 +339,7 @@ def generate_report(
         analysis_snapshot_id=snap.id,
         sources_count=len(docs_for_holdings),
         schema_version=SCHEMA_VERSION,
-        prompt_version=PROMPT_VERSION,
+        prompt_version=prompt_version,
         risk_ruleset_version=RISK_RULESET_VERSION,
         generated_at=now,
         created_at=now,

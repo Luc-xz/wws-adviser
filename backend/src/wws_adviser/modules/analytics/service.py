@@ -155,14 +155,20 @@ def summary(db: DBSession, user_id: str) -> Summary:
 
 
 def risk(db: DBSession, user_id: str, settings: Settings) -> list[Breach]:
-    """评估风险硬上限（PRD FR-ANL-002）：硬上限截断、软上限告警。返回触发清单。"""
+    """评估风险硬上限（PRD FR-ANL-002）：硬上限截断、软上限告警。返回触发清单。
+
+    阈值取有效配置（Settings + /settings/risk PATCH 覆盖，波6）。
+    """
+    from wws_adviser.modules.appsettings import service as appsettings_service
+
+    eff = appsettings_service.effective_settings(db, settings)
     v = valuate(db, user_id)
     breaches: list[Breach] = []
     total = v.total_assets
-    single_cap = Decimal(str(settings.risk_single_cap))
-    industry_cap = Decimal(str(settings.risk_industry_cap))
-    cash_floor = Decimal(str(settings.risk_cash_floor))
-    top_n_conc = Decimal(str(settings.risk_top_n_concentration))
+    single_cap = Decimal(str(eff.risk_single_cap))
+    industry_cap = Decimal(str(eff.risk_industry_cap))
+    cash_floor = Decimal(str(eff.risk_cash_floor))
+    top_n_conc = Decimal(str(eff.risk_top_n_concentration))
 
     for p in v.positions:
         if p.weight is not None and p.weight > single_cap:
@@ -193,7 +199,7 @@ def risk(db: DBSession, user_id: str, settings: Settings) -> list[Breach]:
         )
 
     top_weights = sorted((p.weight for p in v.positions if p.weight is not None), reverse=True)
-    top_n_sum = sum(top_weights[: settings.risk_top_n], start=Decimal(0))
+    top_n_sum = sum(top_weights[: eff.risk_top_n], start=Decimal(0))
     if top_n_sum > top_n_conc:
         breaches.append(
             Breach(rule="top_n_concentration", level="soft", actual=top_n_sum, limit=top_n_conc)

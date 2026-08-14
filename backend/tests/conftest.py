@@ -30,12 +30,15 @@ def client(app) -> Iterator[TestClient]:
 def db_session(tmp_path):
     """已建表（Base.metadata.create_all）的 DB session，供 service 层测试。"""
     from wws_adviser.core.db import Base, create_app_engine, make_session_factory
+    from wws_adviser.modules.appsettings import models as _appsettings_models  # noqa: F401
     from wws_adviser.modules.audit import models as _audit_models  # noqa: F401
     from wws_adviser.modules.documents import models as _documents_models  # noqa: F401
     from wws_adviser.modules.identity import models as _identity_models  # noqa: F401
     from wws_adviser.modules.instruments import models as _instruments_models  # noqa: F401
     from wws_adviser.modules.jobs import models as _jobs_models  # noqa: F401
     from wws_adviser.modules.market_data import models as _market_data_models  # noqa: F401
+    from wws_adviser.modules.model_gateway import models as _model_gateway_models  # noqa: F401
+    from wws_adviser.modules.notifications import models as _notifications_models  # noqa: F401
     from wws_adviser.modules.portfolio import models as _portfolio_models  # noqa: F401
     from wws_adviser.modules.reports import models as _reports_models  # noqa: F401
 
@@ -64,6 +67,7 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.core.ids import new_id
     from wws_adviser.core.time import now_utc_iso
     from wws_adviser.main import lifespan
+    from wws_adviser.modules.appsettings import models as _as  # noqa: F401
     from wws_adviser.modules.audit import models as _a  # noqa: F401
     from wws_adviser.modules.documents import models as _docs  # noqa: F401
     from wws_adviser.modules.identity import domain  # noqa: F401
@@ -71,6 +75,8 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.modules.instruments import models as _i  # noqa: F401
     from wws_adviser.modules.jobs import models as _j  # noqa: F401
     from wws_adviser.modules.market_data import models as _md  # noqa: F401
+    from wws_adviser.modules.model_gateway import models as _mg  # noqa: F401
+    from wws_adviser.modules.notifications import models as _nt  # noqa: F401
     from wws_adviser.modules.portfolio import models as _p  # noqa: F401
     from wws_adviser.modules.reports import models as _r  # noqa: F401
 

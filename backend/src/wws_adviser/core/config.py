@@ -35,6 +35,25 @@ class Settings(BaseModel):
     risk_cash_floor: float = 0.10  # 最低现金比例
     risk_top_n: int = 5
     risk_top_n_concentration: float = 0.60  # 前 N 大持仓集中度
+    # 波6 模型网关（通用 OpenAI-compatible；key 只经 env 引用，绝不落库/日志）
+    model_source: str = "stub"  # stub | openai
+    model_base_url: str = ""
+    model_name: str = ""
+    model_api_key_ref: str = "WWSE_MODEL_API_KEY"  # env 变量名（引用）
+    model_temperature: float = 0.2
+    model_max_tokens: int = 2048
+    model_timeout: float = 30.0
+    model_retry: int = 1
+    # 波6 通知（邮件 SMTP 587/465，已确认；凭据只经 env 引用）
+    notifier_source: str = "stub"  # stub | smtp
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_key_ref: str = "WWSE_SMTP_KEY"  # env 变量名（引用）
+    smtp_from_addr: str = ""
+    smtp_to_addr: str = ""
+    smtp_use_tls: bool = True
+    notification_privacy_mode: bool = True  # 锁屏通知不含标的/金额/动作
     # TODO(Phase2): 盘中新鲜度门禁实际生效；日线口径波2 已用 DAILY 规则
     intraday_freshness_threshold_seconds: int = 180
     clock_skew_threshold_seconds: int = 5  # TODO(clock-skew): NTP 偏移校验未实现
@@ -110,6 +129,24 @@ def load_settings(
         risk_cash_floor=float(os.environ.get("WWSE_RISK_CASH_FLOOR", "0.10")),
         risk_top_n=int(os.environ.get("WWSE_RISK_TOP_N", "5")),
         risk_top_n_concentration=float(os.environ.get("WWSE_RISK_TOP_N_CONC", "0.60")),
+        model_source=os.environ.get("WWSE_MODEL_SOURCE", "stub"),
+        model_base_url=os.environ.get("WWSE_MODEL_BASE_URL", ""),
+        model_name=os.environ.get("WWSE_MODEL_NAME", ""),
+        model_api_key_ref=os.environ.get("WWSE_MODEL_API_KEY_REF", "WWSE_MODEL_API_KEY"),
+        model_temperature=float(os.environ.get("WWSE_MODEL_TEMPERATURE", "0.2")),
+        model_max_tokens=int(os.environ.get("WWSE_MODEL_MAX_TOKENS", "2048")),
+        model_timeout=float(os.environ.get("WWSE_MODEL_TIMEOUT", "30")),
+        model_retry=int(os.environ.get("WWSE_MODEL_RETRY", "1")),
+        notifier_source=os.environ.get("WWSE_NOTIFIER_SOURCE", "stub"),
+        smtp_host=os.environ.get("WWSE_SMTP_HOST", ""),
+        smtp_port=int(os.environ.get("WWSE_SMTP_PORT", "587")),
+        smtp_user=os.environ.get("WWSE_SMTP_USER", ""),
+        smtp_key_ref=os.environ.get("WWSE_SMTP_KEY_REF", "WWSE_SMTP_KEY"),
+        smtp_from_addr=os.environ.get("WWSE_SMTP_FROM", ""),
+        smtp_to_addr=os.environ.get("WWSE_SMTP_TO", ""),
+        smtp_use_tls=os.environ.get("WWSE_SMTP_USE_TLS", "1") not in ("0", "false", "no"),
+        notification_privacy_mode=os.environ.get("WWSE_NOTIFY_PRIVACY", "1")
+        not in ("0", "false", "no"),
         intraday_freshness_threshold_seconds=int(
             os.environ.get("WWSE_INTRADAY_FRESHNESS_SEC", "180")
         ),

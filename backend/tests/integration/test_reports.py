@@ -94,10 +94,10 @@ def test_generate_complete_report_idempotent(migrated_client) -> None:
         uid = _user_id(db)
         s = Settings(env="test")
 
-        r1 = reports_service.generate_report(
+        r1 = asyncio.run(reports_service.generate_report(
             db, settings=s, data_dir=settings.data_dir, user_id=uid,
             report_type=ReportType.PRE_MARKET, business_date=BD, manual=True,
-        )
+        ))
         assert r1.report.status == ReportStatus.RENDERED.value
         assert r1.degradation_flags == []
         # 文件三件套落盘
@@ -106,10 +106,10 @@ def test_generate_complete_report_idempotent(migrated_client) -> None:
         assert (settings.data_dir / r1.report.content_md_path).exists()
 
         # 幂等：二次生成返回同一报告（RENDERED → 不重复）
-        r2 = reports_service.generate_report(
+        r2 = asyncio.run(reports_service.generate_report(
             db, settings=s, data_dir=settings.data_dir, user_id=uid,
             report_type=ReportType.PRE_MARKET, business_date=BD, manual=True,
-        )
+        ))
         assert r2.report.id == r1.report.id
         assert r2.report.version == r1.report.version
         # 冻结快照唯一（同 purpose 不重复冻结）
@@ -123,10 +123,10 @@ def test_generate_degraded_without_market_data(migrated_client) -> None:
     _seed_full(app, with_market=False)  # 无行情（有公告）
     with app.state.session_factory() as db:
         uid = _user_id(db)
-        r = reports_service.generate_report(
+        r = asyncio.run(reports_service.generate_report(
             db, settings=Settings(env="test"), data_dir=settings.data_dir, user_id=uid,
             report_type=ReportType.POST_MARKET, business_date=BD, manual=True,
-        )
+        ))
         assert r.report.status == ReportStatus.PARTIAL.value
         assert "market_data_missing" in r.degradation_flags
         content = reports_service.get_report_content(settings.data_dir, r.report)
@@ -142,10 +142,10 @@ def test_generate_degraded_without_documents(migrated_client) -> None:
     _seed_full(app, with_docs=False)  # 有行情、无公告
     with app.state.session_factory() as db:
         uid = _user_id(db)
-        r = reports_service.generate_report(
+        r = asyncio.run(reports_service.generate_report(
             db, settings=Settings(env="test"), data_dir=settings.data_dir, user_id=uid,
             report_type=ReportType.PRE_MARKET, business_date=BD, manual=True,
-        )
+        ))
         assert "documents_unavailable" in r.degradation_flags
         assert r.report.status == ReportStatus.PARTIAL.value
 
@@ -158,10 +158,10 @@ def test_partial_upgrades_to_new_version(migrated_client) -> None:
     with app.state.session_factory() as db:
         uid = _user_id(db)
         s = Settings(env="test")
-        r1 = reports_service.generate_report(
+        r1 = asyncio.run(reports_service.generate_report(
             db, settings=s, data_dir=settings.data_dir, user_id=uid,
             report_type=ReportType.PRE_MARKET, business_date=BD, manual=True,
-        )
+        ))
         assert r1.report.status == ReportStatus.PARTIAL.value
         assert r1.report.version == 1
 
@@ -179,10 +179,10 @@ def test_partial_upgrades_to_new_version(migrated_client) -> None:
         )
     with app.state.session_factory() as db:
         uid2 = _user_id(db)
-        r2 = reports_service.generate_report(
+        r2 = asyncio.run(reports_service.generate_report(
             db, settings=Settings(env="test"), data_dir=settings.data_dir, user_id=uid2,
             report_type=ReportType.PRE_MARKET, business_date=BD, manual=True,
-        )
+        ))
         assert r2.report.version == 2  # 新版本
         assert r2.report.status == ReportStatus.RENDERED.value
         assert r2.report.id != r1.report.id  # 旧版保留（不同行）
@@ -201,7 +201,7 @@ def test_executor_runs_enqueued_job(migrated_client) -> None:
             db, Settings(env="test"), report_type=ReportType.PRE_MARKET, business_date=BD
         )
         assert job.status == JobStatus.PENDING.value
-        n = executor.run_due_jobs(db, Settings(env="test"), settings.data_dir)
+        n = asyncio.run(executor.run_due_jobs(db, Settings(env="test"), settings.data_dir))
         assert n >= 1
         from wws_adviser.modules.jobs import repository as jobs_repo
 
@@ -228,7 +228,7 @@ def test_executor_skips_pre_market_on_non_trading_day(migrated_client) -> None:
         job = executor.enqueue_report_job(
             db, Settings(env="test"), report_type=ReportType.PRE_MARKET, business_date=NON_TD
         )
-        executor.run_due_jobs(db, Settings(env="test"), settings.data_dir)
+        asyncio.run(executor.run_due_jobs(db, Settings(env="test"), settings.data_dir))
         from wws_adviser.modules.jobs import repository as jobs_repo
 
         done = jobs_repo.get_by_id(db, job.id)
@@ -236,11 +236,11 @@ def test_executor_skips_pre_market_on_non_trading_day(migrated_client) -> None:
         assert done.status == JobStatus.COMPLETED.value
         assert (done.result_ref or "").startswith("skipped://")
         # 手动触发则放行（manual=True）
-        r = reports_service.generate_report(
+        r = asyncio.run(reports_service.generate_report(
             db, settings=Settings(env="test"), data_dir=settings.data_dir,
             user_id=_user_id(db), report_type=ReportType.PRE_MARKET,
             business_date=NON_TD, manual=True,
-        )
+        ))
         assert r.report.status in (ReportStatus.RENDERED.value, ReportStatus.PARTIAL.value)
 
 
