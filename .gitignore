@@ -12,14 +12,15 @@ __pycache__/
 
 # Node / frontend
 frontend/node_modules/
-frontend/node_modules/
 frontend/dist/
 frontend/dev-dist/
 frontend/openapi.json
 frontend/src/api/generated/
 
-# 运行数据（见 1_REPO_STRUCTURE.md §2）
-data/
+# 运行数据（见 1_REPO_STRUCTURE.md §2）——只忽略仓库根与 backend 下的运行目录，
+# 不锚定会误伤任意层级的 data/ 目录（如 frontend/src/features/data/）
+/data/
+backend/data/
 *.db
 *.db-wal
 *.db-shm
