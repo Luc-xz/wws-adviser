@@ -1,0 +1,12 @@
+# 构建上下文为仓库根（docker build -f deploy/Dockerfile …）。
+# 版本库 / 本机环境目录 / 生成物不入上下文：openapi.json 与 src/api/generated/
+# 由镜像内 openapi-export 阶段生成，无需（也不应）从开发机带入。
+.git/
+.claude/
+**/__pycache__/
+**/*.pyc
+backend/.venv/
+frontend/node_modules/
+frontend/dist/
+frontend/openapi.json
+frontend/src/api/generated/
