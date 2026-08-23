@@ -9,7 +9,10 @@ WORKDIR /app/backend
 COPY backend/pyproject.toml backend/uv.lock ./
 # akshare 为 optional extra：生产启用真实数据源时加 --extra akshare（构建参数）
 ARG WITH_AKSHARE=1
-RUN uv sync --frozen --no-dev $([ "$WITH_AKSHARE" = "1" ] && echo --extra akshare)
+# 国内 VM 直连 pypi.org 极慢（pandas/numpy/py-mini-racer 等重依赖）时经构建参数换镜像；
+# 留空则走官方源（compose 已按腾讯云 VM 默认配内网镜像）
+ARG PYPI_INDEX=
+RUN uv sync --frozen --no-dev $([ "$WITH_AKSHARE" = "1" ] && echo --extra akshare) $([ -n "$PYPI_INDEX" ] && echo --default-index "$PYPI_INDEX")
 
 # —— 2. OpenAPI 导出 ——
 # openapi.json 与 src/api/generated/ 均被 gitignore：在镜像内生成（与 CI 的 make gen-api 同源），

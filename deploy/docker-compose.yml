@@ -5,6 +5,10 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
+      args:
+        # 腾讯云内网 PyPI 镜像（仅云内可达、不占公网带宽、速度快）；
+        # 非腾讯云环境换 https://pypi.tuna.tsinghua.edu.cn/simple 或删除此项走官方源
+        PYPI_INDEX: https://mirrors.cloud.tencent.com/pypi/simple
     image: wws-adviser:${WWS_TAG:?需 WWS_TAG（git commit，禁 latest）}
     env_file: ./env.sh
     volumes:
