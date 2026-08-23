@@ -1,6 +1,7 @@
 {
   "name": "wws-adviser-frontend",
   "private": true,
+  "packageManager": "pnpm@11.3.0",
   "version": "0.1.0",
   "type": "module",
   "scripts": {

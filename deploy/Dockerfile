@@ -5,7 +5,9 @@
 # —— 1. 前端构建 ——
 FROM node:22-alpine AS frontend
 WORKDIR /app/frontend
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
+# pnpm-workspace.yaml 必须在 install 前就位：pnpm≥10.3 strictDepBuilds 默认拒绝未审核的
+# 依赖构建脚本（esbuild/vue-demi），缺了 allowBuilds 白名单会以 ERR_PNPM_IGNORED_BUILDS 失败
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./
 RUN corepack enable pnpm && pnpm install --frozen-lockfile
 COPY frontend/ ./
 # openapi.json 由仓库外生成流程提供（make gen-api）；CI 缺省时跳过类型重生成
