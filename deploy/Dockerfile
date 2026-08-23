@@ -20,7 +20,9 @@ RUN uv sync --frozen --no-dev $([ "$WITH_AKSHARE" = "1" ] && echo --extra akshar
 FROM backend-deps AS openapi-export
 COPY backend/src ./src
 COPY backend/scripts ./scripts
-RUN .venv/bin/python scripts/export_openapi.py
+# 依赖层装包时 src 尚未拷入（uv sync 只装了第三方依赖，venv 里没有项目的可编辑安装），
+# 用 PYTHONPATH 显式指向 src，不重装、保持依赖层缓存
+RUN PYTHONPATH=/app/backend/src .venv/bin/python scripts/export_openapi.py
 
 # —— 3. 前端构建 ——
 FROM node:22-alpine AS frontend
@@ -46,7 +48,9 @@ COPY backend/src ./src
 COPY backend/migrations ./migrations
 COPY backend/scripts ./scripts
 COPY --from=frontend /app/frontend/dist /app/static
+# PYTHONPATH 同上：venv 只含第三方依赖，应用本体经 src 显式导入（uvicorn/alembic/scripts 均依赖）
 ENV PATH="/app/backend/.venv/bin:$PATH" \
+    PYTHONPATH=/app/backend/src \
     WWSE_DATA_DIR=/data \
     WWSE_STATIC_DIR=/app/static
 USER wws
