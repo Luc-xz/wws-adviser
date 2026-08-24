@@ -11,8 +11,11 @@
 sudo apt update && sudo apt install -y docker.io docker-compose-plugin nginx git
 sudo usermod -aG docker $USER && newgrp docker
 
-# 2) 拉取代码与构建（标签=commit，禁 latest）
+# 2) 拉取代码与构建（镜像标签=当前 commit，禁 latest——可追溯，8_SECURITY §8）
 git clone <repo> && cd wws-adviser
+# WWS_TAG 作为镜像 tag（如 wws-adviser:2b1bcb4）：docker-compose 以 ${WWS_TAG:?} 引用它，
+# 未设置时 compose 直接报错——即「禁 latest」的强制点。回滚：export WWS_TAG=<旧commit> 再 up。
+# 注意 compose 的变量替换只读 shell 环境；env.sh 里的 WWS_TAG 仅进容器、对 compose 无效。
 export WWS_TAG=$(git rev-parse --short HEAD)
 docker compose -f deploy/docker-compose.yml build   # 默认 --extra akshare
 
