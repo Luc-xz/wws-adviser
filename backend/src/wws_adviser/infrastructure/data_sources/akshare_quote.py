@@ -94,6 +94,8 @@ def rows_to_quote(
 
 
 def _fetch_one_sync(instrument: InstrumentRef, market_time: str) -> RawQuote | None:
+    import time
+
     import httpx
 
     params = {
@@ -103,10 +105,19 @@ def _fetch_one_sync(instrument: InstrumentRef, market_time: str) -> RawQuote | N
         "invt": "2",
         "fields": _QUOTE_FIELDS,
     }
-    resp = httpx.get(_QUOTE_URL, params=params, timeout=10.0)
-    resp.raise_for_status()
-    payload = resp.json().get("data")
-    return payload_to_quote(payload, code=instrument.code, market_time=market_time)
+    # 东财对数据中心 IP 有分钟级滚动风控（间歇性断连），短退避重试可跨过封锁窗口
+    last_exc: Exception | None = None
+    for delay in (0, 1, 3):
+        if delay:
+            time.sleep(delay)
+        try:
+            resp = httpx.get(_QUOTE_URL, params=params, timeout=10.0)
+            resp.raise_for_status()
+            payload = resp.json().get("data")
+            return payload_to_quote(payload, code=instrument.code, market_time=market_time)
+        except Exception as exc:  # noqa: BLE001 — 传输层抖动重试；末次异常上抛由服务层降级
+            last_exc = exc
+    raise last_exc
 
 
 class AKShareQuoteProvider:

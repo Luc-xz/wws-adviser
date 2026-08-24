@@ -78,7 +78,19 @@ class AKShareBarProvider:
     ) -> RawDataset:
         import akshare as ak  # type: ignore[import-not-found]
 
-        df = await asyncio.to_thread(self._fetch_df, ak, instrument, start, end)
+        # 东财对数据中心 IP 有分钟级滚动风控（间歇性断连），短退避重试可跨过封锁窗口
+        last_exc: Exception | None = None
+        df: Any = None
+        for delay in (0, 2, 5):
+            if delay:
+                await asyncio.sleep(delay)
+            try:
+                df = await asyncio.to_thread(self._fetch_df, ak, instrument, start, end)
+                break
+            except Exception as exc:  # noqa: BLE001 — 传输层抖动重试；末次异常上抛由服务层降级
+                last_exc = exc
+        else:
+            raise last_exc
         rows: list[dict[str, Any]] = list(df.to_dict("records"))
         return rows_to_dataset(
             rows, source="akshare", source_url=f"akshare://bars/{instrument.code}"
