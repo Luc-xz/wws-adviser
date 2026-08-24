@@ -35,10 +35,14 @@ def create_app_engine(settings: Settings) -> Engine:
 
 
 def check_db_writable(engine: Engine) -> bool:
-    """health/ready 用：能否在 DB 上完成一次写。用 TEMP TABLE 避免污染主库。"""
+    """health/ready 用：能否在 DB 上完成一次写。用 TEMP TABLE 避免污染主库。
+
+    TEMP 表是连接级的：池化连接复用时同名表已存在，必须 IF NOT EXISTS（否则池热后
+    每次探测都报 already exists，ready 永久 503）。
+    """
     try:
         with engine.begin() as conn:
-            conn.execute(text("CREATE TEMP TABLE _writable_probe (x INTEGER)"))
+            conn.execute(text("CREATE TEMP TABLE IF NOT EXISTS _writable_probe (x INTEGER)"))
             conn.execute(text("INSERT INTO _writable_probe (x) VALUES (1)"))
         return True
     except Exception:

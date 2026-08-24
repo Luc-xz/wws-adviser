@@ -72,6 +72,27 @@ def test_akshare_rows_to_document_ref() -> None:
     assert refs[0].source_url == "http://x/1"
 
 
+def test_akshare_notice_payload_to_refs() -> None:
+    from wws_adviser.infrastructure.data_sources.akshare_document import (
+        notice_payload_to_refs,
+    )
+
+    items = [
+        {
+            "title": "贵州茅台2026年半年度报告",
+            "notice_date": "2026-08-20 18:00:00",
+            "art_code": "AN2026-0820",
+        },
+        {"title": "", "notice_date": "2026-08-19", "art_code": "X"},  # 无标题 → 跳过
+    ]
+    refs = notice_payload_to_refs(items, code="600519")
+    assert len(refs) == 1
+    assert refs[0].title == "贵州茅台2026年半年度报告"
+    assert refs[0].published_at == "2026-08-20"
+    assert refs[0].source_url.endswith("/notices/detail/600519/AN2026-0820.html")
+    assert refs[0].kind == "announcement"
+
+
 def test_akshare_module_imports_lazily() -> None:
     sys.modules.pop("akshare", None)
     import wws_adviser.infrastructure.data_sources.akshare_document  # noqa: F401

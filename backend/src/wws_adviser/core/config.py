@@ -42,7 +42,7 @@ class Settings(BaseModel):
     model_api_key_ref: str = "WWSE_MODEL_API_KEY"  # env 变量名（引用）
     model_temperature: float = 0.2
     model_max_tokens: int = 2048
-    model_timeout: float = 30.0
+    model_timeout: float = 90.0
     model_retry: int = 1
     # 波6 通知（邮件 SMTP 587/465，已确认；凭据只经 env 引用）
     notifier_source: str = "stub"  # stub | smtp
@@ -138,7 +138,7 @@ def load_settings(
         model_api_key_ref=os.environ.get("WWSE_MODEL_API_KEY_REF", "WWSE_MODEL_API_KEY"),
         model_temperature=float(os.environ.get("WWSE_MODEL_TEMPERATURE", "0.2")),
         model_max_tokens=int(os.environ.get("WWSE_MODEL_MAX_TOKENS", "2048")),
-        model_timeout=float(os.environ.get("WWSE_MODEL_TIMEOUT", "30")),
+        model_timeout=float(os.environ.get("WWSE_MODEL_TIMEOUT", "90")),
         model_retry=int(os.environ.get("WWSE_MODEL_RETRY", "1")),
         notifier_source=os.environ.get("WWSE_NOTIFIER_SOURCE", "stub"),
         smtp_host=os.environ.get("WWSE_SMTP_HOST", ""),

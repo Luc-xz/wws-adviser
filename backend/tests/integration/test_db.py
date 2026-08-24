@@ -27,6 +27,18 @@ def test_db_writable(tmp_path):
     engine.dispose()
 
 
+def test_db_writable_idempotent_on_pooled_connection(tmp_path):
+    """回归：TEMP 表是连接级的，池化连接复用时同名表已存在。
+
+    第二次探测会命中池内同一连接——非幂等写法会让 /health/ready 在池热后永久 503。
+    """
+    settings = Settings(env="test", data_dir=tmp_path)
+    engine = create_app_engine(settings)
+    assert check_db_writable(engine) is True
+    assert check_db_writable(engine) is True
+    engine.dispose()
+
+
 def test_backup_produces_consistent_copy(tmp_path):
     src = tmp_path / "app.db"
     conn = sqlite3.connect(str(src))

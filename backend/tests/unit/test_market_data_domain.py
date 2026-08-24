@@ -152,6 +152,29 @@ def test_akshare_rows_to_quote_filters_code() -> None:
     assert rows_to_quote(rows, code="999999", market_time="t") is None
 
 
+def test_akshare_secid_for() -> None:
+    from wws_adviser.infrastructure.data_sources.akshare_quote import secid_for
+
+    assert secid_for("SSE", "600519") == "1.600519"
+    assert secid_for("SZSE", "000001") == "0.000001"
+    assert secid_for("SSE", "510300") == "1.510300"
+    assert secid_for("", "600519") == "1.600519"  # 市场缺失按前缀推断
+    assert secid_for("", "300750") == "0.300750"
+
+
+def test_akshare_payload_to_quote() -> None:
+    from wws_adviser.infrastructure.data_sources.akshare_quote import payload_to_quote
+
+    data = {"f43": 1307.78, "f170": 2.75, "f47": 31000, "f48": 4050000000}
+    q = payload_to_quote(data, code="600519", market_time="t")
+    assert q is not None
+    assert q.price == Decimal("1307.78")
+    assert q.change_pct == Decimal("2.75")
+    # 停牌（无价占位 "-"）与空 data → None
+    assert payload_to_quote({"f43": "-"}, code="600519", market_time="t") is None
+    assert payload_to_quote(None, code="600519", market_time="t") is None
+
+
 def test_akshare_modules_import_lazily() -> None:
     """模块导入不触发 akshare 导入（无 optional extra 也能 import）。"""
     sys.modules.pop("akshare", None)
