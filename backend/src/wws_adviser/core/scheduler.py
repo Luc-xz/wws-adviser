@@ -42,6 +42,9 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
     def _post_market() -> None:
         _enqueue_stub(JobType.POST_MARKET, engine, settings)
 
+    def _calibration_scan() -> None:
+        _enqueue_stub(JobType.CALIBRATION_SCAN, engine, settings)
+
     scheduler.add_job(
         _pre_market,
         CronTrigger(hour=8, minute=30, timezone=SHANGHAI),
@@ -51,5 +54,11 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
         _post_market,
         CronTrigger(hour=16, minute=0, timezone=SHANGHAI),
         id="post_market",
+    )
+    # 校准扫描：开市前重跑（08:00），保证盘中建议用当日校准结论（FR-ANL-003）
+    scheduler.add_job(
+        _calibration_scan,
+        CronTrigger(hour=8, minute=0, timezone=SHANGHAI),
+        id="calibration_scan",
     )
     return scheduler

@@ -61,6 +61,9 @@ class Settings(BaseModel):
     intraday_freshness_threshold_seconds: int = 180
     clock_skew_threshold_seconds: int = 5  # TODO(clock-skew): NTP 偏移校验未实现
     nav_published_freshness_hours: int = 24
+    # Phase 2：校准有效期（交易日，FR-ANL-003 默认 60）与凯利折扣默认（PRD §FR-ANL-004）
+    calibration_ttl_trading_days: int = 60
+    kelly_discount_default: str = "0.20"
 
     @property
     def is_prod(self) -> bool:
@@ -159,4 +162,6 @@ def load_settings(
         ),
         clock_skew_threshold_seconds=int(os.environ.get("WWSE_CLOCK_SKEW_SEC", "5")),
         nav_published_freshness_hours=int(os.environ.get("WWSE_NAV_FRESHNESS_HOURS", "24")),
+        calibration_ttl_trading_days=int(os.environ.get("WWSE_CALIBRATION_TTL_DAYS", "60")),
+        kelly_discount_default=os.environ.get("WWSE_KELLY_DISCOUNT", "0.20"),
     )

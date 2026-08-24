@@ -73,6 +73,17 @@ async def run_due_jobs(
             break
         executed += 1
         if job.job_type not in _REPORT_JOBS:
+            if job.job_type == JobType.CALIBRATION_SCAN.value:
+                try:
+                    result = _run_calibration_scan(db, settings)
+                    jobs_service.complete(
+                        db, job.id,
+                        result_ref=f"calibration://{result.get('instruments', 0)}",
+                    )
+                except Exception as exc:  # noqa: BLE001 — 执行器边界：失败记 error_code
+                    _logger.warning("校准任务失败 job=%s: %s", job.id, exc)
+                    jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+                continue
             jobs_service.complete(db, job.id)
             continue
         report_type = (
@@ -115,6 +126,13 @@ async def run_due_jobs(
                 payload={"report_type": report_type.value, "business_date": job.business_date},
             )
     return executed
+
+
+def _run_calibration_scan(db: DBSession, settings: Settings) -> dict[str, object]:
+    """校准扫描任务体（Phase 2 波6）：信号回测 → OOS 门禁 → 校准记录落库。"""
+    from wws_adviser.modules.analytics import calibration_service
+
+    return calibration_service.run_calibration_scan(db, settings)
 
 
 def enqueue_report_job(
