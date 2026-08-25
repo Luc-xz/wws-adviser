@@ -73,6 +73,18 @@ async def run_due_jobs(
             break
         executed += 1
         if job.job_type not in _REPORT_JOBS:
+            if job.job_type == JobType.ADVICE_REVIEW.value:
+                try:
+                    from wws_adviser.modules.advice import evaluation_service
+
+                    result = evaluation_service.review_due_advices(db, settings)
+                    jobs_service.complete(
+                        db, job.id, result_ref=f"advice_review://{result.get('reviewed', 0)}"
+                    )
+                except Exception as exc:  # noqa: BLE001 — 执行器边界：失败记 error_code
+                    _logger.warning("建议评价任务失败 job=%s: %s", job.id, exc)
+                    jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+                continue
             if job.job_type == JobType.CALIBRATION_SCAN.value:
                 try:
                     result = _run_calibration_scan(db, settings)

@@ -33,6 +33,11 @@ class AdviceRecord(Base):
     reasons_json: Mapped[str | None] = mapped_column(sa.Text)
     trail_json: Mapped[str | None] = mapped_column(sa.Text)
     evidence_json: Mapped[str | None] = mapped_column(sa.Text)
+    model_explanation: Mapped[str | None] = mapped_column(sa.Text)
+    # 评价回填（FR-REV-003 观察窗口后）：结论与审计材料
+    verdict: Mapped[str | None] = mapped_column(sa.Text)
+    evaluated_at: Mapped[str | None] = mapped_column(sa.Text)
+    evaluation_json: Mapped[str | None] = mapped_column(sa.Text)
     invalidated: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
     created_at: Mapped[str] = mapped_column(sa.Text, nullable=False)
     updated_at: Mapped[str] = mapped_column(sa.Text, nullable=False)

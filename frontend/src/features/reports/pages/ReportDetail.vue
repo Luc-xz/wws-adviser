@@ -33,6 +33,15 @@ const positionItems = computed(
 const modelSection = computed(
   () => (content.value?.model as Record<string, any> | null) ?? null
 );
+const biasItems = computed(
+  () => (content.value?.behavioral_bias as Array<Record<string, any>>) ?? []
+);
+const BIAS_NAMES: Record<string, string> = {
+  disposal_effect: "处置效应（卖盈持亏）",
+  chasing: "追涨（买在近期高位）",
+  overtrading: "过度交易",
+  rule_deviation: "偏离风险规则",
+};
 const degradationFlags = computed(() => detail.value?.degradation_flags ?? header.value?.degradation_flags ?? []);
 
 const title = computed(() =>
@@ -229,6 +238,29 @@ watch(
         <div class="rounded-xl bg-risk-warning/5 p-3 text-sm text-risk-warning">
           模型暂不可用，以上为确定性摘要（可点击「重新生成」重试）。
         </div>
+      </section>
+
+      <!-- 行为偏差分析（Phase 2：收市后复盘；只陈述模式不道德化） -->
+      <section
+        v-if="biasItems.length"
+        class="space-y-2"
+      >
+        <h2 class="text-sm font-medium text-gray-600">
+          行为偏差
+        </h2>
+        <p
+          v-for="(b, i) in biasItems"
+          :key="i"
+          class="rounded-xl bg-white p-3 text-sm shadow-sm"
+          data-testid="bias-finding"
+        >
+          <span class="font-medium">{{ BIAS_NAMES[String(b.kind)] ?? b.kind }}</span>
+          <span
+            v-if="b.code"
+            class="ml-1 text-xs text-gray-400"
+          >{{ b.code }}</span>
+          <span class="block mt-0.5 text-xs text-gray-500">{{ b.evidence }}</span>
+        </p>
       </section>
 
       <!-- 来源与版本尾注 -->

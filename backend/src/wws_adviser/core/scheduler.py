@@ -45,6 +45,9 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
     def _calibration_scan() -> None:
         _enqueue_stub(JobType.CALIBRATION_SCAN, engine, settings)
 
+    def _review_scan() -> None:
+        _enqueue_stub(JobType.ADVICE_REVIEW, engine, settings)
+
     scheduler.add_job(
         _pre_market,
         CronTrigger(hour=8, minute=30, timezone=SHANGHAI),
@@ -60,5 +63,11 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
         _calibration_scan,
         CronTrigger(hour=8, minute=0, timezone=SHANGHAI),
         id="calibration_scan",
+    )
+    # 建议评价回填：收市后报告（16:00）完成后，评价观察窗口已过的建议
+    scheduler.add_job(
+        _review_scan,
+        CronTrigger(hour=16, minute=30, timezone=SHANGHAI),
+        id="review",
     )
     return scheduler

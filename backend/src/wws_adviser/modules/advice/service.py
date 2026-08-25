@@ -9,6 +9,7 @@ ledger_unreconciled / no_calibrated_signal / gate:*——不静默隐藏。
 
 import json
 import logging
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
@@ -207,12 +208,67 @@ async def intraday_advice(
         valid_from=now, expires_at=expires_at,
         evidence_ids=evidence,
     )
+    # 模型解释段（FSM MODEL_EXPLAINED，可选）：仅发布形态、短超时，失败不阻断
+    if advice.state.value == "published" and advice.f_max is not None:
+        advice = replace(
+            advice,
+            model_explanation=await _model_explanation(request, advice),
+        )
     _persist(db, user_id, advice)
     if advice.state.value == "published":
         _cache[code] = (advice.expires_at, advice)
     else:
         _cache.pop(code, None)
     return advice
+
+
+# 盘中模型解释的独立超时：快速路径不被上游抖动拖死（区别于报告的宽松超时）
+INTRADAY_MODEL_TIMEOUT_SECONDS = 20
+
+
+async def _model_explanation(request: Request, advice: Advice) -> str | None:
+    import asyncio
+
+    from wws_adviser.modules.model_gateway import service as gateway_service
+    from wws_adviser.ports.model import ModelTaskType
+
+    model_port = getattr(request.app.state, "model_port", None)
+    if model_port is None:
+        return None
+    context = {
+        "advice": {
+            "code": advice.code,
+            "action": advice.action.value,
+            "f_min": str(advice.f_min),
+            "f_max": str(advice.f_max),
+            "suggested_lots": advice.suggested_lots,
+            "reasons": list(advice.reasons),
+            "adjustments": [s.note for s in advice.trail],
+        },
+        "note": "区间来自全市场同类信号回测与分数凯利折扣，为风险预算参考",
+    }
+    try:
+        db = request.app.state.session_factory()
+        try:
+            result = await asyncio.wait_for(
+                gateway_service.call_model(
+                    db, request.app.state.settings, model_port,
+                    task_type=ModelTaskType.INTRADAY,
+                    job_run_id=None,
+                    context=context,
+                    deterministic_summary={},
+                    evidence_whitelist=list(advice.evidence_ids),
+                ),
+                timeout=INTRADAY_MODEL_TIMEOUT_SECONDS,
+            )
+        finally:
+            db.close()
+        if result.ok and result.content:
+            return str(result.content.get("summary", "")) or None
+        return None
+    except Exception as exc:  # noqa: BLE001 — 模型失败不影响建议本体（AC-06 语义）
+        _logger.warning("盘中模型解释失败（不影响建议）code=%s: %s", advice.code, exc)
+        return None
 
 
 def _persist(db: DBSession, user_id: str, advice: Advice) -> None:
@@ -238,6 +294,7 @@ def _persist(db: DBSession, user_id: str, advice: Advice) -> None:
             ], ensure_ascii=False,
         ),
         evidence_json=json.dumps(list(advice.evidence_ids), ensure_ascii=False),
+        model_explanation=advice.model_explanation,
         created_at=now, updated_at=now, row_version=1,
     ))
     db.commit()
@@ -264,6 +321,7 @@ def advice_to_payload(a: Advice) -> dict[str, Any]:
         "suggested_lots": a.suggested_lots,
         "reasons": list(a.reasons),
         "evidence_ids": list(a.evidence_ids),
+        "model_explanation": a.model_explanation,
         # 完整调整轨迹（计算输入/折扣/约束 → 最终区间，PRD 展示规则）
         "trail": [
             {"kind": s.kind, "note": s.note,
