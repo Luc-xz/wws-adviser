@@ -19,7 +19,6 @@ from enum import StrEnum
 
 from wws_adviser.modules.advice.domain import AdviceAction
 
-
 EVALUATION_SPEC_VERSION = "1"
 
 
@@ -75,7 +74,9 @@ def evaluate(advice_id: str, action: AdviceAction, f: ObservationFacts) -> Advic
     return handler(advice_id, action, f)
 
 
-def _evaluate_buy(advice_id: str, action: AdviceAction, f: ObservationFacts) -> AdviceEvaluation:
+def _evaluate_buy(
+    advice_id: str, action: AdviceAction, f: ObservationFacts
+) -> AdviceEvaluation:
     if f.trigger_occurred is None or f.direction_return is None:
         return AdviceEvaluation(advice_id, action, EVALUATION_SPEC_VERSION,
                                 Verdict.INCONCLUSIVE, ("观察窗口事实缺失",))
@@ -90,7 +91,9 @@ def _evaluate_buy(advice_id: str, action: AdviceAction, f: ObservationFacts) -> 
                             max_adverse_excursion=f.max_adverse_excursion)
 
 
-def _evaluate_reduce(advice_id: str, action: AdviceAction, f: ObservationFacts) -> AdviceEvaluation:
+def _evaluate_reduce(
+    advice_id: str, action: AdviceAction, f: ObservationFacts
+) -> AdviceEvaluation:
     if f.direction_return is None or f.benchmark_return is None:
         return AdviceEvaluation(advice_id, action, EVALUATION_SPEC_VERSION,
                                 Verdict.INCONCLUSIVE, ("观察窗口事实缺失",))
@@ -105,7 +108,9 @@ def _evaluate_reduce(advice_id: str, action: AdviceAction, f: ObservationFacts) 
                             excess_vs_benchmark=excess)
 
 
-def _evaluate_hold(advice_id: str, action: AdviceAction, f: ObservationFacts) -> AdviceEvaluation:
+def _evaluate_hold(
+    advice_id: str, action: AdviceAction, f: ObservationFacts
+) -> AdviceEvaluation:
     if f.became_actionable is None:
         return AdviceEvaluation(advice_id, action, EVALUATION_SPEC_VERSION,
                                 Verdict.INCONCLUSIVE, ("观察窗口事实缺失",))
@@ -113,7 +118,9 @@ def _evaluate_hold(advice_id: str, action: AdviceAction, f: ObservationFacts) ->
     return AdviceEvaluation(advice_id, action, EVALUATION_SPEC_VERSION, verdict, ())
 
 
-def _evaluate_suspend(advice_id: str, action: AdviceAction, f: ObservationFacts) -> AdviceEvaluation:
+def _evaluate_suspend(
+    advice_id: str, action: AdviceAction, f: ObservationFacts
+) -> AdviceEvaluation:
     if f.data_recovered is None or f.advice_would_be_warranted is None:
         return AdviceEvaluation(advice_id, action, EVALUATION_SPEC_VERSION,
                                 Verdict.INCONCLUSIVE, ("观察窗口事实缺失",))
@@ -153,11 +160,16 @@ def backfeed(
                    (Verdict.DIRECTION_CORRECT, Verdict.DIRECTION_WRONG,
                     Verdict.AVOIDED_LOSS, Verdict.REDUCED_TOO_EARLY)]
     if len(directional) < min_samples:
-        return BackfeedRecommendation(signal_id, len(directional), Decimal(0), "none", Decimal(1))
-    wrong = sum(1 for e in directional if e.verdict in (Verdict.DIRECTION_WRONG, Verdict.REDUCED_TOO_EARLY))
+        return BackfeedRecommendation(
+            signal_id, len(directional), Decimal(0), "none", Decimal(1)
+        )
+    wrong_verdicts = (Verdict.DIRECTION_WRONG, Verdict.REDUCED_TOO_EARLY)
+    wrong = sum(1 for e in directional if e.verdict in wrong_verdicts)
     wrong_rate = Decimal(wrong) / Decimal(len(directional))
     if wrong_rate >= decay_threshold:
-        return BackfeedRecommendation(signal_id, len(directional), wrong_rate, "decay", Decimal(1))
+        return BackfeedRecommendation(
+            signal_id, len(directional), wrong_rate, "decay", Decimal(1)
+        )
     if wrong_rate >= wrong_threshold:
         return BackfeedRecommendation(signal_id, len(directional), wrong_rate,
                                       "reduce_p", Decimal("0.8"))
@@ -202,11 +214,13 @@ def analyze_behavioral_bias(
     holds_signs = [t.unrealized_pnl_sign for t in trades
                    if t.kind == "BUY" and t.unrealized_pnl_sign is not None]
     if len(sells) >= 3:
-        sell_win_ratio = Decimal(sum(1 for t in sells if t.unrealized_pnl_sign > 0)) / Decimal(len(sells))
+        n_sell_win = sum(1 for t in sells if t.unrealized_pnl_sign > 0)
+        sell_win_ratio = Decimal(n_sell_win) / Decimal(len(sells))
         hold_win_ratio = (Decimal(sum(1 for s in holds_signs if s > 0)) / Decimal(len(holds_signs))
                           if holds_signs else None)
         # 卖出多为浮盈、而持仓多为浮亏 → 处置效应模式
-        if sell_win_ratio >= Decimal("0.7") and (hold_win_ratio is not None and hold_win_ratio <= Decimal("0.3")):
+        hold_low = hold_win_ratio is not None and hold_win_ratio <= Decimal("0.3")
+        if sell_win_ratio >= Decimal("0.7") and hold_low:
             findings.append(BiasFinding(
                 BiasKind.DISPOSAL_EFFECT, None,
                 f"卖出中 {sell_win_ratio} 为浮盈标的，持仓中 {hold_win_ratio} 为浮亏标的",

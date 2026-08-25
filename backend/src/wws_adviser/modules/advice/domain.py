@@ -10,11 +10,10 @@ FSM：DRAFT → DATA_CHECKED → RISK_CHECKED → MODEL_EXPLAINED → OUTPUT_VAL
 - 拒绝/暂停的建议不携带仓位区间，只携带原因类别。
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from decimal import Decimal
 from enum import StrEnum
-from typing import Sequence
-
 
 SCHEMA_VERSION = "1"
 
@@ -74,6 +73,16 @@ def block(state: AdviceState) -> AdviceState:
     return AdviceState.BLOCKED
 
 
+class DegradedReason(StrEnum):
+    """降级原因码（PRD FR-ANL-004：数据过期/市场异常不静默隐藏）。"""
+
+    DATA_STALE = "data_stale"            # 行情过期/不可用
+    MARKET_ABNORMAL = "market_abnormal"  # 标的停牌/不可交易/异常状态
+    LEDGER_UNRECONCILED = "ledger_unreconciled"
+    NO_CALIBRATED_SIGNAL = "no_calibrated_signal"
+    PUBLISH_GATE_PREFIX = "gate:"        # 发布门禁未通过项（七项检查）
+
+
 # —— 发布门禁（七项检查，§9.4）——
 
 
@@ -120,6 +129,17 @@ def resolve_conflict(
 
 
 @dataclass(frozen=True)
+class AdjustmentStep:
+    """调整轨迹的一步（before/after 为组合占比分数）。镜像 kelly.AdjustmentStep，
+    Advice 记录独立持久化轨迹（TECH §9.3：原因链写入 Advice 记录）。"""
+
+    kind: str
+    note: str
+    before: Decimal | None
+    after: Decimal | None
+
+
+@dataclass(frozen=True)
 class Advice:
     """一条建议（发布或降级形态）。拒绝/暂停不携带仓位区间。"""
 
@@ -141,6 +161,8 @@ class Advice:
     evidence_ids: tuple[str, ...] = ()
     model_explanation: str | None = None
     invalidated: bool = False
+    # 完整调整轨迹（PRD：建议须同时展示计算输入、折扣、约束、最终区间）
+    trail: tuple[AdjustmentStep, ...] = ()
 
     @property
     def has_position_interval(self) -> bool:
@@ -183,6 +205,7 @@ class IntradayContext:
     kelly_suggested_lots: int | None = None
     kelly_reasons: tuple[str, ...] = ()
     kelly_rejected: bool = False
+    kelly_trail: tuple[AdjustmentStep, ...] = ()
 
 
 def build_intraday_advice(
@@ -193,17 +216,19 @@ def build_intraday_advice(
     expires_at: str,
     evidence_ids: Sequence[str] = (),
 ) -> Advice:
-    """组装盘中建议：数据不合格/无校准信号 → SUSPEND（不带区间，带原因与已知事实）。"""
-    known_facts: list[str] = [f"标的={ctx.code}"]
+    """组装盘中建议：数据不合格/无校准信号 → SUSPEND（带原因码与已知事实）。
+
+    发布路径过 publish_gate 七项检查（§9.4）——任一不过 → DEGRADED + gate 原因。
+    """
     data_failures: list[str] = []
     if not ctx.ledger_reconciled:
-        data_failures.append("账本未对账")
+        data_failures.append(DegradedReason.LEDGER_UNRECONCILED.value)
     if not ctx.quote_fresh:
-        data_failures.append("行情过期")
+        data_failures.append(DegradedReason.DATA_STALE.value)
     if not ctx.tradable:
-        data_failures.append("标的不可交易")
+        data_failures.append(DegradedReason.MARKET_ABNORMAL.value)
     if ctx.kelly_accepted is None:
-        data_failures.append("无已校准信号")
+        data_failures.append(DegradedReason.NO_CALIBRATED_SIGNAL.value)
 
     if data_failures:
         return Advice(
@@ -220,6 +245,25 @@ def build_intraday_advice(
             action=AdviceAction.HOLD, state=AdviceState.DEGRADED,
             valid_from=valid_from, expires_at=expires_at,
             reasons=ctx.kelly_reasons, evidence_ids=tuple(evidence_ids),
+            trail=ctx.kelly_trail,
+        )
+
+    # 发布门禁（§9.4 七项）：数值/硬限制由凯利 clip 保证，有效期由本函数保证；
+    # 证据齐备仅对携带可操作区间的形态强制（零区间 HOLD 无关键数字可追溯）
+    checks = PublishChecks(
+        ledger_reconciled=True, quote_fresh=True, instrument_tradable=True,
+        numbers_deterministic=True, within_hard_limits=True,
+        has_validity_window=True,
+        evidence_complete=bool(evidence_ids) or (ctx.kelly_f_max or Decimal(0)) == 0,
+    )
+    gate_ok, gate_failed = publish_gate(checks)
+    if not gate_ok:
+        return Advice(
+            advice_id=advice_id, signal_id=ctx.signal_id, code=ctx.code,
+            action=AdviceAction.SUSPEND, state=AdviceState.DEGRADED,
+            valid_from=valid_from, expires_at=expires_at,
+            reasons=tuple(f"{DegradedReason.PUBLISH_GATE_PREFIX.value}{r}" for r in gate_failed),
+            evidence_ids=tuple(evidence_ids), trail=ctx.kelly_trail,
         )
 
     action = AdviceAction.BUY if (ctx.kelly_f_max or Decimal(0)) > 0 else AdviceAction.HOLD
@@ -232,4 +276,5 @@ def build_intraday_advice(
         value_min=ctx.kelly_value_min, value_max=ctx.kelly_value_max,
         suggested_lots=ctx.kelly_suggested_lots,
         reasons=ctx.kelly_reasons, evidence_ids=tuple(evidence_ids),
+        trail=ctx.kelly_trail,
     )

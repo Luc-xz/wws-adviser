@@ -4,7 +4,6 @@ from decimal import Decimal
 
 from wws_adviser.modules.advice.domain import AdviceAction
 from wws_adviser.modules.advice.evaluation import (
-    BackfeedRecommendation,
     BiasKind,
     ObservationFacts,
     TradeFact,

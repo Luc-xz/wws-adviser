@@ -11,21 +11,21 @@
 """
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import StrEnum
-from typing import Sequence
 
 from wws_adviser.modules.analytics.kelly import CalibrationState, KellyInput
 from wws_adviser.modules.analytics.signals import BacktestStats
-
 
 SCHEMA_VERSION = "1"
 
 DEFAULT_TTL_TRADING_DAYS = 60
 DEFAULT_BIN_COUNT = 5
 DEFAULT_BIN_MIN_SAMPLES = 10
-DEFAULT_REL_TOLERANCE = Decimal("0.10")  # |实际命中率 − 预测均值| 超过此值判失准
+# |实际命中率 − 预测均值| 超过此值判失准
+DEFAULT_REL_TOLERANCE = Decimal("0.10")
 
 
 # —— reliability 分箱 ——
@@ -60,7 +60,8 @@ def reliability_bins(
     width = Decimal(1) / Decimal(bin_count)
     buckets: list[list[CalibrationItem]] = [[] for _ in range(bin_count)]
     for it in items:
-        idx = min(bin_count - 1, int((it.predicted_p / width).to_integral_value(rounding="ROUND_DOWN")))
+        pos = (it.predicted_p / width).to_integral_value(rounding="ROUND_DOWN")
+        idx = min(bin_count - 1, int(pos))
         buckets[idx].append(it)
     out: list[ReliabilityBin] = []
     for i, bucket in enumerate(buckets):
@@ -71,7 +72,8 @@ def reliability_bins(
         hits = sum(1 for b in bucket if b.win)
         actual = Decimal(hits) / Decimal(n)
         out.append(ReliabilityBin(
-            bin_index=i, bin_low=width * i, bin_high=width * (i + 1),
+            bin_index=i, bin_low=width * i,
+            bin_high=width * (i + 1),
             n=n, avg_predicted=avg_pred, actual_rate=actual,
             deviation=actual - avg_pred, judged=n >= min_samples,
         ))
@@ -134,10 +136,10 @@ def fit_platt(
     lr: float = 0.5,
     l2: float = 1e-3,
 ) -> PlattParams:
-    """拟合 p' = σ(a·logit(p)+b)，最小化 log-loss（含小 L2 正则）。
+    """拟合 p' = sigmoid(a·logit(p)+b)，最小化 log-loss（含小 L2 正则）。
 
-    确定性：固定迭代次数的标准梯度下降；数据量小（校准场景）下足够稳定。
-    初始 a=1, b=0（恒等映射），保证无信号时输出恒等。
+    确定性：固定迭代次数；小数据量（校准场景）足够稳定。
+    初始 a=1, b=0（恒等映射）。
     """
     zs = [_logit(it.predicted_p) for it in items]
     ys = [1.0 if it.win else 0.0 for it in items]
@@ -145,7 +147,7 @@ def fit_platt(
     n = float(len(items))
     for _ in range(iterations):
         ga, gb = 0.0, 0.0
-        for z, y in zip(zs, ys):
+        for z, y in zip(zs, ys, strict=True):
             err = _sigmoid(a * z + b) - y
             ga += err * z
             gb += err
@@ -235,13 +237,20 @@ def evaluate_oos(
     platt_applied = False
     if oos_items and not reliability.passed:
         platt = fit_platt(oos_items)
-        corrected = [CalibrationItem(apply_platt(i.predicted_p, platt), i.win) for i in oos_items]
-        reliability = reliability_check(reliability_bins(corrected), tolerance=reliability_tolerance)
+        corrected = [
+            CalibrationItem(apply_platt(i.predicted_p, platt), i.win)
+            for i in oos_items
+        ]
+        reliability = reliability_check(
+            reliability_bins(corrected), tolerance=reliability_tolerance
+        )
         platt_applied = True
     if not reliability.passed:
-        reasons.append(f"reliability 失准（over={reliability.worst_overestimate}, under={reliability.worst_underestimate}）")
+        over, under = reliability.worst_overestimate, reliability.worst_underestimate
+        reasons.append(f"reliability 失准（over={over}, under={under}）")
     return OOSVerdict(
-        passed=not reasons, reasons=tuple(reasons), reliability=reliability, platt_applied=platt_applied
+        passed=not reasons, reasons=tuple(reasons),
+        reliability=reliability, platt_applied=platt_applied,
     )
 
 

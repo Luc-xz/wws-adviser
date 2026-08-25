@@ -86,7 +86,9 @@ def test_publish_gate_reports_each_failure() -> None:
         has_validity_window=True, evidence_complete=True,
     ))
     assert not ok
-    assert set(failed) == {"行情过期", "标的不可交易", "突破硬性风险限制"}
+    assert set(failed) == {
+        "行情过期", "标的不可交易", "突破硬性风险限制"
+    }
 
 
 # —— 冲突处理 ——
@@ -95,14 +97,20 @@ def test_publish_gate_reports_each_failure() -> None:
 def test_conflict_resolved_by_deterministic_rebuild() -> None:
     from wws_adviser.modules.advice.domain import resolve_conflict
 
-    assert resolve_conflict(model_conflicts=True, deterministic_rebuild_ok=True) is AdviceAction.HOLD
-    assert resolve_conflict(model_conflicts=False, deterministic_rebuild_ok=False) is AdviceAction.HOLD
+    assert resolve_conflict(
+        model_conflicts=True, deterministic_rebuild_ok=True
+    ) is AdviceAction.HOLD
+    assert resolve_conflict(
+        model_conflicts=False, deterministic_rebuild_ok=False
+    ) is AdviceAction.HOLD
 
 
 def test_conflict_without_rebuild_suspends() -> None:
     from wws_adviser.modules.advice.domain import resolve_conflict
 
-    assert resolve_conflict(model_conflicts=True, deterministic_rebuild_ok=False) is AdviceAction.SUSPEND
+    assert resolve_conflict(
+        model_conflicts=True, deterministic_rebuild_ok=False
+    ) is AdviceAction.SUSPEND
 
 
 # —— 有效期 ——
@@ -115,9 +123,9 @@ def test_is_actionable_respects_window_and_invalidation() -> None:
     assert is_actionable(a, "2026-08-24T02:01:00+00:00")
     assert not is_actionable(a, "2026-08-24T01:59:00+00:00")   # 早于窗口
     assert not is_actionable(a, "2026-08-24T02:05:00+00:00")   # 到期即失效
-    dead = invalidate(a, "行情过期")
+    dead = invalidate(a, "data_stale")
     assert not is_actionable(dead, "2026-08-24T02:01:00+00:00")
-    assert "行情过期" in dead.invalidation_reasons
+    assert "data_stale" in dead.invalidation_reasons
 
 
 def test_invalidate_only_published_or_degraded() -> None:
@@ -144,9 +152,14 @@ def _ctx(**overrides) -> IntradayContext:
 
 
 def test_build_published_interval_advice() -> None:
+    from wws_adviser.modules.advice.domain import AdjustmentStep
+
+    trail = (AdjustmentStep(kind="fractional_discount", note="×0.20",
+                            before=Decimal("0.28"), after=Decimal("0.056")),)
     a = build_intraday_advice(
-        _ctx(), advice_id="a1",
+        _ctx(kelly_trail=trail), advice_id="a1",
         valid_from="2026-08-24T02:00:00+00:00", expires_at="2026-08-24T02:05:00+00:00",
+        evidence_ids=("calibration:x", "market_record:y"),
     )
     assert a.state is AdviceState.PUBLISHED
     assert a.action is AdviceAction.BUY
@@ -154,6 +167,18 @@ def test_build_published_interval_advice() -> None:
     assert a.suggested_lots == 5
     assert a.has_position_interval
     assert a.trigger_conditions  # 发布形态必须带触发/失效条件
+    assert a.trail == trail  # 调整轨迹完整透传（PRD：展示计算输入/折扣/约束）
+
+
+def test_build_blocks_publish_without_evidence() -> None:
+    """发布门禁 evidence_complete：发布形态无证据引用 → gate 降级。"""
+    a = build_intraday_advice(
+        _ctx(), advice_id="a1", valid_from="t0", expires_at="t1", evidence_ids=(),
+    )
+    assert a.state is AdviceState.DEGRADED
+    assert a.action is AdviceAction.SUSPEND
+    assert any(r.startswith("gate:") for r in a.reasons)
+    assert not a.has_position_interval
 
 
 def test_build_suspend_when_data_unqualified() -> None:
@@ -164,7 +189,7 @@ def test_build_suspend_when_data_unqualified() -> None:
     assert a.state is AdviceState.DEGRADED
     assert a.action is AdviceAction.SUSPEND
     assert not a.has_position_interval  # 暂停不携带区间
-    assert "行情过期" in a.reasons and "账本未对账" in a.reasons
+    assert "data_stale" in a.reasons and "ledger_unreconciled" in a.reasons
 
 
 def test_build_suspend_when_no_calibrated_signal() -> None:
@@ -173,7 +198,7 @@ def test_build_suspend_when_no_calibrated_signal() -> None:
         advice_id="a1", valid_from="t0", expires_at="t1",
     )
     assert a.action is AdviceAction.SUSPEND
-    assert "无已校准信号" in a.reasons
+    assert "no_calibrated_signal" in a.reasons
 
 
 def test_build_hold_without_interval_when_kelly_rejected() -> None:

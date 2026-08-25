@@ -37,7 +37,9 @@ def _synthetic_bars(n_instruments: int = 8, n_days: int = 120) -> dict[str, list
         price = Decimal("10")
         for i in range(n_days):
             vol = "5000" if i % 10 == 9 else "1000"
-            rows.append(_bar(d0 + timedelta(days=i), str(price), volume=vol))
+            rows.append(_bar(
+                d0 + timedelta(days=i), str(price), volume=vol
+            ))
             price += Decimal("0.3")
         bars[f"60{k:04d}"] = rows
     return bars
@@ -60,7 +62,9 @@ def test_latest_valid_calibration_roundtrip_and_expiry(db_session) -> None:
     calibration_service.run_calibration_scan(
         db_session, _test_settings(), bars_by_code=_synthetic_bars()
     )
-    rec = calibration_service.latest_valid_calibration(db_session, "breakout-20", as_of="2026-12-31")
+    rec = calibration_service.latest_valid_calibration(
+        db_session, "breakout-20", as_of="2026-12-31"
+    )
     assert rec is not None
     assert rec.signal_id == "breakout-20"
     # 远超有效期（fallback 88 天）→ 视同 STALE

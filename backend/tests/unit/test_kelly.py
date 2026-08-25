@@ -8,8 +8,8 @@ from wws_adviser.modules.analytics.kelly import (
     CalibrationState,
     KellyInput,
     RejectReason,
-    wilson_interval,
     compute_kelly,
+    wilson_interval,
 )
 
 
@@ -122,7 +122,9 @@ def test_gate3_rejects_failed_reliability() -> None:
 
 
 def test_gate4_wide_interval_uses_p_low() -> None:
-    out = compute_kelly(_ok_input(p_low=Decimal("0.40"), p_mid=Decimal("0.60"), p_high=Decimal("0.80")))
+    out = compute_kelly(_ok_input(
+        p_low=Decimal("0.40"), p_mid=Decimal("0.60"), p_high=Decimal("0.80")
+    ))
     assert out.accepted
     assert "wide_p_interval" in out.flags
     # 有效中枢被替换为 p_low=0.40 → f*(0.4, b=1) = -0.2 < 0 → 无正边际坍缩为 0
@@ -183,14 +185,18 @@ def test_kelly_math_known_example() -> None:
 
 
 def test_negative_edge_collapses_to_zero() -> None:
-    out = compute_kelly(_ok_input(p_low=Decimal("0.30"), p_mid=Decimal("0.35"), p_high=Decimal("0.40")))
+    out = compute_kelly(_ok_input(
+        p_low=Decimal("0.30"), p_mid=Decimal("0.35"), p_high=Decimal("0.40")
+    ))
     assert out.accepted
     assert out.f_min == Decimal(0) and out.f_max == Decimal(0)
     assert "negative_edge" in out.flags
 
 
 def test_confidence_and_liquidity_discounts_applied() -> None:
-    out = compute_kelly(_ok_input(confidence_discount=Decimal("0.8"), liquidity_discount=Decimal("0.5")))
+    out = compute_kelly(_ok_input(
+        confidence_discount=Decimal("0.8"), liquidity_discount=Decimal("0.5")
+    ))
     # 0.05 × 0.8 × 0.5 = 0.02
     assert out.f_max == pytest.approx(Decimal("0.02"), abs=Decimal("1e-12"))
     kinds = [s.kind for s in out.trail]

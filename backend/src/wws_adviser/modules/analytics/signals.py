@@ -11,15 +11,14 @@
 零外部依赖；全部 Decimal。bars 输入复用 market_data 的 NormalizedBar。
 """
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date as Date
 from decimal import Decimal
 from enum import StrEnum
-from typing import Mapping, Sequence
 
 from wws_adviser.modules.analytics.kelly import wilson_interval
 from wws_adviser.modules.market_data.domain import NormalizedBar
-
 
 SCHEMA_VERSION = "1"
 
@@ -219,7 +218,8 @@ def cluster_decay(
         dates = sorted(by_code[code])
         sizes: list[int] = []
         run = 1
-        for prev, cur in zip(dates, dates[1:]):
+        # 错位配对（长度差 1）：显式 strict=False 表明是有意为之
+        for prev, cur in zip(dates, dates[1:], strict=False):
             if (cur - prev).days < horizon_days:
                 run += 1
             else:
@@ -228,7 +228,10 @@ def cluster_decay(
         sizes.append(run)
         n_eff += len(sizes)
         details.append(
-            ClusterDecay(code=code, n_instances=len(dates), n_clusters=len(sizes), cluster_sizes=tuple(sizes))
+            ClusterDecay(
+                code=code, n_instances=len(dates), n_clusters=len(sizes),
+                cluster_sizes=tuple(sizes),
+            )
         )
     return n_eff, details
 

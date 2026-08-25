@@ -16,7 +16,6 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import StrEnum
 
-
 # —— 版本化输入/输出（结构变更须升 schema_version）——
 
 SCHEMA_VERSION = "1"
@@ -81,7 +80,7 @@ class KellyInput:
     reliability_passed: bool = False           # reliability 校准结论（Platt 修正上游完成）
 
     # 折扣参数（越界视为配置错误，fail loud）
-    kelly_discount: Decimal = Decimal("0.25")        # 分数凯利折扣 0.10~0.25
+    kelly_discount: Decimal = Decimal("0.20")        # 分数凯利折扣 0.10~0.25（PRD 基线默认 0.20）
     confidence_discount: Decimal = Decimal("1")      # 置信折扣乘数（按 n_eff 分层，≤1）
     liquidity_discount: Decimal = Decimal("1")       # 流动性折扣乘数（≤1）
     max_p_interval_width: Decimal = Decimal("0.30")  # p 区间宽度上限
@@ -151,7 +150,10 @@ def _validate(inp: KellyInput) -> None:
     if not inp.signal_id:
         errors.append("signal_id 不能为空")
     if not (Decimal(0) <= inp.p_low <= inp.p_mid <= inp.p_high <= Decimal(1)):
-        errors.append(f"概率区间须满足 0≤p_low≤p_mid≤p_high≤1，收到 {inp.p_low}/{inp.p_mid}/{inp.p_high}")
+        errors.append(
+            f"概率区间须满足 0≤p_low≤p_mid≤p_high≤1，"
+            f"收到 {inp.p_low}/{inp.p_mid}/{inp.p_high}"
+        )
     if not (Decimal("0.10") <= inp.kelly_discount <= Decimal("0.25")):
         errors.append(f"凯利折扣须在 [0.10, 0.25]，收到 {inp.kelly_discount}")
     for name, d in (("confidence_discount", inp.confidence_discount),
@@ -226,7 +228,8 @@ def compute_kelly(inp: KellyInput) -> KellyOutcome:
         flags.append(Flag.WIDE_P_INTERVAL.value)
         p_mid = p_low
         trail.append(AdjustmentStep(
-            kind="wide_p_interval", note=f"区间宽 {inp.p_high - inp.p_low} 超过 {inp.max_p_interval_width}，有效 p_mid 取 p_low",
+            kind="wide_p_interval",
+            note=f"区间宽 {inp.p_high - inp.p_low} 超过 {inp.max_p_interval_width}，取 p_low",
             before=inp.p_mid, after=p_low,
         ))
 
@@ -291,7 +294,9 @@ def compute_kelly(inp: KellyInput) -> KellyOutcome:
             before = f_max
             f_max = f_max * mult
             f_min = f_min * mult
-            trail.append(AdjustmentStep(kind=kind, note=f"{note} ×{mult}", before=before, after=f_max))
+            trail.append(AdjustmentStep(
+                kind=kind, note=f"{note} ×{mult}", before=before, after=f_max
+            ))
 
     # 关卡 9：clip（现金下限 → 单标的上限 → 行业上限 → 组合）
     #   f 为组合占比，换算货币额受限后回算，保证输出语义一致
@@ -325,7 +330,8 @@ def compute_kelly(inp: KellyInput) -> KellyOutcome:
         # 关卡 10：最小交易单位取整（不能安全取整时只显示区间）
         lots: int | None = None
         if inp.price is not None and inp.price > 0 and value_max > 0:
-            raw_lots = int((value_max / (inp.price * inp.lot_size)).to_integral_value(rounding="ROUND_DOWN"))
+            per_lot = inp.price * inp.lot_size
+            raw_lots = int((value_max / per_lot).to_integral_value(rounding="ROUND_DOWN"))
             lots = raw_lots
             lots_value = Decimal(raw_lots) * inp.price * inp.lot_size
             if lots_value > value_max:

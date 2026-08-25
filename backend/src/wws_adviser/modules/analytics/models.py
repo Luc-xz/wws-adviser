@@ -37,7 +37,9 @@ class SignalCalibration(Base):
     )
 
     id: Mapped[str] = mapped_column(sa.String(26), primary_key=True)
-    signal_def_id: Mapped[str] = mapped_column(sa.String(26), sa.ForeignKey("signals.id"), nullable=False)
+    signal_def_id: Mapped[str] = mapped_column(
+        sa.String(26), sa.ForeignKey("signals.id"), nullable=False
+    )
     signal_id: Mapped[str] = mapped_column(sa.Text, nullable=False)   # 冗余便于查询
     signal_version: Mapped[str] = mapped_column(sa.Text, nullable=False)
     state: Mapped[str] = mapped_column(sa.Text, nullable=False)       # 校准状态机

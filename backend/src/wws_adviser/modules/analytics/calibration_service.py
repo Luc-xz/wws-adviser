@@ -10,9 +10,10 @@ p 只在本服务写入（FR-ANL-003）；有效期按交易日历（trading_cal
 
 import json
 import logging
-from datetime import date as Date, timedelta
+from collections.abc import Mapping, Sequence
+from datetime import date as Date
+from datetime import timedelta
 from decimal import Decimal
-from typing import Mapping, Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DBSession
@@ -22,13 +23,13 @@ from wws_adviser.core.ids import new_id
 from wws_adviser.core.time import business_date, now_utc_iso
 from wws_adviser.modules.analytics import signals as sig
 from wws_adviser.modules.analytics.calibration import (
+    CalibrationEvent,
     CalibrationItem,
     CalibrationRecord,
     CalibrationState,
     evaluate_oos,
     state_on_date,
     transition,
-    CalibrationEvent,
 )
 from wws_adviser.modules.analytics.models import SignalCalibration, SignalRecord
 from wws_adviser.modules.instruments import models as instruments_models
@@ -124,7 +125,8 @@ def _expiry_date(db: DBSession, calibrated_on: str, ttl_days: int) -> tuple[str,
     ).all()
     if len(rows) >= ttl_days:
         return rows[-1], "calendar"
-    fallback = (Date.fromisoformat(calibrated_on) + timedelta(days=CALENDAR_FALLBACK_DAYS)).isoformat()
+    fb = Date.fromisoformat(calibrated_on) + timedelta(days=CALENDAR_FALLBACK_DAYS)
+    fallback = fb.isoformat()
     return fallback, "calendar_fallback_approx"
 
 
@@ -156,11 +158,16 @@ def run_calibration_scan(
         signal_result: dict[str, object] = {
             "instances": len(instances), "outcomes": len(outcomes), "n_eff": n_eff_all,
         }
+        window = {
+            "is_count": len(is_outcomes), "oos_count": len(oos_outcomes),
+            "first_exit": ordered[0].exit_date.isoformat() if ordered else None,
+            "last_exit": ordered[-1].exit_date.isoformat() if ordered else None,
+        }
         if not oos_outcomes or not is_outcomes:
             _persist(db, row, state=CalibrationState.UNCALIBRATED, stats=None,
                      n_eff=n_eff_all, n_eff_oos=0, reliability=False,
-                     notes={"reasons": ["样本不足以完成 IS/OOS 切分"]}, calibrated_on=today,
-                     settings=settings)
+                     notes={"reasons": ["样本不足以完成 IS/OOS 切分"], "window": window},
+                     calibrated_on=today, settings=settings)
             signal_result["state"] = CalibrationState.UNCALIBRATED.value
             results["signals"][row.signal_id] = signal_result  # type: ignore[index]
             continue
@@ -181,7 +188,8 @@ def run_calibration_scan(
             db, row, state=state, stats=oos_stats,
             n_eff=n_eff_all, n_eff_oos=n_eff_oos,
             reliability=verdict.reliability.passed,
-            notes={"reasons": list(verdict.reasons), "platt_applied": verdict.platt_applied},
+            notes={"reasons": list(verdict.reasons), "platt_applied": verdict.platt_applied,
+                   "window": window},
             calibrated_on=today, settings=settings,
         )
         signal_result.update({
@@ -236,7 +244,9 @@ def _persist(
         existing.calibrated_on = calibrated_on
         existing.expires_on = expires_on
         if stats is not None:
-            existing.p_low, existing.p_mid, existing.p_high = str(stats.p_low), str(stats.p_mid), str(stats.p_high)
+            existing.p_low = str(stats.p_low)
+            existing.p_mid = str(stats.p_mid)
+            existing.p_high = str(stats.p_high)
             existing.b = str(stats.b)
         existing.n_eff, existing.n_eff_oos = n_eff, n_eff_oos
         existing.reliability_passed = reliability
@@ -249,6 +259,14 @@ def latest_valid_calibration(
     db: DBSession, signal_id: str, *, as_of: str | None = None
 ) -> CalibrationRecord | None:
     """最新校准记录（读时判定过期）。无记录 → None。"""
+    record, _row_id = latest_valid_calibration_with_row(db, signal_id, as_of=as_of)
+    return record
+
+
+def latest_valid_calibration_with_row(
+    db: DBSession, signal_id: str, *, as_of: str | None = None
+) -> tuple[CalibrationRecord | None, str | None]:
+    """同 latest_valid_calibration，附带 ORM 行 id（供 Advice 证据引用）。"""
     row = db.scalar(
         select(SignalCalibration)
         .where(SignalCalibration.signal_id == signal_id)
@@ -256,8 +274,8 @@ def latest_valid_calibration(
         .limit(1)
     )
     if row is None:
-        return None
-    record = CalibrationRecord(
+        return None, None
+    raw = CalibrationRecord(
         signal_id=row.signal_id, signal_version=row.signal_version,
         state=CalibrationState(row.state),
         calibrated_on=row.calibrated_on, expires_on=row.expires_on,
@@ -266,11 +284,12 @@ def latest_valid_calibration(
         reliability_passed=row.reliability_passed,
     )
     # 读时过期：CALIBRATED_OOS 过期视同 STALE（凯利关卡 1 消费）
-    return CalibrationRecord(
-        signal_id=record.signal_id, signal_version=record.signal_version,
-        state=state_on_date(record, as_of or business_date().isoformat()),
-        calibrated_on=record.calibrated_on, expires_on=record.expires_on,
-        p_low=record.p_low, p_mid=record.p_mid, p_high=record.p_high,
-        b=record.b, n_eff=record.n_eff, n_eff_oos=record.n_eff_oos,
-        reliability_passed=record.reliability_passed,
+    record = CalibrationRecord(
+        signal_id=raw.signal_id, signal_version=raw.signal_version,
+        state=state_on_date(raw, as_of or business_date().isoformat()),
+        calibrated_on=raw.calibrated_on, expires_on=raw.expires_on,
+        p_low=raw.p_low, p_mid=raw.p_mid, p_high=raw.p_high,
+        b=raw.b, n_eff=raw.n_eff, n_eff_oos=raw.n_eff_oos,
+        reliability_passed=raw.reliability_passed,
     )
+    return record, row.id

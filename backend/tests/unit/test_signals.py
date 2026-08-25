@@ -18,7 +18,6 @@ from wws_adviser.modules.analytics.signals import (
 )
 from wws_adviser.modules.market_data.domain import NormalizedBar
 
-
 DEF = SignalDefinition(
     signal_id="sig-break-20", name="20日新高+量能", signal_class=SignalClass.L1_RULE,
     version="v1", lookback_days=3, horizon_days=2, cost_bps=Decimal("10"),
@@ -201,7 +200,9 @@ def test_split_chronological_by_exit_date() -> None:
     assert len(split.out_of_sample) > 0
     # 顺序性保证：样本内最大出场日 < 样本外最小出场日
     if split.in_sample:
-        assert max(o.exit_date for o in split.in_sample) < min(o.exit_date for o in split.out_of_sample)
+        max_is = max(o.exit_date for o in split.in_sample)
+        min_oos = min(o.exit_date for o in split.out_of_sample)
+        assert max_is < min_oos
 
 
 # —— 端到端小闭环：生成 → 回测 → 衰减 → 切分 ——

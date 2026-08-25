@@ -4,7 +4,6 @@
 配套结构性检查：p 字段的写路径只能在校准服务（模型 Gateway 无权写入）。
 """
 
-import asyncio
 import inspect
 import tempfile
 from decimal import Decimal
@@ -160,14 +159,13 @@ def test_exit3_degradation_scenarios_all_explicit(migrated_client: TestClient) -
 def test_exit3_expired_calibration_never_yields_position(migrated_client: TestClient) -> None:
     """校准记录存在但已过期 → 建议不携带仓位区间（读时过期 → STALE → 凯利拒绝）。"""
     app = migrated_client.app
-    settings = app.state.settings
     headers = _login_headers(migrated_client)
     with app.state.session_factory() as db:
         uid = db.scalar(select(User.id))
         portfolio_service.create_account(
             db, user_id=uid, name="main", initial_cash=Decimal("100000")
         )
-        inst = instruments_service.get_or_create_instrument(db, code="600519", name="贵州茅台")
+        instruments_service.get_or_create_instrument(db, code="600519", name="贵州茅台")
         db.commit()
         # 造一份「已过期」的校准记录（状态对但有效期已过）
         sig = calibration_service.seed_default_signal(db)
