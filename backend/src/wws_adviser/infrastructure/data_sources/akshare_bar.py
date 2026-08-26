@@ -115,7 +115,8 @@ class AKShareBarProvider:
                 break
             except Exception as exc:  # noqa: BLE001 — 传输层抖动重试
                 last_exc = exc
-        if df is None:
+        if df is None or getattr(df, "empty", False):
+            # 空 DF 也是封锁形态（200 + 空结果）——走腾讯备源
             try:
                 return await asyncio.to_thread(
                     self._fetch_tencent_bars, instrument, start, end

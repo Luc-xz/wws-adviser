@@ -173,8 +173,12 @@ def _fetch_one_sync(instrument: InstrumentRef, market_time: str) -> RawQuote | N
             resp = httpx.get(_QUOTE_URL, params=params, timeout=10.0)
             resp.raise_for_status()
             payload = resp.json().get("data")
-            return payload_to_quote(payload, code=instrument.code, market_time=market_time)
-        except Exception as exc:  # noqa: BLE001 — 传输层抖动重试
+            quote = payload_to_quote(payload, code=instrument.code, market_time=market_time)
+            if quote is None:
+                # 封锁形态之一：200 + data 空（实测 2026-08）——视为失败走重试/备源
+                raise RuntimeError("eastmoney empty payload")
+            return quote
+        except Exception as exc:  # noqa: BLE001 — 传输层抖动/空响应重试
             last_exc = exc
     try:
         return _fetch_tencent_sync(instrument, market_time)
