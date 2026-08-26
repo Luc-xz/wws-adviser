@@ -23,6 +23,7 @@ from wws_adviser.modules.model_gateway.domain import (
     build_masked_context,
     context_to_prompt_text,
     repair_prompt_errors,
+    response_schema_for,
     validate_model_output,
 )
 from wws_adviser.modules.model_gateway.models import ModelCall
@@ -71,6 +72,8 @@ async def call_model(
         prompt_template_version=template.version,
         structured_context=context,
         evidence_ids=whitelist,
+        # 原生 structured-output：适配器不支持时自行剥离回退（文本抽取兜底）
+        response_schema=response_schema_for(template.name),
         timeout=profile.timeout or settings.model_timeout,
         max_tokens=profile.max_tokens or settings.model_max_tokens,
     )
@@ -108,6 +111,7 @@ async def call_model(
                     prompt_template_version=template.version,
                     structured_context=repair_ctx,
                     evidence_ids=whitelist,
+                    response_schema=response_schema_for(template.name),
                     timeout=profile.timeout or settings.model_timeout,
                     max_tokens=profile.max_tokens or settings.model_max_tokens,
                 )
