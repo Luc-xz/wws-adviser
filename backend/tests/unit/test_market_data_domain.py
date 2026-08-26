@@ -183,3 +183,44 @@ def test_akshare_modules_import_lazily() -> None:
     import wws_adviser.infrastructure.data_sources.akshare_quote  # noqa: F401
 
     assert "akshare" not in sys.modules
+
+
+def test_tencent_quote_parsing() -> None:
+    """腾讯实时行情文本解析：现价/昨收自算涨跌幅；停牌（价 0）→ None。"""
+    from decimal import Decimal as D
+
+    from wws_adviser.infrastructure.data_sources.akshare_quote import (
+        tencent_symbol,
+        tencent_text_to_quote,
+    )
+
+    sample = 'v_sh510500="1~中证500ETF南方~510500~7.825~7.726~7.732~3344444~..."'
+    q = tencent_text_to_quote(sample, code="510500", market_time="t")
+    assert q is not None
+    assert q.price == D("7.825")
+    assert q.source == "tencent"
+    expected = (D("7.825") - D("7.726")) / D("7.726") * 100
+    assert q.change_pct == expected
+    # 停牌：现价 0 → None
+    halted = 'v_sz159558="51~半导体E~159558~0.000~1.100~0.000~0~..."'
+    assert tencent_text_to_quote(halted, code="159558", market_time="t") is None
+
+    assert tencent_symbol("SSE", "510500") == "sh510500"
+    assert tencent_symbol("SZSE", "159558") == "sz159558"
+    assert tencent_symbol("", "600519") == "sh600519"
+
+
+def test_tencent_bars_row_mapping() -> None:
+    """腾讯日线行结构 → rows_to_dataset 中文列（日期/开收高低/量）。"""
+    from wws_adviser.infrastructure.data_sources.akshare_bar import rows_to_dataset
+
+    rows = [
+        {"日期": "2026-08-25", "开盘": "7.663", "收盘": "7.726",
+         "最高": "7.777", "最低": "7.594", "成交量": "3782961"},
+    ]
+    ds = rows_to_dataset(rows, source="tencent", source_url="tencent://bars/x")
+    assert len(ds.bars) == 1
+    b = ds.bars[0]
+    assert b.date.isoformat() == "2026-08-25"
+    assert b.open == Decimal("7.663") and b.close == Decimal("7.726")
+    assert b.high == Decimal("7.777") and b.low == Decimal("7.594")

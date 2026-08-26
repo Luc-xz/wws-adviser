@@ -48,6 +48,9 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
     def _review_scan() -> None:
         _enqueue_stub(JobType.ADVICE_REVIEW, engine, settings)
 
+    def _data_maintenance() -> None:
+        _enqueue_stub(JobType.DATA_MAINTENANCE, engine, settings)
+
     scheduler.add_job(
         _pre_market,
         CronTrigger(hour=8, minute=30, timezone=SHANGHAI),
@@ -63,6 +66,12 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
         _calibration_scan,
         CronTrigger(hour=8, minute=0, timezone=SHANGHAI),
         id="calibration_scan",
+    )
+    # 数据维护：持仓日线采集（15:20 赶在 16:00 收市后报告前拿到当日收盘价）
+    scheduler.add_job(
+        _data_maintenance,
+        CronTrigger(hour=15, minute=20, timezone=SHANGHAI),
+        id="data_maintenance",
     )
     # 建议评价回填：收市后报告（16:00）完成后，评价观察窗口已过的建议
     scheduler.add_job(

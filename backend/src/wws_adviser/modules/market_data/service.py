@@ -285,3 +285,49 @@ def market_quality(
             }
         )
     return out
+
+
+async def ingest_bars_for_holdings(
+    db: DBSession,
+    *,
+    data_dir: Path,
+    provider: BarProvider,
+    lookback_days: int = 30,
+    request_id: str | None = None,
+) -> dict[str, str]:
+    """为全部持仓标的批量采集日线（幂等：内容哈希去重，重采安全）。
+
+    DATA_MAINTENANCE 每日任务用：15:20 采集赶在 16:00 收市后报告前拿到当日收盘。
+    返回 {code: quality_status}（失败标的记异常类型名，不中断其余标的）。
+    """
+    import logging
+    from datetime import timedelta
+
+    from wws_adviser.modules.portfolio import service as portfolio_service
+    from wws_adviser.modules.portfolio.models import Account
+
+    logger = logging.getLogger(__name__)
+    end = date.today()
+    start = end - timedelta(days=lookback_days)
+    results: dict[str, str] = {}
+    seen: set[str] = set()
+    for account in db.scalars(select(Account)).all():
+        state = portfolio_service.get_position_state(db, account.id)
+        for inst_id, st in state.positions.items():
+            if st.qty <= 0 or inst_id in seen:
+                continue
+            seen.add(inst_id)
+            inst = instruments_service.get_instrument(db, inst_id)
+            if inst is None:
+                continue
+            try:
+                r = await ingest_daily_bars(
+                    db, data_dir=data_dir, instrument_id=inst_id, provider=provider,
+                    start=start, end=end, request_id=request_id,
+                )
+                results[inst.code] = r.quality
+            except Exception as exc:  # noqa: BLE001 — 单标的失败不中断批次
+                logger.warning("日线采集失败 %s: %s", inst.code, exc)
+                results[inst.code] = type(exc).__name__
+    db.commit()
+    return results

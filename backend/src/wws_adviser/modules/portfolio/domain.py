@@ -110,7 +110,11 @@ class PositionError(DomainError):
 
 @dataclass
 class TxnInput:
-    """compute_positions 的输入（由 service 从 ORM Transaction 转换，保持 domain 零 ORM 依赖）。"""
+    """compute_positions 的输入（由 service 从 ORM Transaction 转换，保持 domain 零 ORM 依赖）。
+
+    id 为同日 tie-break：ULID 创建时单调递增 = 插入序（导入文件序）= 真实日内时间序；
+    空串（手工构造/测试）退化为稳定排序保持输入序。
+    """
 
     instrument_id: str
     kind: TransactionKind
@@ -120,6 +124,7 @@ class TxnInput:
     fee: Decimal
     tax: Decimal
     trade_at: str
+    id: str = ""
 
 
 @dataclass
@@ -180,11 +185,12 @@ def _apply_txn(positions: dict[str, PositionState], t: TxnInput) -> Decimal:
 def compute_positions(txns: list[TxnInput], *, initial_cash: Decimal) -> PositionsResult:
     """按 trade_at 排序回放交易 → 每标的 PositionState + 账户现金。纯函数、确定性。
 
-    输入需已按 (trade_at, 序) 排序（调用方保证）；本函数对其做稳定排序以防万一。
+    排序 (trade_at, id)：同日按插入序（ULID 单调递增）——日内先卖后买等顺序敏感场景
+    的确定性保证（同日 ULID 随机序曾导致回放卖超）。
     """
     positions: dict[str, PositionState] = {}
     cash = initial_cash
-    for t in sorted(txns, key=lambda x: x.trade_at):
+    for t in sorted(txns, key=lambda x: (x.trade_at, x.id)):
         cash += _apply_txn(positions, t)
     return PositionsResult(positions=positions, cash=cash)
 
@@ -196,7 +202,7 @@ def compute_position_series(txns: list[TxnInput]) -> list[tuple[str, PositionSta
     """
     positions: dict[str, PositionState] = {}
     series: list[tuple[str, PositionState]] = []
-    for t in sorted(txns, key=lambda x: x.trade_at):
+    for t in sorted(txns, key=lambda x: (x.trade_at, x.id)):
         _apply_txn(positions, t)
         st = positions[t.instrument_id]
         series.append(

@@ -7,7 +7,9 @@ import pytest
 from wws_adviser.modules.portfolio.domain import (
     Direction,
     TransactionKind,
+    TxnInput,
     compute_fingerprint,
+    compute_positions,
     decode_cursor,
     encode_cursor,
     from_scaled_int,
@@ -177,3 +179,28 @@ def test_parse_fee_optional() -> None:
     assert errors == []
     assert rows[0].fee == Decimal("0")
     assert rows[0].tax == Decimal("0")
+
+
+def test_compute_positions_same_day_tiebreak_by_id() -> None:
+    """回归：同日多笔按 id（插入序）回放——随机 ULID 序曾致同日卖超。
+
+    日内真实序：先卖旧仓 500（id 小）再买 500（id 大）。无论输入顺序如何，
+    回放都应按 id 序成功（卖的是昨日持仓）。
+    """
+    def txn(tid: str, kind: TransactionKind, qty: str, price: str) -> TxnInput:
+        return TxnInput(
+            instrument_id="I1", kind=kind,
+            direction=Direction.IN if kind is TransactionKind.BUY else Direction.OUT,
+            quantity=Decimal(qty), price=Decimal(price), fee=Decimal(0), tax=Decimal(0),
+            trade_at="2026-07-17", id=tid,
+        )
+
+    initial = [
+        txn("01AAA", TransactionKind.BUY, "500", "0.70"),  # 前日持仓
+        txn("01BBB", TransactionKind.SELL, "500", "0.72"),  # 日内先卖
+        txn("01CCC", TransactionKind.BUY, "500", "0.75"),   # 日内后买
+    ]
+    # 打乱输入顺序，回放结果必须一致且不抛 PositionError
+    for perm in (initial, list(reversed(initial)), [initial[2], initial[0], initial[1]]):
+        result = compute_positions(perm, initial_cash=Decimal("1000"))
+        assert result.positions["I1"].qty == Decimal(500)

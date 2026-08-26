@@ -96,6 +96,17 @@ async def run_due_jobs(
                     _logger.warning("校准任务失败 job=%s: %s", job.id, exc)
                     jobs_service.fail(db, job.id, error_code=type(exc).__name__)
                 continue
+            if job.job_type == JobType.DATA_MAINTENANCE.value:
+                try:
+                    result = await _run_data_maintenance(db, settings)
+                    ok_n, fail_n = result.get("ok", 0), result.get("failed", 0)
+                    jobs_service.complete(
+                        db, job.id, result_ref=f"bars://{ok_n}/{fail_n}"
+                    )
+                except Exception as exc:  # noqa: BLE001 — 执行器边界：失败记 error_code
+                    _logger.warning("数据维护任务失败 job=%s: %s", job.id, exc)
+                    jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+                continue
             jobs_service.complete(db, job.id)
             continue
         report_type = (
@@ -145,6 +156,25 @@ def _run_calibration_scan(db: DBSession, settings: Settings) -> dict[str, object
     from wws_adviser.modules.analytics import calibration_service
 
     return calibration_service.run_calibration_scan(db, settings)
+
+async def _run_data_maintenance(db: DBSession, settings: Settings) -> dict[str, int]:
+    """数据维护任务体：持仓日线批量采集（幂等，重采安全）。
+
+    15:20 调度赶在 16:00 收市后报告前拿到当日收盘价；单标的失败不中断批次。
+    """
+    from wws_adviser.core.time import business_date as _bd
+    from wws_adviser.infrastructure.data_sources.akshare_bar import AKShareBarProvider
+    from wws_adviser.modules.market_data import service as market_service
+
+    if settings.market_data_source != "akshare":
+        return {"ok": 0, "failed": 0}
+    results = await market_service.ingest_bars_for_holdings(
+        db, data_dir=settings.data_dir,
+        provider=AKShareBarProvider(env=settings.env),
+        request_id=f"data-maintenance-{_bd().isoformat()}",
+    )
+    ok = sum(1 for v in results.values() if v == "OK")
+    return {"ok": ok, "failed": len(results) - ok}
 
 
 def enqueue_report_job(
