@@ -4,6 +4,7 @@
 PATCH 写审计（脱敏差异）。
 """
 
+import re
 from typing import Any
 
 from sqlalchemy.orm import Session as DBSession
@@ -18,6 +19,50 @@ class SettingsValidationError(DomainError):
     code = "VALIDATION_ERROR"
     status = 422
     title = "设置校验失败"
+
+
+# —— 自选（watchlist）：非敏感可调项，存 app_settings KV（技术债清理：PORT 自选 Tab）——
+
+_WATCHLIST_KEY = "watchlist.codes"
+
+_CODE_RE = re.compile(r"^\d{6}$")  # A股/场内ETF 6 位数字代码
+
+
+def get_watchlist(db: DBSession) -> list[str]:
+    """当前自选代码列表（保持用户排序，去重）。"""
+    value = repository.get_value(db, _WATCHLIST_KEY)
+    if not isinstance(value, list):
+        return []
+    return [str(c) for c in value]
+
+
+def set_watchlist(
+    db: DBSession,
+    *,
+    user_id: str,
+    codes: list[str],
+    request_id: str | None = None,
+) -> list[str]:
+    """整体替换自选（PUT 语义）。校验 6 位代码、保序去重；写审计。"""
+    cleaned: list[str] = []
+    for raw in codes:
+        code = str(raw).strip()
+        if not _CODE_RE.match(code):
+            raise SettingsValidationError(f"非法标的代码: {raw}")
+        if code not in cleaned:
+            cleaned.append(code)
+    repository.set_value(db, _WATCHLIST_KEY, cleaned)
+    audit_service.append_event(
+        db,
+        action="watchlist_updated",
+        actor=user_id,
+        target_type="settings",
+        target_id="watchlist",
+        after={"count": len(cleaned)},
+        request_id=request_id,
+    )
+    db.commit()
+    return cleaned
 
 # 各 section 允许 PATCH 的字段（白名单；敏感字段不在其中）
 _PATCHABLE: dict[str, set[str]] = {
