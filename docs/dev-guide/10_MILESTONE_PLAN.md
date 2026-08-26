@@ -135,6 +135,24 @@ Phase 3 完成后逐项核：
 
 ## 8. 运行配置与待确认项
 
+### 8.0 技术债清理批次（2026-08-26，tech-debt 分支）
+
+Phase 1 各波次注记中的「无期留白」一次性清账（每项原子提交，门禁全绿）：
+
+| # | 项 | 出处 | 落点 |
+| --- | --- | --- | --- |
+| 1 | documents 游标分页（keyset，替换 limit 截断） | 波3 `TODO(波后续)` | `GET /documents` + `next_cursor` |
+| 2 | clock-skew 校验（零依赖 SNTP，启动测偏移 + health 暴露） | 波2 `TODO(clock-skew)` | `infrastructure/clock_sntp.py` |
+| 3 | 通知冷却窗口（同 channel+event_type，默认关闭可配） | 波6 留白 | `WWSE_NOTIFY_COOLDOWN_SEC` |
+| 4 | 企微机器人 / Server酱 渠道适配器 | 波6 留白 / PRD §20.1 | `notifier_source=wechat_work\|server_chan` |
+| 5 | 模型原生 structured-output（json_schema，4xx 剥离回退） | 波6 留白 | model_gateway + openai_model |
+| 6 | PORT 三 Tab：流水列表 / 自选增删（app_settings KV）/ ECharts 已实现盈亏趋势 | 波7 前端留白 | `/portfolio` |
+| 7 | 深色模式（useDark class 策略 + 表面 token + 全页面 dark: 变体） | 波7 前端留白 | 设置页外观开关 |
+| 8 | dev 遗留 mypy strict 报错 ×6（备源 None 上抛防御等） | 近期运行期提交 | 随批清零 |
+
+仍留待后续：交易记录手工录入 UI、CSV 导入 UI、SSE 服务端 `/events`（Phase 2 收口项）、
+离线报告私有缓存与报告导出（Phase 3.4）、企微/Server酱真实联调（VPS+凭据）。
+
 ### 8.1 运行配置 / 条件触发（2026-08-11 复核）
 
 | 事项 | 确认策略 | 备注 |
