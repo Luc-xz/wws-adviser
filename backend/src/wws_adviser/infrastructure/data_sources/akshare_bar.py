@@ -13,6 +13,8 @@ from typing import Any
 from wws_adviser.core.time import now_utc_iso
 from wws_adviser.ports.market_data import BarRow, InstrumentRef, RawDataset, SourceDelayClass
 
+_TENCENT_KLINE_URL = "https://ifzq.gtimg.cn/appstock/app/fqkline/get"
+
 
 def _dec(v: object) -> Decimal:
     try:
@@ -73,12 +75,36 @@ class AKShareBarProvider:
             start_date=start_s, end_date=end_s, adjust=self._adjust,
         )
 
+    def _fetch_tencent_bars(
+        self, instrument: InstrumentRef, start: date, end: date
+    ) -> RawDataset:
+        """腾讯日线（qfq 优先，day 兜底）。东财封锁期 fallback。"""
+        import httpx
+
+        from wws_adviser.infrastructure.data_sources.akshare_quote import tencent_symbol
+
+        sym = tencent_symbol(instrument.market, instrument.code)
+        params = {"param": f"{sym},day,{start.isoformat()},{end.isoformat()},640,qfq"}
+        resp = httpx.get(_TENCENT_KLINE_URL, params=params, timeout=15.0)
+        resp.raise_for_status()
+        payload = (resp.json().get("data") or {}).get(sym) or {}
+        days = payload.get("qfqday") or payload.get("day") or []
+        # 腾讯行结构：[日期, 开, 收, 高, 低, 成交量(手)] → rows_to_dataset 中文列
+        rows = [
+            {"日期": d[0], "开盘": d[1], "收盘": d[2], "最高": d[3], "最低": d[4],
+             "成交量": d[5] if len(d) > 5 else 0}
+            for d in days
+        ]
+        return rows_to_dataset(
+            rows, source="tencent", source_url=f"tencent://bars/{instrument.code}"
+        )
+
     async def fetch_daily_bars(
         self, instrument: InstrumentRef, start: date, end: date
     ) -> RawDataset:
         import akshare as ak  # type: ignore[import-not-found]
 
-        # 东财对数据中心 IP 有分钟级滚动风控（间歇性断连），短退避重试可跨过封锁窗口
+        # 东财滚动风控重试；全败 → 腾讯日线 fallback（2026-08 实测东财封锁可持续数日）
         last_exc: Exception | None = None
         df: Any = None
         for delay in (0, 2, 5):
@@ -87,10 +113,15 @@ class AKShareBarProvider:
             try:
                 df = await asyncio.to_thread(self._fetch_df, ak, instrument, start, end)
                 break
-            except Exception as exc:  # noqa: BLE001 — 传输层抖动重试；末次异常上抛由服务层降级
+            except Exception as exc:  # noqa: BLE001 — 传输层抖动重试
                 last_exc = exc
-        else:
-            raise last_exc
+        if df is None:
+            try:
+                return await asyncio.to_thread(
+                    self._fetch_tencent_bars, instrument, start, end
+                )
+            except Exception as fallback_exc:  # noqa: BLE001 — 备源失败上抛主源异常
+                raise last_exc from fallback_exc
         rows: list[dict[str, Any]] = list(df.to_dict("records"))
         return rows_to_dataset(
             rows, source="akshare", source_url=f"akshare://bars/{instrument.code}"
