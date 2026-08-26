@@ -30,15 +30,18 @@ with factory() as db:
     preview = portfolio_service.import_preview(
         db, user_id=luc.id, text=text, request_id="jgd-import-1"
     )
-    print(f"预览: 可导入 {len(preview.preview)} 行, 错误 {len(preview.errors)}, 重复 {len(preview.duplicates)}")
+    print(
+        f"预览: 可导入 {len(preview.preview)} 行, "
+        f"错误 {len(preview.errors)}, 重复 {len(preview.duplicates)}"
+    )
     for e in preview.errors[:10]:
         print("  错误:", e.row_no, e.message)
     if preview.errors:
         raise SystemExit("存在错误行，中止（不确认）")
+    fps = [p.fingerprint for p in preview.preview]
     result = portfolio_service.import_confirm(
         db, user_id=luc.id, batch_id=preview.batch_id,
-        fingerprints=[p.fingerprint for p in preview.preview],
-        request_id="jgd-import-1",
+        fingerprints=fps, request_id="jgd-import-1",
     )
     print(f"确认: {result}")
     db.commit()

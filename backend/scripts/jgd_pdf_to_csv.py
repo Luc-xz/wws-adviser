@@ -164,6 +164,32 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
                            qty=qty, price=price, fee=fee, tax=tax,
                            scan=scan_order[id(r)]))
 
+    # 期初持仓合成：股票余额列反推——某代码首个可导入行的（余额 − 当行增减）> 0
+    # 说明窗口开始前已有持仓（旧券商转入/更早买入），合成一笔期初买入行：
+    # 数量=反推值，成本=首行价格代理（警告标注，待真实更长交割单修正）。
+    # 现金口径不变式保持：初始现金 = 期末余额 − Σ回放增量，虚拟购入成本被
+    # 初始现金吸收 → 期末现金仍精确，净值不受影响。
+    first_seen: dict[str, JgdRow] = {}
+    # 时间正序（date 升序 + 扫描序降序）取每代码首个可导入行——期初判定基准
+    for r in sorted(imported, key=lambda x: (x.date, -scan_order[id(x)])):
+        first_seen.setdefault(r.code, r)
+    opening_qty: dict[str, Decimal] = {}
+    for code, r in first_seen.items():
+        signed = -r.qty if r.op == "证券卖出" else r.qty
+        pre = r.share_balance - signed
+        if pre > 0:
+            opening_qty[code] = pre
+            skipped.append(
+                f"警告: {code} {r.name} 期初持仓 {pre} 份（交割单窗口前已有），"
+                f"按首行价格 {r.price} 代理成本合成买入——建议导出更长周期交割单修正成本"
+            )
+            staged.append(dict(
+                date=r.date, code=r.code, name=r.name, kind="买入",
+                qty=pre, price=r.price, fee=Decimal(0), tax=Decimal(0),
+                # scan +0.5：期初行排在同代码首行之前（时间更早）
+                scan=Decimal(scan_order[id(r)]) + Decimal("0.5"),
+            ))
+
     # 聚合：同（日期,代码,方向,价格）→ 数量/费用求和（消除日内重复成交的指纹冲突）
     agg: dict[tuple, dict[str, Decimal | str]] = {}
     for s in staged:
@@ -179,7 +205,7 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
     replay_total = Decimal(0)
     # 输出序 = 时间正序：日期升序；同日内 PDF 扫描序（时间倒序）取逆 → scan 降序
     for s in sorted(
-        agg.values(), key=lambda x: (str(x["date"]), -int(x["scan"]))  # type: ignore[arg-type]
+        agg.values(), key=lambda x: (str(x["date"]), -float(x["scan"]))  # type: ignore[arg-type]
     ):
         qty, price = Decimal(s["qty"]), Decimal(s["price"])  # type: ignore[arg-type]
         fee, tax = Decimal(s["fee"]), Decimal(s["tax"])  # type: ignore[arg-type]
