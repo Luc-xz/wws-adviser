@@ -1,10 +1,25 @@
 :root {
   font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei",
     "Noto Sans CJK SC", system-ui, sans-serif;
-  color: #101828;
-  background-color: #f5f7fa;
   /* 语义 token（uno.config theme 同源；CSS 侧引用避免裸 hex） */
   --color-primary: #3157d5;
+  /* 深色模式表面 token：.dark 挂 <html> 时同元素覆盖（shared/theme.ts） */
+  --color-bg: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-text: #101828;
+  --color-text-muted: #475467;
+  --color-border: #e4e7ec;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+.dark {
+  --color-bg: #0f1115;
+  --color-surface: #171b23;
+  --color-text: #f2f4f7;
+  --color-text-muted: #98a2b3;
+  --color-border: #232936;
+  color-scheme: dark;
 }
 
 body {

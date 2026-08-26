@@ -11,10 +11,10 @@ defineProps<{
 
 <template>
   <div
-    class="rounded-xl bg-white p-3 shadow-sm"
+    class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
     data-testid="metric-card"
   >
-    <div class="text-xs text-gray-500">
+    <div class="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
       {{ label }}
     </div>
     <div
@@ -29,7 +29,7 @@ defineProps<{
     </div>
     <div
       v-if="sub"
-      class="mt-0.5 text-xs text-gray-400"
+      class="mt-0.5 text-xs text-gray-400 dark:text-gray-500"
     >
       {{ sub }}
     </div>

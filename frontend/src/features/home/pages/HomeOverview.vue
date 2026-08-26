@@ -74,13 +74,13 @@ function reportTitle(t: string): string {
         <h1 class="text-lg font-semibold">
           {{ greeting() }}
         </h1>
-        <p class="text-xs text-gray-400">
+        <p class="text-xs text-gray-400 dark:text-gray-500">
           {{ new Date().toLocaleDateString("zh-CN") }}
         </p>
       </div>
       <button
         type="button"
-        class="rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:opacity-40"
+        class="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm disabled:opacity-40"
         :disabled="offline"
         data-testid="refresh"
         @click="refresh"
@@ -92,13 +92,13 @@ function reportTitle(t: string): string {
     <!-- 空账户：导入引导（绝不显示假 ¥0） -->
     <div
       v-if="summaryOk && !hasAccount"
-      class="rounded-xl bg-white p-6 text-center shadow-sm"
+      class="rounded-xl bg-white dark:bg-gray-800 p-6 text-center shadow-sm"
       data-testid="empty-guide"
     >
       <p class="font-medium">
         还没有持仓数据
       </p>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
         导入券商 CSV 或手工录入交易后，这里将展示组合概览。
       </p>
     </div>
@@ -137,7 +137,7 @@ function reportTitle(t: string): string {
         v-if="sortedBreaches.length"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600">
+        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           风险提示
         </h2>
         <RiskAlert
@@ -158,7 +158,7 @@ function reportTitle(t: string): string {
         class="space-y-2"
       >
         <div class="flex items-center justify-between">
-          <h2 class="text-sm font-medium text-gray-600">
+          <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
             持仓概览
           </h2>
           <router-link
@@ -186,14 +186,14 @@ function reportTitle(t: string): string {
         v-if="reportsData?.items?.length"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600">
+        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           最新报告
         </h2>
         <router-link
           v-for="r in reportsData.items.slice(0, 3)"
           :key="r.id"
           :to="`/reports/${r.id}`"
-          class="block rounded-xl bg-white p-3 shadow-sm"
+          class="block rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
         >
           <div class="flex items-center justify-between">
             <span class="font-medium">{{ reportTitle(r.report_type) }}</span>
@@ -208,7 +208,7 @@ function reportTitle(t: string): string {
               {{ r.status === "RENDERED" ? "已完成" : "不完整" }}
             </span>
           </div>
-          <div class="mt-1 text-xs text-gray-400">
+          <div class="mt-1 text-xs text-gray-400 dark:text-gray-500">
             {{ r.business_date }} · v{{ r.version }}
           </div>
         </router-link>

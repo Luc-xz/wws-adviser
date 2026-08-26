@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <div
-    class="mt-1 text-xs text-gray-400"
+    class="mt-1 text-xs text-gray-400 dark:text-gray-500"
     data-testid="data-footer"
   >
     <span v-if="asOf">截至 {{ asOf }}</span>
