@@ -42,6 +42,9 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
     def _post_market() -> None:
         _enqueue_stub(JobType.POST_MARKET, engine, settings)
 
+    def _data_maintenance() -> None:
+        _enqueue_stub(JobType.DATA_MAINTENANCE, engine, settings)
+
     scheduler.add_job(
         _pre_market,
         CronTrigger(hour=8, minute=30, timezone=SHANGHAI),
@@ -51,5 +54,11 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
         _post_market,
         CronTrigger(hour=16, minute=0, timezone=SHANGHAI),
         id="post_market",
+    )
+    # 数据维护：持仓日线采集（15:20 赶在 16:00 收市后报告前拿到当日收盘价）
+    scheduler.add_job(
+        _data_maintenance,
+        CronTrigger(hour=15, minute=20, timezone=SHANGHAI),
+        id="data_maintenance",
     )
     return scheduler
