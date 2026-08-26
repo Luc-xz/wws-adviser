@@ -294,6 +294,7 @@ def _to_txn_input(row: Transaction) -> TxnInput:
         fee=from_scaled_int(row.fee_minor, row.fee_scale),
         tax=from_scaled_int(row.tax_minor, row.tax_scale),
         trade_at=row.trade_at,
+        id=row.id,
     )
 
 
