@@ -54,6 +54,8 @@ class Settings(BaseModel):
     smtp_to_addr: str = ""
     smtp_use_tls: bool = True
     notification_privacy_mode: bool = True  # 锁屏通知不含标的/金额/动作
+    # 技术债清理：同 channel+event_type 冷却窗口（秒）。0=关闭（保持逐条发送）
+    notification_cooldown_seconds: int = 0
     # 波8 部署：同源静态（PWA dist；空=不挂载，开发用 vite dev/proxy）；执行器轮询间隔
     static_dir: Path | None = None
     executor_poll_seconds: int = 30
@@ -151,6 +153,9 @@ def load_settings(
         smtp_use_tls=os.environ.get("WWSE_SMTP_USE_TLS", "1") not in ("0", "false", "no"),
         notification_privacy_mode=os.environ.get("WWSE_NOTIFY_PRIVACY", "1")
         not in ("0", "false", "no"),
+        notification_cooldown_seconds=int(
+            os.environ.get("WWSE_NOTIFY_COOLDOWN_SEC", "0")
+        ),
         static_dir=Path(os.environ["WWSE_STATIC_DIR"])
         if os.environ.get("WWSE_STATIC_DIR")
         else None,
