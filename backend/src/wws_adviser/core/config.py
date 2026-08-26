@@ -59,7 +59,8 @@ class Settings(BaseModel):
     executor_poll_seconds: int = 30
     # TODO(Phase2): 盘中新鲜度门禁实际生效；日线口径波2 已用 DAILY 规则
     intraday_freshness_threshold_seconds: int = 180
-    clock_skew_threshold_seconds: int = 5  # TODO(clock-skew): NTP 偏移校验未实现
+    clock_skew_threshold_seconds: int = 5  # 偏移超阈值 → warning + health 标 skew
+    clock_skew_ntp_host: str = "ntp.aliyun.com"  # SNTP 源；空串=禁用（UDP 被拦时设空）
     nav_published_freshness_hours: int = 24
 
     @property
@@ -158,5 +159,6 @@ def load_settings(
             os.environ.get("WWSE_INTRADAY_FRESHNESS_SEC", "180")
         ),
         clock_skew_threshold_seconds=int(os.environ.get("WWSE_CLOCK_SKEW_SEC", "5")),
+        clock_skew_ntp_host=os.environ.get("WWSE_CLOCK_SKEW_NTP_HOST", "ntp.aliyun.com"),
         nav_published_freshness_hours=int(os.environ.get("WWSE_NAV_FRESHNESS_HOURS", "24")),
     )

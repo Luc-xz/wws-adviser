@@ -20,7 +20,11 @@ def test_ready_unmigrated_returns_503(client: TestClient):
 def test_dependencies_returns_ok(client: TestClient):
     r = client.get("/health/dependencies")
     assert r.status_code == 200
-    assert r.json()["status"] == "ok"
+    body = r.json()
+    assert body["status"] == "ok"
+    # test 环境不发起真实 SNTP → 固定 unknown（不依赖网络）
+    assert body["clock_skew"]["status"] == "unknown"
+    assert body["clock_skew"]["threshold_seconds"] == 5
 
 
 def test_request_id_echoed(client: TestClient):
