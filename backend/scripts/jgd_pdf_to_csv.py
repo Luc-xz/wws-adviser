@@ -107,11 +107,48 @@ def _replay_cash_delta(
     return Decimal(0)  # 拆股：零成本增数
 
 
+def _signed_qty(r: JgdRow) -> Decimal:
+    """该行导致的持股变化（买入/申购/拆股=+，卖出=−）。"""
+    return -r.qty if r.op == "证券卖出" else r.qty
+
+
+def _chain_by_share(rows: list[JgdRow]) -> list[JgdRow]:
+    """同（日期,代码）内按股票余额链重构时间序。
+
+    PDF 同日行序实测不可靠（既非正序也非倒序）；余额列是唯一可靠的序信息：
+    每行 before = after − signed，链头 = before 不在任一 after 中。
+
+    余额环（日内"买 N→卖 N"回到起点，before/after 互为镜像）物理上不可分辨
+    "先买后卖"与"先卖（期初 N）后买回"；环回退按「买入优先」排列——保证回放
+    不产生负持仓，成本口径在极少数真·先卖场景下略有偏差（余额列无法区分）。
+    """
+    afters = {r.share_balance: r for r in rows}
+    before_map: dict[Decimal, JgdRow] = {}
+    for r in rows:
+        before_map.setdefault(r.share_balance - _signed_qty(r), r)
+    candidates = [r for r in rows if r.share_balance - _signed_qty(r) not in afters]
+    # 链头歧义（含余额环 candidates 为空）时买入优先——卖出作头需要期初持仓佐证
+    pool = candidates or rows
+    head = next((r for r in pool if r.op != "证券卖出"), pool[0])
+    order: list[JgdRow] = []
+    seen: set[int] = set()
+    cur: JgdRow | None = head
+    while cur is not None and id(cur) not in seen:
+        order.append(cur)
+        seen.add(id(cur))
+        cur = before_map.get(cur.share_balance)
+    if len(order) < len(rows):  # 余额环/链不完整：剩余行买入优先补齐
+        rest = [r for r in rows if id(r) not in seen]
+        rest.sort(key=lambda r: 0 if r.op != "证券卖出" else 1)  # 稳定排序保原相对序
+        order.extend(rest)
+    return order
+
+
 def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> ConversionResult:
     """解析行集合 → 聚合导入行 + 初始现金 + 对账锚点。纯函数可单测。
 
-    final_cash：交割单最新资金余额（PDF 全局按时间倒序，通常为扫描到的首个余额）。
-    缺省时取行集合中最后出现的 fund_balance。
+    final_cash：交割单最终资金余额（由 convert_pdf 经资金余额链定位末笔得出）。
+    缺省时取行集合中 fund_balance 的最大可见值（不可靠，仅供测试）。
     """
     if final_cash is None:
         for r in reversed(rows):
@@ -148,9 +185,17 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
             continue
         imported.append(r)
 
-    staged: list[dict[str, Decimal | str]] = []
-    scan_order = {id(r): i for i, r in enumerate(rows)}  # PDF 扫描序（时间倒序）
+    # 同（日期,代码）内按股票余额链重构时间序（PDF 行序不可靠）
+    chained: list[JgdRow] = []
+    groups: dict[tuple[str, str], list[JgdRow]] = defaultdict(list)
     for r in imported:
+        groups[(r.date, r.code)].append(r)
+    for date_key in sorted(groups):
+        chained.extend(_chain_by_share(groups[date_key]))
+    seq_of = {id(r): i for i, r in enumerate(chained)}
+
+    staged: list[dict[str, Decimal | str]] = []
+    for r in chained:
         kind = _OP_MAP[r.op]
         qty, price, fee, tax = r.qty, r.price, r.fee, r.tax
         if kind == "拆股":
@@ -162,23 +207,19 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
             fee, tax = Decimal(0), Decimal(0)
         staged.append(dict(date=r.date, code=r.code, name=r.name, kind=kind,
                            qty=qty, price=price, fee=fee, tax=tax,
-                           scan=scan_order[id(r)]))
+                           seq=seq_of[id(r)]))
 
-    # 期初持仓合成：股票余额列反推——某代码首个可导入行的（余额 − 当行增减）> 0
+    # 期初持仓合成：股票余额链反推——某代码时间上首个可导入行的（余额 − 当行增减）> 0
     # 说明窗口开始前已有持仓（旧券商转入/更早买入），合成一笔期初买入行：
     # 数量=反推值，成本=首行价格代理（警告标注，待真实更长交割单修正）。
     # 现金口径不变式保持：初始现金 = 期末余额 − Σ回放增量，虚拟购入成本被
     # 初始现金吸收 → 期末现金仍精确，净值不受影响。
     first_seen: dict[str, JgdRow] = {}
-    # 时间正序（date 升序 + 扫描序降序）取每代码首个可导入行——期初判定基准
-    for r in sorted(imported, key=lambda x: (x.date, -scan_order[id(x)])):
+    for r in chained:  # 链序即时间序
         first_seen.setdefault(r.code, r)
-    opening_qty: dict[str, Decimal] = {}
     for code, r in first_seen.items():
-        signed = -r.qty if r.op == "证券卖出" else r.qty
-        pre = r.share_balance - signed
+        pre = r.share_balance - _signed_qty(r)
         if pre > 0:
-            opening_qty[code] = pre
             skipped.append(
                 f"警告: {code} {r.name} 期初持仓 {pre} 份（交割单窗口前已有），"
                 f"按首行价格 {r.price} 代理成本合成买入——建议导出更长周期交割单修正成本"
@@ -186,8 +227,8 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
             staged.append(dict(
                 date=r.date, code=r.code, name=r.name, kind="买入",
                 qty=pre, price=r.price, fee=Decimal(0), tax=Decimal(0),
-                # scan +0.5：期初行排在同代码首行之前（时间更早）
-                scan=Decimal(scan_order[id(r)]) + Decimal("0.5"),
+                # 期初行排在同代码首行之前（时间更早）
+                seq=seq_of[id(r)] - Decimal("0.5"),
             ))
 
     # 聚合：同（日期,代码,方向,价格）→ 数量/费用求和（消除日内重复成交的指纹冲突）
@@ -197,16 +238,14 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
         if key in agg:
             for f in ("qty", "fee", "tax"):
                 agg[key][f] = Decimal(agg[key][f]) + Decimal(s[f])  # type: ignore[operator]
-            agg[key]["scan"] = min(agg[key]["scan"], s["scan"])  # type: ignore[type-var]
+            agg[key]["seq"] = min(agg[key]["seq"], s["seq"])  # type: ignore[type-var]
         else:
             agg[key] = dict(s)
 
     out_rows: list[dict[str, str]] = []
     replay_total = Decimal(0)
-    # 输出序 = 时间正序：日期升序；同日内 PDF 扫描序（时间倒序）取逆 → scan 降序
-    for s in sorted(
-        agg.values(), key=lambda x: (str(x["date"]), -float(x["scan"]))  # type: ignore[arg-type]
-    ):
+    # 输出序 = 链重构的时间序
+    for s in sorted(agg.values(), key=lambda x: float(x["seq"])):  # type: ignore[arg-type]
         qty, price = Decimal(s["qty"]), Decimal(s["price"])  # type: ignore[arg-type]
         fee, tax = Decimal(s["fee"]), Decimal(s["tax"])  # type: ignore[arg-type]
         out_rows.append({
@@ -216,11 +255,13 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
         })
         replay_total += _replay_cash_delta(str(s["kind"]), qty, price, fee, tax)
 
-    # 对账锚点：各代码最终股票余额（升序遍历后写覆盖）
+    # 对账锚点：各代码最终股票余额（按链序遍历；清仓行移除——PDF 行序不可靠）
     final_holdings: dict[str, tuple[str, Decimal]] = {}
-    for r in rows_asc:
+    for r in chained:
         if r.share_balance > 0:
             final_holdings[r.code] = (r.name, r.share_balance)
+        else:
+            final_holdings.pop(r.code, None)
 
     initial_cash = (final_cash - replay_total).quantize(Decimal("0.01"))
     return ConversionResult(
@@ -235,22 +276,33 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
     )
 
 
+def _final_cash_by_fund_chain(rows: list[JgdRow]) -> Decimal | None:
+    """最新日期的资金余额链定位末笔：其 after 不出现在任何行的 before 中。
+
+    before(row) = after − cash_delta；末笔 after 即最终资金余额
+    （PDF 同日行序不可靠，余额链是唯一可信序信息）。
+    """
+    newest = max(r.date for r in rows)
+    day = [r for r in rows if r.date == newest and r.fund_balance is not None]
+    if not day:
+        return None
+    befores = {r.fund_balance - r.cash_delta for r in day}
+    tails = [r.fund_balance for r in day if r.fund_balance not in befores]
+    return tails[0] if len(tails) == 1 else max(r.fund_balance for r in day)
+
+
 def convert_pdf(pdf_path: str) -> ConversionResult:
-    """PDF 全文 → ConversionResult。首个带资金余额的数据行即最新（PDF 按时间倒序）。"""
+    """PDF 全文 → ConversionResult（最终现金由资金余额链定位）。"""
     import pdfplumber
 
     rows: list[JgdRow] = []
-    final_cash: Decimal | None = None
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
             for line in (page.extract_text() or "").splitlines():
                 r = parse_line(line)
-                if r is None:
-                    continue
-                rows.append(r)
-                if final_cash is None and r.fund_balance is not None:
-                    final_cash = r.fund_balance
-    return convert(rows, final_cash=final_cash)
+                if r is not None:
+                    rows.append(r)
+    return convert(rows, final_cash=_final_cash_by_fund_chain(rows))
 
 
 def main() -> None:

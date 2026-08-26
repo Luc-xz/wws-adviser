@@ -20,10 +20,10 @@ with factory() as db:
     assert account is not None
 
     # 1) 修正初始现金（交割单反推 80644.78）；current_cash 同步为期末余额
-    account.initial_cash_minor = to_scaled_int(Decimal("80644.78"))
-    account.current_cash_minor = to_scaled_int(Decimal("31152.66"))
+    account.initial_cash_minor = to_scaled_int(Decimal("69992.32"))
+    account.current_cash_minor = to_scaled_int(Decimal("20500.20"))
     db.commit()
-    print("账户已修正: initial=80644.78, current=31152.66")
+    print("账户已修正: initial=69992.32, current=20500.20")
 
     # 2) 导入（预览 → 确认）
     text = open("/tmp/jgd.csv", encoding="utf-8-sig").read()
