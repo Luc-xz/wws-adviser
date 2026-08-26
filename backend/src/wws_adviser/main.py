@@ -61,7 +61,29 @@ def _build_model_port(settings: Settings) -> object:
 
 
 def _build_notifier(settings: Settings) -> object:
-    """通知选源：smtp（stdlib smtplib，凭据经 env 引用）或 stub。"""
+    """通知选源：smtp / wechat_work / server_chan（凭据经 env 引用）或 stub。"""
+    if settings.notifier_source == "wechat_work":
+        from wws_adviser.infrastructure.notifications.wechat_work_notifier import (
+            WeChatWorkNotifierPort,
+        )
+
+        _logger.info(
+            "通知渠道：企业微信机器人（webhook env 引用 %s）", settings.wechat_work_webhook_ref
+        )
+        return WeChatWorkNotifierPort(
+            webhook_ref=settings.wechat_work_webhook_ref, env=settings.env
+        )
+    if settings.notifier_source == "server_chan":
+        from wws_adviser.infrastructure.notifications.serverchan_notifier import (
+            ServerChanNotifierPort,
+        )
+
+        _logger.info(
+            "通知渠道：Server酱（sendkey env 引用 %s）", settings.server_chan_sendkey_ref
+        )
+        return ServerChanNotifierPort(
+            sendkey_ref=settings.server_chan_sendkey_ref, env=settings.env
+        )
     if settings.notifier_source == "smtp" and settings.smtp_host:
         from wws_adviser.infrastructure.notifications.smtp_notifier import SMTPNotifierPort
 

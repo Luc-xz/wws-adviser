@@ -45,7 +45,7 @@ class Settings(BaseModel):
     model_timeout: float = 90.0
     model_retry: int = 1
     # 波6 通知（邮件 SMTP 587/465，已确认；凭据只经 env 引用）
-    notifier_source: str = "stub"  # stub | smtp
+    notifier_source: str = "stub"  # stub | smtp | wechat_work | server_chan
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
@@ -53,6 +53,9 @@ class Settings(BaseModel):
     smtp_from_addr: str = ""
     smtp_to_addr: str = ""
     smtp_use_tls: bool = True
+    # 企微/Server酱 webhook 凭据同样只存 env 引用名
+    wechat_work_webhook_ref: str = "WWSE_WECHAT_WORK_WEBHOOK"
+    server_chan_sendkey_ref: str = "WWSE_SERVERCHAN_KEY"
     notification_privacy_mode: bool = True  # 锁屏通知不含标的/金额/动作
     # 技术债清理：同 channel+event_type 冷却窗口（秒）。0=关闭（保持逐条发送）
     notification_cooldown_seconds: int = 0
@@ -151,6 +154,12 @@ def load_settings(
         smtp_from_addr=os.environ.get("WWSE_SMTP_FROM", ""),
         smtp_to_addr=os.environ.get("WWSE_SMTP_TO", ""),
         smtp_use_tls=os.environ.get("WWSE_SMTP_USE_TLS", "1") not in ("0", "false", "no"),
+        wechat_work_webhook_ref=os.environ.get(
+            "WWSE_WECHAT_WORK_WEBHOOK_REF", "WWSE_WECHAT_WORK_WEBHOOK"
+        ),
+        server_chan_sendkey_ref=os.environ.get(
+            "WWSE_SERVERCHAN_KEY_REF", "WWSE_SERVERCHAN_KEY"
+        ),
         notification_privacy_mode=os.environ.get("WWSE_NOTIFY_PRIVACY", "1")
         not in ("0", "false", "no"),
         notification_cooldown_seconds=int(
