@@ -4,6 +4,7 @@
 结构化 PDF/HTML 解析留后续波次。
 """
 
+import base64
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -65,3 +66,29 @@ def parse_document(raw: RawDocument) -> NormalizedDocument:
         source_url=raw.source_url,
         published_at="",  # published_at 在 DocumentRef 上，由 service 注入
     )
+
+
+# —— 游标分页（keyset：published_at desc + id desc 稳定序，offset 在插入下会漂移）——
+
+
+def encode_cursor(*, published_at: str | None, document_id: str) -> str:
+    """排序键 → 不透明游标（base64url）。客户端原样回传，无需理解内容。"""
+    raw = f"{published_at or ''}|{document_id}".encode()
+    return base64.urlsafe_b64encode(raw).decode("ascii")
+
+
+def decode_cursor(cursor: str) -> tuple[str, str]:
+    """游标 → (published_at, document_id)。格式非法抛 ValueError（API 层转 400）。
+
+    published_at 为 NULL 的文档以 '' 参与编码，与仓储侧 COALESCE 排序口径一致。
+    """
+    try:
+        raw = base64.urlsafe_b64decode(cursor.encode("ascii")).decode("utf-8")
+    except Exception as exc:
+        raise ValueError(f"游标不是合法 base64url: {exc}") from exc
+    if "|" not in raw:
+        raise ValueError("游标缺少分隔符")
+    published_at, _, document_id = raw.rpartition("|")
+    if not document_id:
+        raise ValueError("游标缺少 id 段")
+    return published_at, document_id

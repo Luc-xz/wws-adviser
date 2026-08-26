@@ -17,6 +17,7 @@ from wws_adviser.modules.documents import repository
 from wws_adviser.modules.documents.domain import (
     NormalizedDocument,
     default_trust,
+    encode_cursor,
     parse_document,
 )
 from wws_adviser.modules.documents.models import Document, Evidence
@@ -115,6 +116,42 @@ def list_documents(
     )
 
 
+@dataclass(frozen=True)
+class DocumentPage:
+    items: list[Document]
+    next_cursor: str | None  # null = 已到末页
+
+
+def list_documents_page(
+    db: DBSession,
+    *,
+    kind: str | None = None,
+    instrument_id: str | None = None,
+    since: str | None = None,
+    trust_level: str | None = None,
+    cursor_published_at: str | None = None,
+    cursor_document_id: str | None = None,
+    limit: int = 50,
+) -> DocumentPage:
+    """游标分页列表。有下一页时以最后一行的排序键编 next_cursor。"""
+    items, has_more = repository.list_documents_page(
+        db,
+        kind=kind,
+        instrument_id=instrument_id,
+        since=since,
+        trust_level=trust_level,
+        cursor_published_at=cursor_published_at,
+        cursor_document_id=cursor_document_id,
+        limit=limit,
+    )
+    next_cursor = (
+        encode_cursor(published_at=items[-1].published_at, document_id=items[-1].id)
+        if has_more and items
+        else None
+    )
+    return DocumentPage(items=items, next_cursor=next_cursor)
+
+
 def get_document(db: DBSession, document_id: str) -> Document | None:
     return repository.get_document(db, document_id)
 
@@ -130,11 +167,13 @@ def get_evidence(db: DBSession, evidence_id: str) -> Evidence | None:
 
 
 __all__ = [
+    "DocumentPage",
     "IngestResult",
     "NormalizedDocument",
     "get_document",
     "get_evidence",
     "ingest_documents",
     "list_documents",
+    "list_documents_page",
     "search_documents",
 ]
