@@ -142,9 +142,9 @@ def _fetch_tencent_sync(
     import httpx
 
     sym = tencent_symbol(instrument.market, instrument.code)
-    resp = httpx.get(_TENCENT_QUOTE_URL + sym, timeout=10.0)
+    resp = httpx.get(_TENCENT_QUOTE_URL, params={"q": sym}, timeout=10.0)
     resp.raise_for_status()
-    # 响应为 GBK 编码文本（v_sh510500="…"）
+    # 响应为 GBK 编码文本（v_sh510500="…"），查询参数形式（路径形式非行情文本）
     return tencent_text_to_quote(
         resp.content.decode("gbk", errors="replace"),
         code=instrument.code, market_time=market_time,
