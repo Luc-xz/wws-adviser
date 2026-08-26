@@ -75,8 +75,8 @@ async def run_due_jobs(
         if job.job_type not in _REPORT_JOBS:
             if job.job_type == JobType.DATA_MAINTENANCE.value:
                 try:
-                    result = await _run_data_maintenance(db, settings)
-                    ok_n, fail_n = result.get("ok", 0), result.get("failed", 0)
+                    maint = await _run_data_maintenance(db, settings)
+                    ok_n, fail_n = maint.get("ok", 0), maint.get("failed", 0)
                     jobs_service.complete(
                         db, job.id, result_ref=f"bars://{ok_n}/{fail_n}"
                     )
