@@ -24,6 +24,7 @@ from wws_adviser.modules.market_data.api import market_router
 from wws_adviser.modules.market_data.api import router as market_data_router
 from wws_adviser.modules.portfolio.api import router as portfolio_router
 from wws_adviser.modules.reports.api import router as reports_router
+from wws_adviser.modules.research.api import router as research_router
 
 
 def create_app(
@@ -51,6 +52,7 @@ def create_app(
     app.include_router(reports_router)
     app.include_router(settings_router)
     app.include_router(advice_router)
+    app.include_router(research_router)
 
     write_methods = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
