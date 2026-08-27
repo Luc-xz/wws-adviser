@@ -5,6 +5,7 @@
 无打开写事务（6_MODEL §3.2）；审计行由本服务在自己的事务里提交。
 """
 
+import asyncio
 import json
 import os
 from dataclasses import dataclass
@@ -79,7 +80,20 @@ async def call_model(
     attempt = 0
     started = now_utc_iso()
     try:
-        response = await port.call(request)
+        # 传输层重试：代理/上游间歇性停摆（实测同一请求前后结果不同），
+        # 退避重试可落在健康账号上。retry=1 表示首试+1 次重试。
+        last_exc: Exception | None = None
+        for backoff in (0, 15, 45)[: 1 + max(0, profile.retry or settings.model_retry)]:
+            if backoff:
+                await asyncio.sleep(backoff)
+            try:
+                response = await port.call(request)
+                last_exc = None
+                break
+            except Exception as exc:  # noqa: BLE001 — 传输失败重试；耗尽后降级
+                last_exc = exc
+        if last_exc is not None:
+            raise last_exc
         attempt = 1
         result = validate_model_output(
             response.content,

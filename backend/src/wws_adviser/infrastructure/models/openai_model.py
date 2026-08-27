@@ -75,16 +75,33 @@ class OpenAICompatibleModelPort:
             ],
             "temperature": self._temperature,
             "max_tokens": request.max_tokens,
+            # 流式：推理型模型（deepseek-r/flash 系）思考数分钟才产出正文，
+            # 非流式在思考期间零字节——单一读超时会被整体掐断；流式增量
+            # 持续到达（含 reasoning 增量），连接保持活跃直至完成。
+            "stream": True,
         }
+        # 流式下 httpx 的 read timeout 是"相邻两次读之间"的超时，而非整体
         async with httpx.AsyncClient(timeout=self._timeout) as client:
-            resp = await client.post(
-                f"{self._base_url}/chat/completions", json=body, headers=self._headers()
-            )
-            resp.raise_for_status()
-            data = resp.json()
-        choice = data["choices"][0]["message"]["content"]
+            async with client.stream(
+                "POST", f"{self._base_url}/chat/completions",
+                json=body, headers=self._headers(),
+            ) as resp:
+                resp.raise_for_status()
+                chunks: list[str] = []
+                usage: dict[str, Any] = {}
+                async for line in resp.aiter_lines():
+                    if not line.startswith("data: "):
+                        continue
+                    payload = line[len("data: "):]
+                    if payload.strip() == "[DONE]":
+                        break
+                    content, chunk_usage = parse_sse_chunk(payload)
+                    if content:
+                        chunks.append(content)
+                    if chunk_usage:
+                        usage = chunk_usage
+                choice = "".join(chunks)
         content = parse_content(choice)
-        usage = data.get("usage", {})
         return ModelResponse(
             content=content,
             audit=ModelAudit(
@@ -101,3 +118,20 @@ class OpenAICompatibleModelPort:
                 status="ok",
             ),
         )
+
+
+def parse_sse_chunk(payload: str) -> tuple[str, dict[str, Any]]:
+    """SSE data 载荷（JSON 字符串）→ (content 增量, usage)。
+
+    只累积 delta.content（推理增量 delta.reasoning_content 剥离——
+    与非流式路径 strip_reasoning 口径一致）；usage 出现在末块（若供应商支持）。
+    纯函数可单测；非法 JSON 返回空（流中偶发心跳/空行）。
+    """
+    try:
+        obj = json.loads(payload)
+    except json.JSONDecodeError:
+        return "", {}
+    delta = (obj.get("choices") or [{}])[0].get("delta") or {}
+    content = delta.get("content") or ""
+    usage = obj.get("usage") or {}
+    return str(content), dict(usage) if usage else {}
