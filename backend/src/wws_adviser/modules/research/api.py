@@ -4,7 +4,7 @@ import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DBSession
 
@@ -107,6 +107,45 @@ class ReportOut(BaseModel):
     citations: list[dict]
     generation_config: dict
     created_at: str
+
+
+@router.get("/tasks/{task_id}/events")
+async def task_events(
+    task_id: str,
+    db: Annotated[DBSession, Depends(get_session)],
+    user: Annotated[User, Depends(get_current_user)],
+    max_seconds: int = 600,
+) -> StreamingResponse:
+    """任务进度 SSE 推送（Phase 3 波7）：1s 心跳查询 → 终态/超时后关闭。
+
+    EventSource 无法带自定义头，依赖 cookie 会话；任务须属于当前用户。
+    max_seconds 连接上限（默认 10 分钟，防僵尸连接；客户端可重连）。
+    """
+    import asyncio
+
+    from fastapi.responses import StreamingResponse
+
+    service.get_report_task_checked(db, task_id, user.id)  # 存在性 + 属主校验
+
+    terminal = {"COMPLETED", "FAILED", "CANCELLED"}
+
+    async def gen():
+        deadline = asyncio.get_event_loop().time() + max(1, max_seconds)
+        while asyncio.get_event_loop().time() < deadline:
+            db.expire_all()  # 执行器线程在另一 session 写入，强制重读
+            t = service.get_task(db, task_id)
+            if t is None:
+                break
+            payload = json.dumps({
+                "task_id": t.id, "status": t.status, "progress": t.progress,
+                "report_id": t.report_id, "error_code": t.error_code,
+            }, ensure_ascii=False)
+            yield f"data: {payload}\n\n"
+            if t.status in terminal:
+                break
+            await asyncio.sleep(1)
+
+    return StreamingResponse(gen(), media_type="text/event-stream")
 
 
 @router.get("/reports/{report_id}", response_model=ReportOut)

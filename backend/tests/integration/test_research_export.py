@@ -1,6 +1,7 @@
 """研究报告导出测试（Phase 3 波6）：md 附件 / html 渲染 / 越权与格式校验。"""
 
 import asyncio
+import json
 
 from fastapi.testclient import TestClient
 
@@ -139,3 +140,33 @@ def test_export_rejects_unknown_format_and_missing_report(migrated_client: TestC
         f"/api/v1/research/reports/{report_id}/export?format=pdf", headers=headers,
     )
     assert r2.status_code in (400, 422, 500)
+
+
+def test_task_sse_streams_until_terminal(migrated_client: TestClient) -> None:
+    """SSE：PENDING 阶段可订阅到事件流；越权任务拒绝。"""
+    headers = _login(migrated_client, "exp-sse-1")
+    r = migrated_client.post(
+        "/api/v1/research/tasks",
+        json={"task_type": "industry", "subject": "白酒行业", "depth": "quick"},
+        headers={**headers, "Idempotency-Key": "sse-1"},
+    )
+    task_id = r.json()["id"]
+
+    # max_seconds=1 → 流自行终止（无需客户端断开），普通 GET 即可读完
+    r = migrated_client.get(
+        f"/api/v1/research/tasks/{task_id}/events?max_seconds=1", headers=headers,
+    )
+    assert r.status_code == 200
+    assert "text/event-stream" in r.headers["content-type"]
+    data_lines = [ln for ln in r.text.splitlines() if ln.startswith("data:")]
+    assert data_lines, "至少一条事件"
+    payload = json.loads(data_lines[0][5:].strip())
+    assert payload["task_id"] == task_id
+    assert payload["status"] == "PENDING"
+    assert payload["progress"] == 0
+
+    # 不存在/越权 → DomainError
+    r2 = migrated_client.get(
+        "/api/v1/research/tasks/01AAAAAAAAAAAAAAAAAAAAAAAAA/events", headers=headers,
+    )
+    assert r2.status_code in (400, 404, 500)

@@ -69,6 +69,16 @@ def get_task(db: DBSession, task_id: str) -> ResearchTask | None:
     return db.scalar(select(ResearchTask).where(ResearchTask.id == task_id))
 
 
+def get_report_task_checked(
+    db: DBSession, task_id: str, user_id: str
+) -> ResearchTask:
+    """取任务并校验属主（不存在/越权统一报「任务不存在」）。"""
+    task = get_task(db, task_id)
+    if task is None or task.user_id != user_id:
+        raise DomainError("任务不存在")
+    return task
+
+
 def list_tasks(
     db: DBSession, user_id: str, *, limit: int = 20
 ) -> list[ResearchTask]:
