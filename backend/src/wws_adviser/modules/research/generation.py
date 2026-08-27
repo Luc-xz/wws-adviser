@@ -1,4 +1,4 @@
-"""公司报告生成流水线（Phase 3 波4，FR-RES-002 / FR-RES-004）。
+"""研究报告生成流水线（Phase 3 波4 公司 / 波5 行业）。
 
 组装前三波的能力：
     证据检索（波2）→ 确定性分析（波3）→ 模型生成（model_gateway）→
@@ -38,6 +38,7 @@ _logger = logging.getLogger(__name__)
 
 # 模板版本（generation_config 快照的一部分，可复盘）
 COMPANY_TEMPLATE_VERSION = "company-v1"
+INDUSTRY_TEMPLATE_VERSION = "industry-v1"
 
 
 @dataclass(frozen=True)
@@ -61,18 +62,36 @@ COMPANY_SECTION_PLAN: tuple[SectionSpec, ...] = (
     SectionSpec(SectionType.CONCLUSION, "结论与待验证假设", "model_judgment", False),
 )
 
+# 行业报告段落计划（FR-RES-003 全集）
+INDUSTRY_SECTION_PLAN: tuple[SectionSpec, ...] = (
+    SectionSpec(SectionType.OVERVIEW, "行业定义、市场规模与周期位置", "fact", True),
+    SectionSpec(SectionType.VALUE_CHAIN, "产业链与价值分配", "fact", True),
+    SectionSpec(SectionType.COMPETITIVE, "竞争格局、进入壁垒与政策影响", "fact", True),
+    SectionSpec(SectionType.FINANCIAL, "代表公司与核心指标对比", "fact", True),
+    SectionSpec(SectionType.VALUATION, "上行、中性、下行情景", "inference", False),
+    SectionSpec(SectionType.CATALYSTS, "催化剂与跟踪指标", "inference", False),
+    SectionSpec(SectionType.RISKS, "结构性风险与反方观点", "inference", False),
+    SectionSpec(SectionType.CONCLUSION, "结论与待验证假设", "model_judgment", False),
+)
+
 _QUICK_PLAN: tuple[SectionSpec, ...] = (
     COMPANY_SECTION_PLAN[0],   # overview
     COMPANY_SECTION_PLAN[3],   # valuation
     COMPANY_SECTION_PLAN[-1],  # conclusion
 )
 
+_INDUSTRY_QUICK_PLAN: tuple[SectionSpec, ...] = (
+    INDUSTRY_SECTION_PLAN[0],   # overview
+    INDUSTRY_SECTION_PLAN[4],   # scenarios
+    INDUSTRY_SECTION_PLAN[-1],  # conclusion
+)
 
-def plan_for_depth(depth: str) -> tuple[SectionSpec, ...]:
-    """quick = 概览+估值+结论；standard/deep = 全量七段。"""
-    if depth == "quick":
-        return _QUICK_PLAN
-    return COMPANY_SECTION_PLAN
+
+def plan_for_depth(depth: str, *, task_type: str = "company") -> tuple[SectionSpec, ...]:
+    """quick = 概览+估值/情景+结论；standard/deep = 全量段落。"""
+    if task_type == "industry":
+        return _INDUSTRY_QUICK_PLAN if depth == "quick" else INDUSTRY_SECTION_PLAN
+    return _QUICK_PLAN if depth == "quick" else COMPANY_SECTION_PLAN
 
 
 @dataclass(frozen=True)
@@ -86,8 +105,9 @@ class DeterministicInputs:
 # —— 上下文组装 ——
 
 
-def build_company_context(
+def build_research_context(
     *,
+    report_kind: str,
     subject: str,
     plan: tuple[SectionSpec, ...],
     evidence: list[EvidenceSlice],
@@ -98,6 +118,7 @@ def build_company_context(
 ) -> dict[str, Any]:
     """证据 + 确定性数据 → 模型上下文（不包含用户持仓等私有数据）。"""
     return {
+        "report_kind": report_kind,
         "subject": subject,
         "depth": depth,
         "time_span": time_span,
@@ -231,6 +252,7 @@ def _metric_table_md(rows: list[MetricRow]) -> str:
 
 def assemble_report_md(
     *,
+    report_kind: str,
     subject: str,
     sections: tuple[ResearchSection, ...],
     metric_rows: list[MetricRow],
@@ -239,7 +261,8 @@ def assemble_report_md(
     generation_config: dict[str, Any],
 ) -> str:
     """段落 + 确定性表 → 完整 Markdown 报告。"""
-    lines: list[str] = [f"# 公司研究报告：{subject}", ""]
+    kind_label = "行业研究报告" if report_kind == "industry" else "公司研究报告"
+    lines: list[str] = [f"# {kind_label}：{subject}", ""]
     if current_price is not None:
         lines.append(f"- 当前价（确定性）：{current_price}")
     lines.append(f"- 数据截止：{data_cutoff}")
@@ -283,13 +306,47 @@ async def run_company_research(
     det_inputs: DeterministicInputs | None = None,
 ) -> str:
     """执行公司研究任务全流程。成功 → report_id；失败 → 抛异常（调用方 fail_task）。"""
+    return await _run_research(
+        db, settings, port, task=task, data_dir=data_dir,
+        report_kind="company", det_inputs=det_inputs,
+    )
+
+
+async def run_industry_research(
+    db: DBSession,
+    settings: Settings,
+    port: ModelPort,
+    *,
+    task: ResearchTask,
+    data_dir,
+    det_inputs: DeterministicInputs | None = None,
+) -> str:
+    """执行行业研究任务全流程（证据按行业名全库检索，不限标的）。"""
+    return await _run_research(
+        db, settings, port, task=task, data_dir=data_dir,
+        report_kind="industry", det_inputs=det_inputs,
+    )
+
+
+async def _run_research(
+    db: DBSession,
+    settings: Settings,
+    port: ModelPort,
+    *,
+    task: ResearchTask,
+    data_dir,
+    report_kind: str,
+    det_inputs: DeterministicInputs | None,
+) -> str:
     inputs = det_inputs or DeterministicInputs()
-    plan = plan_for_depth(task.depth)
+    plan = plan_for_depth(task.depth, task_type=task.task_type)
     subject_name = task.subject
+    # 公司研究限定标的公告；行业研究按行业名全库检索
+    instrument_code = task.subject if report_kind == "company" else None
 
     # 1) 证据检索（波2）
     result = retrieve_evidence(
-        db, query=subject_name, instrument_code=task.subject, max_results=12,
+        db, query=subject_name, instrument_code=instrument_code, max_results=12,
     )
     research_service.update_progress(db, task, 20)
     if not result.slices:
@@ -302,15 +359,19 @@ async def run_company_research(
     research_service.update_progress(db, task, 40)
 
     # 3) 模型生成（model_gateway：白名单校验 + 受控修复 + 审计）
-    context = build_company_context(
-        subject=subject_name, plan=plan, evidence=evidence,
+    context = build_research_context(
+        report_kind=report_kind, subject=subject_name, plan=plan, evidence=evidence,
         metric_rows=metric_rows, current_price=inputs.current_price,
         depth=task.depth, time_span=task.time_span,
     )
     research_service.update_progress(db, task, 60)
+    task_type = (
+        ModelTaskType.RESEARCH_INDUSTRY if report_kind == "industry"
+        else ModelTaskType.RESEARCH_COMPANY
+    )
     call: ModelCallResult = await call_model(
         db, settings, port,
-        task_type=ModelTaskType.RESEARCH_COMPANY,
+        task_type=task_type,
         job_run_id=None,
         context=context,
         deterministic_summary={},
@@ -330,14 +391,18 @@ async def run_company_research(
     # 5) 渲染 + 保存（波1 service：原子写 + 落库）
     data_cutoff = evidence[0].published_at or "unknown"
     generation_config = {
-        "template_version": COMPANY_TEMPLATE_VERSION,
+        "template_version": (
+            INDUSTRY_TEMPLATE_VERSION if report_kind == "industry"
+            else COMPANY_TEMPLATE_VERSION
+        ),
         "prompt_version": call.prompt_version,
         "depth": task.depth,
         "time_span": task.time_span,
         "sections": [s.section_type.value for s in sections],
     }
     content_md = assemble_report_md(
-        subject=subject_name, sections=sections, metric_rows=metric_rows,
+        report_kind=report_kind, subject=subject_name, sections=sections,
+        metric_rows=metric_rows,
         current_price=inputs.current_price,
         data_cutoff=data_cutoff, generation_config=generation_config,
     )

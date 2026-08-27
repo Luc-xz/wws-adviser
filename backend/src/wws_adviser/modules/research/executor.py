@@ -1,4 +1,4 @@
-"""研究任务执行器：领取 PENDING 任务并运行对应流水线（Phase 3 波4）。
+"""研究任务执行器：领取 PENDING 任务并运行对应流水线（Phase 3 波4/波5）。
 
 由 main.py 常驻执行器线程在报告任务之后调用（同一轮询循环）。
 单任务失败 → fail_task（error_code 保留原因），不影响后续任务。
@@ -16,8 +16,8 @@ from wws_adviser.ports.model import ModelPort
 
 _logger = logging.getLogger(__name__)
 
-# 已实现流水线的任务类型（行业研究在波5接入）
-_SUPPORTED_TYPES = {ResearchTaskType.COMPANY.value}
+# 已实现流水线的任务类型
+_SUPPORTED_TYPES = {ResearchTaskType.COMPANY.value, ResearchTaskType.INDUSTRY.value}
 
 
 async def run_pending(
@@ -43,10 +43,13 @@ async def run_pending(
             task.progress = 0
             db.commit()
             continue
+        pipeline = (
+            generation.run_industry_research
+            if task.task_type == ResearchTaskType.INDUSTRY.value
+            else generation.run_company_research
+        )
         try:
-            await generation.run_company_research(
-                db, settings, model_port, task=task, data_dir=data_dir,
-            )
+            await pipeline(db, settings, model_port, task=task, data_dir=data_dir)
             ran += 1
         except Exception as exc:  # noqa: BLE001 — 执行器边界：单任务失败不阻断
             code = str(exc).split("：", 1)[0][:120] or type(exc).__name__

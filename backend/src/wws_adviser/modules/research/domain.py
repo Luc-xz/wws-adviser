@@ -41,11 +41,12 @@ def transition(state: ResearchStatus, target: ResearchStatus) -> ResearchStatus:
 
 
 class SectionType(StrEnum):
-    """研究报告段落类型（事实/推断/模型判断显式区分，FR-RES-002）。"""
+    """研究报告段落类型（事实/推断/模型判断显式区分，FR-RES-002/003）。"""
 
     OVERVIEW = "overview"              # 公司概览/行业定义
+    VALUE_CHAIN = "value_chain"        # 产业链与价值分配（行业）
     COMPETITIVE = "competitive"        # 竞争格局
-    FINANCIAL = "financial"            # 财务指标（确定性计算）
+    FINANCIAL = "financial"            # 财务指标（确定性计算）/代表公司对比
     VALUATION = "valuation"            # 估值（历史分位/可比/情景/DCF）
     CATALYSTS = "catalysts"            # 催化剂
     RISKS = "risks"                    # 风险与反方观点

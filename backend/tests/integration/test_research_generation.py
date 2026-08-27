@@ -29,6 +29,39 @@ def test_plan_for_depth() -> None:
     assert not full[-1].require_citations
 
 
+def test_industry_plan_and_markdown_kind() -> None:
+    """行业计划（FR-RES-003）：含 value_chain 八段；报告标题为行业研究报告。"""
+    ind = generation.plan_for_depth("standard", task_type="industry")
+    assert len(ind) == 8
+    types = [s.section_type.value for s in ind]
+    assert "value_chain" in types
+    # quick 子集：定义+情景+结论
+    ind_quick = generation.plan_for_depth("quick", task_type="industry")
+    assert [s.section_type.value for s in ind_quick] == [
+        "overview", "valuation", "conclusion",
+    ]
+
+    overview_spec = ind[0]
+    evidence = [_mk_slice("ev-1", "doc-1"), _mk_slice("ev-2", "doc-2")]
+    model_out = {
+        "sections": [{
+            "section_type": "overview", "title": "行业定义", "content": "市场规模…",
+            "evidence_ids": ["ev-1", "ev-2"],
+        }],
+    }
+    sections = generation.sections_from_model(
+        model_out, plan=(overview_spec,), evidence=evidence,
+    )
+    md = generation.assemble_report_md(
+        report_kind="industry", subject="白酒", sections=sections,
+        metric_rows=[], current_price=None, data_cutoff="2026-08-01",
+        generation_config={"depth": "standard", "template_version": "industry-v1"},
+    )
+    assert "# 行业研究报告：白酒" in md
+    assert "【事实】" in md
+    assert all(c.verified for c in sections[0].citations)  # 双文档 = 已验证
+
+
 def _mk_slice(evidence_id: str, doc_id: str, text: str = "内容"):
     from wws_adviser.modules.research.evidence import EvidenceSlice
     return EvidenceSlice(
@@ -105,7 +138,7 @@ def test_markdown_rendering_contains_labels_and_tables() -> None:
     }
     sections = generation.sections_from_model(model_out, plan=plan, evidence=evidence)
     md = generation.assemble_report_md(
-        subject="600519", sections=sections,
+        report_kind="company", subject="600519", sections=sections,
         metric_rows=generation.build_metric_table(
             {"营业收入": {"value": "100.5", "prior": "85.2", "unit": "亿元"}}
         ),
@@ -306,3 +339,50 @@ def test_executor_fails_without_evidence(migrated_client: TestClient) -> None:
         assert task is not None
         assert task.status == "FAILED"
         assert task.error_code and task.error_code.startswith("insufficient_evidence")
+
+
+def test_executor_completes_industry_task(migrated_client: TestClient) -> None:
+    """行业全链路：行业名全库检索（不限标的）→ 八段报告 → 引用可复盘。"""
+    app = migrated_client.app
+    with app.state.session_factory() as db:
+        # 文档不关联任何标的也能被行业检索命中（instrument_code=None 全库）
+        _seed_doc(
+            db, title="白酒行业2026年度报告",
+            text="白酒行业市场规模稳定增长，高端化趋势延续。",
+            code="600519",
+        )
+        db.commit()
+
+    headers = _login(migrated_client)
+    r = migrated_client.post(
+        "/api/v1/research/tasks",
+        json={"task_type": "industry", "subject": "白酒行业", "depth": "standard"},
+        headers={**headers, "Idempotency-Key": "gen-ind-1"},
+    )
+    assert r.status_code == 200
+    task_id = r.json()["id"]
+
+    from wws_adviser.modules.research import executor as research_executor
+
+    with app.state.session_factory() as db:
+        ran = asyncio.run(research_executor.run_pending(
+            db, app.state.settings, app.state.settings.data_dir,
+            model_port=app.state.model_port,
+        ))
+    assert ran == 1
+
+    with app.state.session_factory() as db:
+        task = research_service.get_task(db, task_id)
+        assert task is not None
+        assert task.status == "COMPLETED"
+        assert task.report_id
+
+    r2 = migrated_client.get(
+        f"/api/v1/research/reports/{task.report_id}", headers=headers,
+    )
+    assert r2.status_code == 200
+    report = r2.json()
+    assert "# 行业研究报告：白酒行业" in report["content_md"]
+    assert "产业链与价值分配" in report["content_md"]          # value_chain 段存在
+    assert report["generation_config"]["template_version"] == "industry-v1"
+    assert report["citations"]
