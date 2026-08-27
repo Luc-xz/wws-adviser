@@ -4,6 +4,7 @@ import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header
+from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DBSession
 
@@ -134,6 +135,47 @@ async def get_report(
         citations=json.loads(report.citations_json or "[]"),
         generation_config=json.loads(report.generation_config_json or "{}"),
         created_at=report.created_at,
+    )
+
+
+@router.get("/reports/{report_id}/export")
+async def export_report(
+    report_id: str,
+    db: Annotated[DBSession, Depends(get_session)],
+    user: Annotated[User, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    format: str = "md",
+) -> Response:
+    """导出报告（Phase 3 波6）：md 原文 / html 自包含页面（可打印为 PDF）。"""
+    if format not in ("md", "html"):
+        raise DomainError(f"不支持的导出格式：{format}")
+    report = service.get_report(db, report_id)
+    if report is None:
+        raise DomainError("报告不存在")
+    task = service.get_task(db, report.task_id)
+    if task is None or task.user_id != user.id:
+        raise DomainError("报告不存在")
+    md = ""
+    if report.content_md_path:
+        p = settings.data_dir / report.content_md_path
+        if p.exists():
+            md = p.read_text(encoding="utf-8")
+    if not md:
+        raise DomainError("报告内容为空，无法导出")
+
+    from wws_adviser.modules.research import export as export_mod
+
+    filename = export_mod.export_filename(report, format)
+    if format == "html":
+        body = export_mod.md_to_html(md, title=f"{report.subject} 研究报告")
+        media = "text/html; charset=utf-8"
+    else:
+        body = md
+        media = "text/markdown; charset=utf-8"
+    return Response(
+        content=body,
+        media_type=media,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
