@@ -41,9 +41,16 @@ curl -fsS https://wws.example.com/health/live  &&  curl -fsS https://wws.example
 # 手机浏览器打开 https://… → 安装 PWA → 登录（AC-08）
 ```
 
-## 2. 波8：连续 10 个交易日验证（PRD §17 退出条件）
+## 2. 波8：连续 5 个交易日验证（PRD §17 退出条件；2026-08-27 压缩决策）
+
+> **压缩决策**（已记 PRD §20 决策表）：验证窗口由连续 10 个交易日压缩为 **5 个交易日**，
+> 窗口必须**跨一个周末并含至少一个周一**（覆盖非交易日 PRE_MARKET skip 路径与周一
+> 数据积压形态）；按时率口径由「20 份样本 ≥95%（容 1 迟）」收紧为「**10 份报告
+> 0 迟到**」。代价：多日级数据源封锁形态（如东财数日封锁）覆盖度降低，由腾讯备源
+> 兜底测试补偿。故障注入集中在 D1–D2 完成，D3–D5 为纯观察日。
 
 **起算**：部署完成且首个交易日数据闭环形成日起，单实例手动起算并记审计（10_MILESTONE §8.1）。
+**窗口构成**：D1（周二）–D4（周五）+ D5（次周一）。
 
 **每日节奏**（scheduler 08:30/16:00 自动入队，执行器线程领取生成，SMTP 通知结果）：
 
@@ -53,16 +60,25 @@ curl -fsS https://wws.example.com/health/live  &&  curl -fsS https://wws.example
 | 盘中任意 | 记录交易（curl/后续 UI）、查看持仓 | 交易入账、快照重建、无重复 |
 | 收盘后 | 收到收市后复盘邮件 → 查看 | 17:00 前生成；盈亏/归因正确 |
 | 每日一次 | `curl /health/ready` + 数据状态页 | ready 200；质量状态可解释 |
-| 每周一次 | 备份演练 `docker compose exec wws python scripts/backup_drill.py` | 表一致 |
+| 窗口内一次 | 备份演练 `docker compose exec wws python scripts/backup_drill.py` | 表一致 |
 
-**10 日核验表**（对应 Phase 1 七条退出条件，10_MILESTONE_PLAN.md §3；全绿后回填勾选）：
+**D1–D2 集中故障注入**（三项，完成后即在核验表勾选对应条目）：
 
-1. **闭环稳定** — 10 个交易日「交易→持仓→报告→复盘」无中断：逐日记录 ✅/❌ 于下表。
+1. **模型关闭（AC-06）**：设 `WWSE_MODEL_SOURCE=stub` 重启容器跑一轮报告 → 登录/交易/
+   行情/风险摘要正常，报告出 `model_unavailable` 降级（确定性内容完整）并可重试成功；恢复后正常。
+2. **CSV 幂等（AC-01）**：重复导入同一交割单 CSV/重放 `import_settlement.py` → 0 新增
+   （指纹 duplicate）；构造一行非法数据 → 预览拒绝。
+3. **公告源（AC-02）**：当前公告-持仓关联未接通（evidence 属 Phase 3.1），日常报告即
+   `documents_unavailable` + PARTIAL 形态；本项验证降级行为稳定、无异常即可（视为已覆盖）。
+
+**5 日核验表**（对应 Phase 1 七条退出条件，10_MILESTONE_PLAN.md §3；全绿后回填勾选）：
+
+1. **闭环稳定** — 5 个交易日「交易→持仓→报告→复盘」无中断：逐日记录 ✅/❌ 于下表。
 2. **对账一致/数值可追溯** — 任一日抽查：`GET /positions` 数值 = 交易回放（MWAC 测试基线口径）；报告头含各版本与冻结引用。
-3. **报告按时率 ≥95%** — 10 日 ≥19/20 份（pre+post）在 09:00/17:00 前完成；从 `job_runs`/邮件时间统计。
-4. **模型关闭降级（AC-06）** — 任选一日停模型（改 `WWSE_MODEL_SOURCE=stub` 或断 key）→ 登录/交易/行情/风险摘要正常，报告出 `model_unavailable` 降级并可重试成功。
-5. **CSV 幂等（AC-01）** — 重复导入同一 CSV：0 新增、预览标 duplicate；错误行被拒。
-6. **公告源失败标记（AC-02）** — 任选一日断公告源 → 报告 `documents_unavailable` + PARTIAL。
+3. **报告按时** — **10 份（5×pre+post）全部**在 09:00/17:00 前完成；从 `job_runs`/邮件时间统计（压缩版零容错，1 份迟到即不达标）。
+4. **模型关闭降级（AC-06）** — D1–D2 注入通过（见上）。
+5. **CSV 幂等（AC-01）** — D1–D2 注入通过（见上）。
+6. **公告源降级（AC-02）** — 日常形态即验证（见上）。
 7. **备份恢复（AC-09）** — backup_drill 通过；检查备份归档不含 `WWSE_*_KEY` 值。
 
 **逐日记录**（粘贴于运维笔记，日期/两份报告状态/异常）：
@@ -70,6 +86,9 @@ curl -fsS https://wws.example.com/health/live  &&  curl -fsS https://wws.example
 ```
 D1  2026-__-__  pre:✅ post:✅  异常:-
 D2  ...
+D3  ...
+D4  ...
+D5  ...
 ```
 
 ## 3. 运维要点
