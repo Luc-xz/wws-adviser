@@ -80,14 +80,23 @@ def list_tasks(
     ))
 
 
-def claim_pending(db: DBSession) -> ResearchTask | None:
-    """领取一个待执行任务（PENDING → RUNNING）。"""
-    task = db.scalar(
+def claim_pending(
+    db: DBSession, *, task_type: str | None = None
+) -> ResearchTask | None:
+    """领取一个待执行任务（PENDING → RUNNING）。
+
+    task_type 过滤用于渐进上线：执行器只领取已实现流水线的类型，
+    未实现类型的任务保持 PENDING。
+    """
+    stmt = (
         select(ResearchTask)
         .where(ResearchTask.status == ResearchStatus.PENDING.value)
         .order_by(ResearchTask.created_at)
         .limit(1)
     )
+    if task_type is not None:
+        stmt = stmt.where(ResearchTask.task_type == task_type)
+    task = db.scalar(stmt)
     if task is None:
         return None
     task.status = transition(ResearchStatus(task.status), ResearchStatus.RUNNING).value

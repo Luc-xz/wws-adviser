@@ -1,12 +1,14 @@
-"""Research API：创建/查询/取消研究任务（Phase 3 波1）。"""
+"""Research API：创建/查询/取消研究任务 + 报告读取（Phase 3 波1/波4）。"""
 
+import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DBSession
 
-from wws_adviser.api.dependencies import get_current_user, get_session
+from wws_adviser.api.dependencies import get_current_user, get_session, get_settings
+from wws_adviser.core.config import Settings
 from wws_adviser.core.errors import DomainError, MissingIdempotencyKeyError
 from wws_adviser.modules.identity.models import User
 from wws_adviser.modules.research import service
@@ -93,6 +95,46 @@ async def cancel_task(
 ) -> TaskOut:
     task = service.cancel_task(db, task_id, user.id)
     return _to_out(task)
+
+
+class ReportOut(BaseModel):
+    id: str
+    task_id: str
+    report_type: str
+    subject: str
+    content_md: str
+    citations: list[dict]
+    generation_config: dict
+    created_at: str
+
+
+@router.get("/reports/{report_id}", response_model=ReportOut)
+async def get_report(
+    report_id: str,
+    db: Annotated[DBSession, Depends(get_session)],
+    user: Annotated[User, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> ReportOut:
+    """获取研究报告（含引用清单与生成配置，FR-RES-004 可复盘）。"""
+    report = service.get_report(db, report_id)
+    if report is None:
+        raise DomainError("报告不存在")
+    task = service.get_task(db, report.task_id)
+    if task is None or task.user_id != user.id:
+        raise DomainError("报告不存在")
+    md = ""
+    if report.content_md_path:
+        p = settings.data_dir / report.content_md_path
+        if p.exists():
+            md = p.read_text(encoding="utf-8")
+    return ReportOut(
+        id=report.id, task_id=report.task_id,
+        report_type=report.report_type, subject=report.subject,
+        content_md=md,
+        citations=json.loads(report.citations_json or "[]"),
+        generation_config=json.loads(report.generation_config_json or "{}"),
+        created_at=report.created_at,
+    )
 
 
 def _to_out(t) -> TaskOut:

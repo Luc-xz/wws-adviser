@@ -31,7 +31,6 @@ def db_session(tmp_path):
     """已建表（Base.metadata.create_all）的 DB session，供 service 层测试。"""
     from wws_adviser.core.db import Base, create_app_engine, make_session_factory
     from wws_adviser.modules.advice import models as _advice_models  # noqa: F401
-    from wws_adviser.modules.research import models as _res  # noqa: F401
     from wws_adviser.modules.analytics import models as _analytics_models  # noqa: F401
     from wws_adviser.modules.appsettings import models as _appsettings_models  # noqa: F401
     from wws_adviser.modules.audit import models as _audit_models  # noqa: F401
@@ -44,6 +43,7 @@ def db_session(tmp_path):
     from wws_adviser.modules.notifications import models as _notifications_models  # noqa: F401
     from wws_adviser.modules.portfolio import models as _portfolio_models  # noqa: F401
     from wws_adviser.modules.reports import models as _reports_models  # noqa: F401
+    from wws_adviser.modules.research import models as _res  # noqa: F401
 
     s = Settings(env="test", data_dir=tmp_path)
     engine = create_app_engine(s)
@@ -71,7 +71,6 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.core.time import now_utc_iso
     from wws_adviser.main import lifespan
     from wws_adviser.modules.advice import models as _adv  # noqa: F401
-    from wws_adviser.modules.research import models as _res  # noqa: F401
     from wws_adviser.modules.analytics import models as _an  # noqa: F401
     from wws_adviser.modules.appsettings import models as _as  # noqa: F401
     from wws_adviser.modules.audit import models as _a  # noqa: F401
@@ -85,6 +84,7 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.modules.notifications import models as _nt  # noqa: F401
     from wws_adviser.modules.portfolio import models as _p  # noqa: F401
     from wws_adviser.modules.reports import models as _r  # noqa: F401
+    from wws_adviser.modules.research import models as _res  # noqa: F401
 
     settings = Settings(env="test", data_dir=tmp_path)
     engine = create_app_engine(settings)

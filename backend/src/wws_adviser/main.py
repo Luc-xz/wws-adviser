@@ -87,6 +87,7 @@ def _start_executor_worker(app: FastAPI, settings: Settings) -> threading.Thread
     import asyncio
 
     from wws_adviser.modules.reports import executor as reports_executor
+    from wws_adviser.modules.research import executor as research_executor
 
     stop_event = threading.Event()
 
@@ -101,6 +102,14 @@ def _start_executor_worker(app: FastAPI, settings: Settings) -> threading.Thread
                             settings.data_dir,
                             model_port=getattr(app.state, "model_port", None),
                             notifier=getattr(app.state, "notifier", None),
+                        )
+                    )
+                    asyncio.run(
+                        research_executor.run_pending(
+                            db,
+                            settings,
+                            settings.data_dir,
+                            model_port=getattr(app.state, "model_port", None),
                         )
                     )
             except Exception:  # noqa: BLE001 — 工作线程边界：单轮失败仅记日志续跑
