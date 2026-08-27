@@ -353,6 +353,9 @@ async def _run_research(
         raise ValueError("insufficient_evidence：未检索到任何证据切片")
     evidence = result.slices
     evidence_ids = [e.evidence_id for e in evidence]
+    # 证据持久化（FR-RES-004 可复盘：evidence_id → 文档/切片哈希可回查）
+    from wws_adviser.modules.research.evidence import persist_evidence
+    persist_evidence(db, evidence)
 
     # 2) 确定性分析（波3；数据源未接入时为空表，报告如实标注）
     metric_rows = build_metric_table(inputs.raw_metrics)
