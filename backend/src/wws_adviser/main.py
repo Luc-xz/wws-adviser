@@ -19,6 +19,7 @@ from wws_adviser.core.db import create_app_engine, make_session_factory
 from wws_adviser.core.logging import setup_logging
 from wws_adviser.core.scheduler import create_scheduler
 from wws_adviser.core.worker_guard import enforce_single_worker
+from wws_adviser.infrastructure.clock_sntp import measure_clock_skew
 from wws_adviser.infrastructure.data_sources.stub_bar import StubBarProvider
 from wws_adviser.infrastructure.data_sources.stub_document import StubDocumentProvider
 from wws_adviser.infrastructure.data_sources.stub_nav import StubNAVProvider
@@ -60,7 +61,29 @@ def _build_model_port(settings: Settings) -> object:
 
 
 def _build_notifier(settings: Settings) -> object:
-    """通知选源：smtp（stdlib smtplib，凭据经 env 引用）或 stub。"""
+    """通知选源：smtp / wechat_work / server_chan（凭据经 env 引用）或 stub。"""
+    if settings.notifier_source == "wechat_work":
+        from wws_adviser.infrastructure.notifications.wechat_work_notifier import (
+            WeChatWorkNotifierPort,
+        )
+
+        _logger.info(
+            "通知渠道：企业微信机器人（webhook env 引用 %s）", settings.wechat_work_webhook_ref
+        )
+        return WeChatWorkNotifierPort(
+            webhook_ref=settings.wechat_work_webhook_ref, env=settings.env
+        )
+    if settings.notifier_source == "server_chan":
+        from wws_adviser.infrastructure.notifications.serverchan_notifier import (
+            ServerChanNotifierPort,
+        )
+
+        _logger.info(
+            "通知渠道：Server酱（sendkey env 引用 %s）", settings.server_chan_sendkey_ref
+        )
+        return ServerChanNotifierPort(
+            sendkey_ref=settings.server_chan_sendkey_ref, env=settings.env
+        )
     if settings.notifier_source == "smtp" and settings.smtp_host:
         from wws_adviser.infrastructure.notifications.smtp_notifier import SMTPNotifierPort
 
@@ -169,6 +192,30 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.model_port = _build_model_port(settings)
     app.state.notifier = _build_notifier(settings)
     app.state.object_store = LocalObjectStore(settings.data_dir)
+    # clock-skew 校验（技术债清理）：偏移失真会让新鲜度门禁误判；失败降级 unknown。
+    # test 环境不发起真实 SNTP（同执行器线程约定）。
+    if settings.env != "test":
+        skew = await measure_clock_skew(
+            settings.clock_skew_ntp_host,
+            threshold_seconds=settings.clock_skew_threshold_seconds,
+        )
+        if skew.status == "skew":
+            _logger.warning(
+                "系统时钟偏移 %+.3fs 超阈值 %ss——行情/报告新鲜度判定可能失真",
+                skew.offset_seconds or 0.0,
+                skew.threshold_seconds,
+            )
+        elif skew.status == "unknown":
+            _logger.warning(
+                "SNTP 时钟校验不可用（host=%s），偏移未知", settings.clock_skew_ntp_host
+            )
+    else:
+        from wws_adviser.infrastructure.clock_sntp import ClockSkewReport
+
+        skew = ClockSkewReport(
+            offset_seconds=None, threshold_seconds=settings.clock_skew_threshold_seconds
+        )
+    app.state.clock_skew = skew
     app.state.scheduler_lock = acquire_scheduler_lock(settings)
     scheduler = None
     executor_started = False

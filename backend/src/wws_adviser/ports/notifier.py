@@ -21,6 +21,8 @@ class NotificationResult:
     payload_hash: str
     sent: bool
     error_code: str | None = None
+    # 冷却窗口内被抑制（未触达渠道）；sent=False 且 error_code="cooldown_suppressed"
+    suppressed_by_cooldown: bool = False
 
 
 class NotifierPort(Protocol):

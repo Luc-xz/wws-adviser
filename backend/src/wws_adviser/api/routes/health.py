@@ -5,15 +5,13 @@
 - /health/dependencies：数据源/模型/通知近况，仅认证用户可见（Phase 0 占位）。
 """
 
-from typing import Annotated, cast
+from typing import cast
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from wws_adviser.api.dependencies import get_settings
-from wws_adviser.core.config import Settings
 from wws_adviser.core.db import check_db_writable
 
 router = APIRouter(prefix="/health", tags=["health"])
@@ -54,6 +52,18 @@ async def ready(request: Request) -> JSONResponse:
 
 
 @router.get("/dependencies")
-async def dependencies(settings: Annotated[Settings, Depends(get_settings)]) -> dict[str, str]:
-    # Phase 0 占位；波3 起接入数据源/模型/通知的真实健康状态
-    return {"status": "ok", "env": settings.env, "phase": "0"}
+async def dependencies(request: Request) -> dict[str, object]:
+    """依赖近况：clock_skew 为启动时 SNTP 测量结果；unknown = 未启用或 UDP 被拦。
+
+    数据源/模型/通知的真实健康状态留待后续波次接入。
+    """
+    skew = getattr(request.app.state, "clock_skew", None)
+    if skew is not None:
+        clock: dict[str, object] = {
+            "status": skew.status,
+            "offset_seconds": skew.offset_seconds,
+            "threshold_seconds": skew.threshold_seconds,
+        }
+    else:
+        clock = {"status": "unknown", "offset_seconds": None, "threshold_seconds": None}
+    return {"status": "ok", "clock_skew": clock}

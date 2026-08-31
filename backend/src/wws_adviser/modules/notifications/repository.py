@@ -18,6 +18,20 @@ def get_by_idem(
     )
 
 
+def get_last_sent(db: DBSession, channel: str, event_type: str) -> Notification | None:
+    """同 channel+event_type 最近一次成功发送（冷却窗口锚点）。"""
+    return db.scalar(
+        select(Notification)
+        .where(
+            Notification.channel == channel,
+            Notification.event_type == event_type,
+            Notification.status == "sent",
+        )
+        .order_by(Notification.created_at.desc(), Notification.id.desc())
+        .limit(1)
+    )
+
+
 def insert_pending(db: DBSession, n: Notification) -> Notification:
     db.add(n)
     db.flush()

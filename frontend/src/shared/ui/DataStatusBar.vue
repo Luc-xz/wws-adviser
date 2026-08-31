@@ -48,7 +48,7 @@ function go() {
       'bg-risk-warning/10 text-risk-warning': state === 'stale',
       'bg-error/10 text-error': state === 'degraded',
       'bg-success/10 text-success': state === 'normal',
-      'bg-gray-100 text-gray-500': state === 'offline',
+      'bg-gray-100 text-gray-500 dark:text-gray-400 dark:text-gray-500': state === 'offline',
     }"
     :data-state="state"
     data-testid="data-status-bar"

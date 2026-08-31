@@ -45,7 +45,7 @@ class Settings(BaseModel):
     model_timeout: float = 90.0
     model_retry: int = 1
     # 波6 通知（邮件 SMTP 587/465，已确认；凭据只经 env 引用）
-    notifier_source: str = "stub"  # stub | smtp
+    notifier_source: str = "stub"  # stub | smtp | wechat_work | server_chan
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
@@ -53,13 +53,19 @@ class Settings(BaseModel):
     smtp_from_addr: str = ""
     smtp_to_addr: str = ""
     smtp_use_tls: bool = True
+    # 企微/Server酱 webhook 凭据同样只存 env 引用名
+    wechat_work_webhook_ref: str = "WWSE_WECHAT_WORK_WEBHOOK"
+    server_chan_sendkey_ref: str = "WWSE_SERVERCHAN_KEY"
     notification_privacy_mode: bool = True  # 锁屏通知不含标的/金额/动作
+    # 技术债清理：同 channel+event_type 冷却窗口（秒）。0=关闭（保持逐条发送）
+    notification_cooldown_seconds: int = 0
     # 波8 部署：同源静态（PWA dist；空=不挂载，开发用 vite dev/proxy）；执行器轮询间隔
     static_dir: Path | None = None
     executor_poll_seconds: int = 30
     # TODO(Phase2): 盘中新鲜度门禁实际生效；日线口径波2 已用 DAILY 规则
     intraday_freshness_threshold_seconds: int = 180
-    clock_skew_threshold_seconds: int = 5  # TODO(clock-skew): NTP 偏移校验未实现
+    clock_skew_threshold_seconds: int = 5  # 偏移超阈值 → warning + health 标 skew
+    clock_skew_ntp_host: str = "ntp.aliyun.com"  # SNTP 源；空串=禁用（UDP 被拦时设空）
     nav_published_freshness_hours: int = 24
 
     @property
@@ -148,8 +154,17 @@ def load_settings(
         smtp_from_addr=os.environ.get("WWSE_SMTP_FROM", ""),
         smtp_to_addr=os.environ.get("WWSE_SMTP_TO", ""),
         smtp_use_tls=os.environ.get("WWSE_SMTP_USE_TLS", "1") not in ("0", "false", "no"),
+        wechat_work_webhook_ref=os.environ.get(
+            "WWSE_WECHAT_WORK_WEBHOOK_REF", "WWSE_WECHAT_WORK_WEBHOOK"
+        ),
+        server_chan_sendkey_ref=os.environ.get(
+            "WWSE_SERVERCHAN_KEY_REF", "WWSE_SERVERCHAN_KEY"
+        ),
         notification_privacy_mode=os.environ.get("WWSE_NOTIFY_PRIVACY", "1")
         not in ("0", "false", "no"),
+        notification_cooldown_seconds=int(
+            os.environ.get("WWSE_NOTIFY_COOLDOWN_SEC", "0")
+        ),
         static_dir=Path(os.environ["WWSE_STATIC_DIR"])
         if os.environ.get("WWSE_STATIC_DIR")
         else None,
@@ -158,5 +173,6 @@ def load_settings(
             os.environ.get("WWSE_INTRADAY_FRESHNESS_SEC", "180")
         ),
         clock_skew_threshold_seconds=int(os.environ.get("WWSE_CLOCK_SKEW_SEC", "5")),
+        clock_skew_ntp_host=os.environ.get("WWSE_CLOCK_SKEW_NTP_HOST", "ntp.aliyun.com"),
         nav_published_freshness_hours=int(os.environ.get("WWSE_NAV_FRESHNESS_HOURS", "24")),
     )

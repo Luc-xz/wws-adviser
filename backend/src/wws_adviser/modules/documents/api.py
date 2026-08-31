@@ -16,6 +16,7 @@ from wws_adviser.api.dependencies import (
 )
 from wws_adviser.core.errors import DomainError, MissingIdempotencyKeyError
 from wws_adviser.modules.documents import service
+from wws_adviser.modules.documents.domain import decode_cursor
 from wws_adviser.modules.documents.models import Document, Evidence
 from wws_adviser.modules.documents.schemas import (
     DocumentListResponse,
@@ -39,6 +40,12 @@ class DocumentNotFoundError(DomainError):
     code = "NOT_FOUND"
     status = 404
     title = "文档不存在"
+
+
+class InvalidCursorError(DomainError):
+    code = "INVALID_CURSOR"
+    status = 400
+    title = "无效分页游标"
 
 
 def _require_idempotency_key(
@@ -72,17 +79,29 @@ async def list_documents(
     instrument_id: Annotated[str | None, Query()] = None,
     since: Annotated[str | None, Query()] = None,
     trust_level: Annotated[str | None, Query()] = None,
-    limit: int = 50,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    cursor: Annotated[str | None, Query()] = None,
 ) -> DocumentListResponse:
-    docs = service.list_documents(
+    cursor_published_at: str | None = None
+    cursor_document_id: str | None = None
+    if cursor:
+        try:
+            cursor_published_at, cursor_document_id = decode_cursor(cursor)
+        except ValueError as exc:
+            raise InvalidCursorError(str(exc)) from exc
+    page = service.list_documents_page(
         db,
         kind=kind,
         instrument_id=instrument_id,
         since=since,
         trust_level=trust_level,
+        cursor_published_at=cursor_published_at,
+        cursor_document_id=cursor_document_id,
         limit=limit,
     )
-    return DocumentListResponse(items=[_to_out(d) for d in docs])
+    return DocumentListResponse(
+        items=[_to_out(d) for d in page.items], next_cursor=page.next_cursor
+    )
 
 
 @router.get("/search", response_model=DocumentSearchResponse)

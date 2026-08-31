@@ -48,8 +48,8 @@ onMounted(() => session.fetchSession());
   right: 0;
   height: calc(64px + env(safe-area-inset-bottom));
   display: flex;
-  background: #fff;
-  border-top: 1px solid #e4e7ec;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 10;
 }
@@ -59,7 +59,7 @@ onMounted(() => session.fetchSession());
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: #475467;
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 .nav a.router-link-active {
@@ -80,7 +80,7 @@ onMounted(() => session.fetchSession());
     width: 224px;
     height: 100vh;
     border-top: none;
-    border-right: 1px solid #e4e7ec;
+    border-right: 1px solid var(--color-border);
     padding-bottom: 0;
   }
   .nav a {

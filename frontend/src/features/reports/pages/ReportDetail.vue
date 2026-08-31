@@ -81,7 +81,7 @@ watch(
 <template>
   <div class="space-y-3">
     <!-- 头部 -->
-    <div class="rounded-xl bg-white p-4 shadow-sm">
+    <div class="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <h1 class="text-lg font-semibold">
           {{ title }}
@@ -94,7 +94,7 @@ watch(
           {{ incomplete ? "不完整" : "已完成" }}
         </span>
       </div>
-      <p class="mt-1 text-xs text-gray-400">
+      <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
         {{ detail?.business_date }} · v{{ detail?.version }} · 生成于 {{ detail?.generated_at }}
       </p>
       <!-- 降级标记（AC-02：公告源失败→标记不完整） -->
@@ -121,7 +121,7 @@ watch(
       </button>
       <p
         v-if="jobState.source === 'polling'"
-        class="mt-2 text-center text-xs text-gray-400"
+        class="mt-2 text-center text-xs text-gray-400 dark:text-gray-500"
       >
         任务进行中（{{ jobState.status ?? "..." }}）· 可离开此页
       </p>
@@ -129,7 +129,7 @@ watch(
 
     <div
       v-if="!content"
-      class="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm"
+      class="rounded-xl bg-white dark:bg-gray-800 p-6 text-center text-sm text-gray-400 dark:text-gray-500 shadow-sm"
     >
       {{ reportLoading ? "加载中…" : "报告内容不可用" }}
     </div>
@@ -140,7 +140,7 @@ watch(
         v-if="summarySection"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600">
+        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           执行摘要
         </h2>
         <div class="grid grid-cols-2 gap-2">
@@ -165,7 +165,7 @@ watch(
 
       <!-- 风险 -->
       <section class="space-y-2">
-        <h2 class="text-sm font-medium text-gray-600">
+        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           风险
         </h2>
         <RiskAlert
@@ -180,7 +180,7 @@ watch(
         />
         <p
           v-if="!riskItems.length"
-          class="rounded-xl bg-white p-3 text-sm text-gray-400 shadow-sm"
+          class="rounded-xl bg-white dark:bg-gray-800 p-3 text-sm text-gray-400 dark:text-gray-500 shadow-sm"
         >
           未触发风险限制
         </p>
@@ -191,7 +191,7 @@ watch(
         v-if="positionItems.length"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600">
+        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           持仓
         </h2>
         <PositionRow
@@ -212,10 +212,10 @@ watch(
         v-if="modelSection"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600">
+        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           解读
         </h2>
-        <div class="rounded-xl bg-white p-3 text-sm leading-relaxed shadow-sm">
+        <div class="rounded-xl bg-white dark:bg-gray-800 p-3 text-sm leading-relaxed shadow-sm">
           {{ modelSection.summary }}
         </div>
       </section>
@@ -223,7 +223,7 @@ watch(
         v-else-if="degradationFlags.includes('model_unavailable')"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600">
+        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           解读
         </h2>
         <div class="rounded-xl bg-risk-warning/5 p-3 text-sm text-risk-warning">
@@ -232,7 +232,7 @@ watch(
       </section>
 
       <!-- 来源与版本尾注 -->
-      <div class="rounded-xl bg-white p-3 text-xs text-gray-400 shadow-sm">
+      <div class="rounded-xl bg-white dark:bg-gray-800 p-3 text-xs text-gray-400 dark:text-gray-500 shadow-sm">
         <p>来源 {{ detail?.sources_count ?? 0 }} 项</p>
         <p class="mt-1">
           schema {{ header?.schema_version ?? detail?.schema_version }} ·

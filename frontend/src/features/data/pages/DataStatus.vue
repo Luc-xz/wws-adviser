@@ -20,7 +20,7 @@ function statusClass(s: string): string {
 
     <div
       v-if="!qualityData?.items?.length"
-      class="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm"
+      class="rounded-xl bg-white dark:bg-gray-800 p-6 text-center text-sm text-gray-400 dark:text-gray-500 shadow-sm"
     >
       {{ qualityLoading ? "加载中…" : "暂无数据源记录（采集后展示）" }}
     </div>
@@ -28,7 +28,7 @@ function statusClass(s: string): string {
     <div
       v-for="(e, i) in qualityData?.items ?? []"
       :key="i"
-      class="flex items-center justify-between rounded-xl bg-white p-3 shadow-sm"
+      class="flex items-center justify-between rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
     >
       <div>
         <div
@@ -37,7 +37,7 @@ function statusClass(s: string): string {
         >
           {{ e.instrument_id }}
         </div>
-        <div class="text-xs text-gray-400">
+        <div class="text-xs text-gray-400 dark:text-gray-500">
           {{ e.series === "bar" ? "日线" : "净值" }} · 来源 {{ e.source }}
         </div>
       </div>
@@ -49,7 +49,7 @@ function statusClass(s: string): string {
           {{ e.quality_status }}
         </span>
         <div
-          class="mt-1 text-xs text-gray-400 num"
+          class="mt-1 text-xs text-gray-400 dark:text-gray-500 num"
           data-num
         >
           {{ e.business_date ?? e.nav_date ?? "—" }}

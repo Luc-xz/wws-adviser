@@ -101,3 +101,95 @@ def test_documents_http_endpoints(migrated_client) -> None:
 
     miss = migrated_client.get("/api/v1/documents/search", params={"q": "nomatch"}).json()
     assert miss["items"] == []
+
+
+# —— 游标分页（keyset：(published_at,id) 倒序；NULL published_at 视作 ''）——
+
+
+def _seed_docs(db, count: int = 5) -> list[str]:
+    """直接落库 count 篇文档（published_at 递增），返回期望倒序 id 列表。"""
+    from wws_adviser.core.ids import new_id
+    from wws_adviser.core.time import now_utc_iso
+    from wws_adviser.modules.documents.models import Document
+
+    ids_desc = []
+    for i in range(count):
+        day = f"2026-08-{10 + i:02d}"
+        doc = Document(
+            id=new_id(),
+            kind="announcement",
+            title=f"公告{i}",
+            published_at=day,
+            source="stub",
+            content_sha256=f"sha-{i}" + "0" * 40,
+            trust_level="L1",
+            quality_status="OK",
+            created_at=now_utc_iso(),
+            updated_at=now_utc_iso(),
+            version=1,
+        )
+        db.add(doc)
+        ids_desc.insert(0, doc.id)
+    # 一篇无发布时间的文档 → 排序末尾（COALESCE '' 最小）
+    null_doc = Document(
+        id=new_id(),
+        kind="news",
+        title="无时间公告",
+        published_at=None,
+        source="stub",
+        content_sha256="sha-null" + "0" * 39,
+        trust_level="L4",
+        quality_status="OK",
+        created_at=now_utc_iso(),
+        updated_at=now_utc_iso(),
+        version=1,
+    )
+    db.add(null_doc)
+    ids_desc.append(null_doc.id)
+    db.commit()
+    return ids_desc
+
+
+def test_list_documents_page_keyset_walk(db_session) -> None:
+    ids_desc = _seed_docs(db_session)
+    seen: list[str] = []
+    cursor: str | None = None
+    while True:
+        kwargs = {}
+        if cursor is not None:
+            from wws_adviser.modules.documents.domain import decode_cursor
+
+            pa, did = decode_cursor(cursor)
+            kwargs = {"cursor_published_at": pa, "cursor_document_id": did}
+        page = docs_service.list_documents_page(db_session, limit=2, **kwargs)
+        seen.extend(d.id for d in page.items)
+        if page.next_cursor is None:
+            break
+        cursor = page.next_cursor
+    assert seen == ids_desc
+    # 单页足够大 → 一次取全，next_cursor 为 null
+    full = docs_service.list_documents_page(db_session, limit=50)
+    assert len(full.items) == len(ids_desc)
+    assert full.next_cursor is None
+
+
+def test_documents_pagination_http(migrated_client) -> None:
+    app = migrated_client.app
+    with app.state.session_factory() as db:
+        ids_desc = _seed_docs(db)
+
+    r1 = migrated_client.get("/api/v1/documents", params={"limit": 3}).json()
+    assert [d["id"] for d in r1["items"]] == ids_desc[:3]
+    assert r1["next_cursor"]
+
+    r2 = migrated_client.get(
+        "/api/v1/documents", params={"limit": 3, "cursor": r1["next_cursor"]}
+    ).json()
+    assert [d["id"] for d in r2["items"]] == ids_desc[3:]
+    assert r2["next_cursor"] is None
+
+    bad = migrated_client.get(
+        "/api/v1/documents", params={"limit": 3, "cursor": "!!!bad!!!"}
+    )
+    assert bad.status_code == 400
+    assert bad.json()["code"] == "INVALID_CURSOR"

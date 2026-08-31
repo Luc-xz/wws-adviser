@@ -67,6 +67,34 @@ def required_fields() -> set[str]:
     return {"summary"}
 
 
+# —— 原生 structured-output（JSON Schema；与 prompt 内联格式约束同构）——
+
+# pre/post_market v1 输出结构。strict 模式要求全字段 required + additionalProperties=false
+_RESPONSE_SCHEMA_V1: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "summary": {"type": "string", "description": "中文解读段，150字内"},
+        "evidence_ids": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "引用的证据 id，必须来自输入白名单",
+        },
+    },
+    "required": ["summary", "evidence_ids"],
+    "additionalProperties": False,
+}
+
+
+def response_schema_for(prompt_name: str) -> dict[str, Any]:
+    """prompt 名 → 原生 structured-output JSON Schema（当前两模板输出同构）。
+
+    返回副本：调用方修改不得污染注册表。
+    """
+    import copy
+
+    return copy.deepcopy(_RESPONSE_SCHEMA_V1)
+
+
 # —— 脱敏上下文（8_SECURITY §5：现金金额不进模型明文；最小字段默认）——
 
 

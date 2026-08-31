@@ -102,3 +102,31 @@ def test_akshare_module_imports_lazily() -> None:
 
 def test_dockind_enum() -> None:
     assert DocKind.ANNOUNCEMENT.value == "announcement"
+
+
+# —— 游标分页编解码（keyset，见 3_API §3.7）——
+
+
+def test_cursor_roundtrip() -> None:
+    from wws_adviser.modules.documents.domain import decode_cursor, encode_cursor
+
+    cursor = encode_cursor(published_at="2026-08-20", document_id="01ABC")
+    assert decode_cursor(cursor) == ("2026-08-20", "01ABC")
+    # NULL published_at 以 '' 参与编码（与仓储 COALESCE 口径一致）
+    cursor_null = encode_cursor(published_at=None, document_id="01XYZ")
+    assert decode_cursor(cursor_null) == ("", "01XYZ")
+
+
+def test_cursor_malformed_rejected() -> None:
+    import pytest
+
+    from wws_adviser.modules.documents.domain import decode_cursor
+
+    with pytest.raises(ValueError):
+        decode_cursor("!!!not-base64url!!!")
+    with pytest.raises(ValueError):
+        decode_cursor("aGVsbG8=")  # base64 合法但无分隔符（"hello"）
+    with pytest.raises(ValueError):
+        from wws_adviser.modules.documents.domain import encode_cursor
+
+        decode_cursor(encode_cursor(published_at="2026-08-20", document_id=""))

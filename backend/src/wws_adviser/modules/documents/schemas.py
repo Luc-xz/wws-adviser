@@ -19,7 +19,8 @@ class DocumentOut(BaseModel):
 
 class DocumentListResponse(BaseModel):
     items: list[DocumentOut]
-    # TODO(波后续): 游标分页（当前 limit 截断）
+    # 游标分页：有下一页时携带（keyset，见 documents/domain.encode_cursor）；null = 末页
+    next_cursor: str | None = None
 
 
 class DocumentSearchResponse(BaseModel):

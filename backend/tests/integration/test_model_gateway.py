@@ -279,3 +279,30 @@ def test_settings_masked_and_patch_effective(migrated_client) -> None:
 
     with app.state.session_factory() as db:
         assert db.get(AppSetting, "models") is None
+
+
+async def test_gateway_request_carries_response_schema(db_session) -> None:
+    """原生 structured-output 接线：gateway 构造的 ModelRequest 必带 JSON Schema。"""
+    from wws_adviser.core.config import Settings
+    from wws_adviser.infrastructure.models.stub_model import StubModelPort
+    from wws_adviser.modules.model_gateway import service as gateway_service
+    from wws_adviser.ports.model import ModelRequest, ModelTaskType
+
+    captured: list[ModelRequest] = []
+
+    class _CapturePort(StubModelPort):
+        async def call(self, request: ModelRequest):  # type: ignore[override]
+            captured.append(request)
+            return await super().call(request)
+
+    result = await gateway_service.call_model(
+        db_session,
+        Settings(env="test"),
+        _CapturePort(env="test"),
+        task_type=ModelTaskType.PRE_MARKET,
+        job_run_id=None,
+        context={"report_type": "pre_market"},
+        deterministic_summary={"pnl_total": None, "cash_ratio": None},
+    )
+    assert result.ok
+    assert captured[0].response_schema.get("required") == ["summary", "evidence_ids"]

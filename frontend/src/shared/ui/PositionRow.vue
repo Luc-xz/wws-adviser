@@ -15,16 +15,16 @@ defineProps<{
 
 <template>
   <div
-    class="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm"
+    class="flex items-center gap-3 rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
     data-testid="position-row"
   >
     <div class="min-w-0 flex-1">
       <div class="flex items-baseline gap-2">
         <span class="font-medium">{{ name }}</span>
-        <span class="text-xs text-gray-400">{{ code }}</span>
+        <span class="text-xs text-gray-400 dark:text-gray-500">{{ code }}</span>
       </div>
       <div
-        class="mt-0.5 text-xs text-gray-500 num"
+        class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 num"
         data-num
       >
         数量 {{ quantity }} · 成本 {{ avgCost }}
@@ -38,14 +38,14 @@ defineProps<{
         {{ marketValue ?? EMPTY }}
       </div>
       <div
-        class="text-xs text-gray-500 num"
+        class="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 num"
         data-num
       >
         {{ weight ? formatPercent(weight) : EMPTY }}
       </div>
       <div
         class="text-xs"
-        :class="freshness === 'missing' ? 'text-risk-warning' : 'text-gray-400'"
+        :class="freshness === 'missing' ? 'text-risk-warning' : 'text-gray-400 dark:text-gray-500'"
       >
         {{ freshness === "missing" ? "无行情" : freshness }}
       </div>
