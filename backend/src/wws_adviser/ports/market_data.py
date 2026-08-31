@@ -88,3 +88,9 @@ class BarProvider(Protocol):
 
 class NAVProvider(Protocol):
     async def fetch_nav(self, instrument: InstrumentRef, as_of: date) -> RawNAV: ...
+
+
+class TradingCalendarProvider(Protocol):
+    """交易日历源：返回区间内的交易日列表（节假日 = 不在列表中）。"""
+
+    async def fetch_trading_dates(self, start: date, end: date) -> list[date]: ...

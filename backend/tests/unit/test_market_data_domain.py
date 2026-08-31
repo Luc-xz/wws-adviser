@@ -224,3 +224,55 @@ def test_tencent_bars_row_mapping() -> None:
     assert b.date.isoformat() == "2026-08-25"
     assert b.open == Decimal("7.663") and b.close == Decimal("7.726")
     assert b.high == Decimal("7.777") and b.low == Decimal("7.594")
+
+
+# —— 交易日兜底 + 日历同步（技术债清理）——
+
+
+def test_weekday_trading_fallback() -> None:
+    from datetime import date
+
+    from wws_adviser.modules.market_data.domain import weekday_trading_fallback
+
+    assert weekday_trading_fallback(date(2026, 8, 28)) is True   # 周五
+    assert weekday_trading_fallback(date(2026, 8, 31)) is True   # 周一
+    assert weekday_trading_fallback(date(2026, 8, 29)) is False  # 周六（实测误生成日）
+    assert weekday_trading_fallback(date(2026, 8, 30)) is False  # 周日
+
+
+def test_akshare_calendar_rows_to_days() -> None:
+    from datetime import date
+
+    from wws_adviser.infrastructure.data_sources.akshare_calendar import rows_to_days
+
+    rows = [
+        {"trade_date": "2026-08-28"},
+        {"trade_date": date(2026, 8, 31)},   # akshare 可能返回 date 对象
+        {"trade_date": "2026-08-31 00:00:00"},  # 带时间后缀
+        {"trade_date": ""},                  # 空 → 跳过
+        {"other": 1},                        # 缺列 → 跳过
+    ]
+    assert rows_to_days(rows) == [date(2026, 8, 28), date(2026, 8, 31)]
+
+
+def test_calendar_sync_service_idempotent(db_session) -> None:
+    from datetime import date
+
+    from wws_adviser.modules.market_data import repository as md_repository
+    from wws_adviser.modules.market_data import service as market_service
+
+    start, end = date(2026, 8, 24), date(2026, 8, 31)  # 含周末 + 8/31 周一
+    trading = [date(2026, 8, d) for d in (24, 25, 26, 27, 28, 31)]
+    n1 = market_service.sync_trading_calendar(
+        db_session, trading_days=trading, start=start, end=end
+    )
+    assert n1 == 8
+    cal = md_repository.get_calendar(db_session, "2026-08-29")
+    assert cal is not None and cal.is_trading_day is False   # 周六显式落库
+    assert md_repository.get_calendar(db_session, "2026-08-31").is_trading_day is True
+    # 幂等：重跑行数一致，无重复行
+    n2 = market_service.sync_trading_calendar(
+        db_session, trading_days=trading, start=start, end=end
+    )
+    assert n2 == 8
+    assert len(list(db_session.query(md_repository.TradingCalendar).all())) == 8

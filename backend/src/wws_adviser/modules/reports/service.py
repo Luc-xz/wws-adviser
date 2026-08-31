@@ -8,6 +8,7 @@
 import json
 import os
 from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
@@ -21,6 +22,7 @@ from wws_adviser.modules.analytics import service as analytics_service
 from wws_adviser.modules.audit import service as audit_service
 from wws_adviser.modules.documents import service as documents_service
 from wws_adviser.modules.market_data import repository as md_repository
+from wws_adviser.modules.market_data.domain import weekday_trading_fallback
 from wws_adviser.modules.portfolio import service as portfolio_service
 from wws_adviser.modules.reports import repository
 from wws_adviser.modules.reports.domain import (
@@ -142,10 +144,17 @@ async def generate_report(
     """
     account = portfolio_service.get_user_account(db, user_id)
 
-    # 交易日校验：非交易日自动生成拒绝（手动触发放行，FR-REP-003）
+    # 交易日校验：非交易日自动生成拒绝（手动触发放行，FR-REP-003）。
+    # 有日历记录以记录为准；无记录走 weekday 兜底（周六日拒，节假日需日历同步后识别）——
+    # 此前空表 fail-open 曾致周末照常出报告（2026-08-29/30 实测）。
     if not manual:
         cal = md_repository.get_calendar(db, business_date)
-        if cal is not None and not cal.is_trading_day:
+        trading = (
+            cal.is_trading_day
+            if cal is not None
+            else weekday_trading_fallback(date.fromisoformat(business_date))
+        )
+        if not trading:
             raise NotTradingDayError(f"{business_date} 非交易日，跳过自动生成")
 
     # 幂等：最新版本报告若已为终态（RENDERED/COMPLETED/PARTIAL）→ 生成新版本（PARTIAL 补算）；

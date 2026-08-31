@@ -27,12 +27,13 @@ from wws_adviser.modules.market_data.domain import (
     parse_nav,
     parse_quote,
 )
-from wws_adviser.modules.market_data.models import MarketRecord, NavRecord
+from wws_adviser.modules.market_data.models import MarketRecord, NavRecord, TradingCalendar
 from wws_adviser.ports.market_data import (
     BarProvider,
     InstrumentRef,
     NAVProvider,
     QuoteProvider,
+    TradingCalendarProvider,
 )
 
 
@@ -331,3 +332,56 @@ async def ingest_bars_for_holdings(
                 results[inst.code] = type(exc).__name__
     db.commit()
     return results
+
+
+# —— 交易日历同步（技术债清理：trading_calendar 此前无任何喂数据路径，报告侧只能空表放行）——
+
+
+def sync_trading_calendar(
+    db: DBSession, *, trading_days: list[date], start: date, end: date
+) -> int:
+    """交易日列表 → 全区间日历行显式落库（交易日 True / 非交易日 False）。幂等 upsert。
+
+    非交易日也落行：报告侧 get_calendar 查到即权威判定，不再依赖 weekday 兜底；
+    节假日（国庆等连休）由本同步识别。返回落库行数。
+    """
+    days = set(trading_days)
+    from datetime import timedelta
+
+    cur = start
+    n = 0
+    while cur <= end:
+        repository.upsert_calendar_row(
+            db,
+            TradingCalendar(
+                date=cur.isoformat(),
+                market="CN",
+                is_trading_day=cur in days,
+                session_schedule_json=None,
+                calendar_version="akshare_v1",
+            ),
+        )
+        n += 1
+        cur += timedelta(days=1)
+    audit_service.append_event(
+        db,
+        action="calendar_synced",
+        target_type="trading_calendar",
+        after={"rows": n, "start": start.isoformat(), "end": end.isoformat()},
+    )
+    db.commit()
+    return n
+
+
+async def sync_trading_calendar_from_provider(
+    db: DBSession,
+    *,
+    provider: TradingCalendarProvider,
+    start: date,
+    end: date,
+) -> int:
+    """经端口拉取交易日并落库。源返回空列表 → 0（不写日历，报告侧维持 weekday 兜底）。"""
+    days = await provider.fetch_trading_dates(start, end)
+    if not days:
+        return 0
+    return sync_trading_calendar(db, trading_days=days, start=start, end=end)

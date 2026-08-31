@@ -136,3 +136,12 @@ def is_daily_complete(
 ) -> bool:
     """新鲜度骨架：最近交易日完整（DAILY_COMPLETE）。盘中 180s 门禁留 Phase 2.1。"""
     return latest_record_date is not None and latest_record_date >= expected_trading_day
+
+
+def weekday_trading_fallback(day: date) -> bool:
+    """交易日历无记录时的兜底判定：周六日非交易日，周一~五交易日。
+
+    节假日（如国庆连休）仍需日历数据才能识别——由每日数据维护任务同步
+    trading_calendar（service.sync_trading_calendar）；有记录时以记录为准、不走本兜底。
+    """
+    return day.weekday() < 5

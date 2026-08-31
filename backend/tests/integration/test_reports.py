@@ -286,3 +286,71 @@ def test_reports_http_endpoints(migrated_client) -> None:
 
     job = migrated_client.get(f"/api/v1/jobs/{body['job_run_id']}").json()
     assert job["id"] == body["job_run_id"]
+
+
+# —— 非交易日跳过（技术债清理：空日历 fail-open 曾致周末照常出报告）——
+
+
+def test_weekend_auto_generate_rejected_by_weekday_fallback(migrated_client) -> None:
+    """无日历记录：周六自动生成被 weekday 兜底拒绝；手动触发放行（FR-REP-003）。"""
+    import pytest
+
+    from wws_adviser.modules.reports.service import NotTradingDayError
+
+    app = migrated_client.app
+    _seed_full(app)
+    saturday = "2026-08-29"  # 周六（当年实测被误生成的日期）
+    with app.state.session_factory() as db:
+        uid = _user_id(db)
+        with pytest.raises(NotTradingDayError):
+            asyncio.run(
+                reports_service.generate_report(
+                    db, settings=app.state.settings, data_dir=app.state.settings.data_dir,
+                    user_id=uid, report_type=ReportType.POST_MARKET,
+                    business_date=saturday, manual=False,
+                )
+            )
+        # 手动触发放行（补生成场景不受非交易日限制）
+        r = asyncio.run(
+            reports_service.generate_report(
+                db, settings=app.state.settings, data_dir=app.state.settings.data_dir,
+                user_id=uid, report_type=ReportType.POST_MARKET,
+                business_date=saturday, manual=True,
+            )
+        )
+        assert r.report.business_date == saturday
+
+
+def test_calendar_row_authoritative_over_weekday_fallback(migrated_client) -> None:
+    """有日历记录以记录为准：周三标记非交易日（节假日形态）→ 拒；周六标记交易日（调休）→ 放行。"""
+    import pytest
+
+    from wws_adviser.modules.market_data import repository as md_repository
+    from wws_adviser.modules.market_data.models import TradingCalendar
+    from wws_adviser.modules.reports.service import NotTradingDayError
+
+    app = migrated_client.app
+    _seed_full(app)
+    with app.state.session_factory() as db:
+        uid = _user_id(db)
+        db.add(TradingCalendar(date="2026-10-01", market="CN", is_trading_day=False))
+        db.add(TradingCalendar(date="2026-09-26", market="CN", is_trading_day=True))  # 周六调休
+        db.commit()
+
+        with pytest.raises(NotTradingDayError):  # 国庆假期（周四，weekday 兜底会放行）
+            asyncio.run(
+                reports_service.generate_report(
+                    db, settings=app.state.settings, data_dir=app.state.settings.data_dir,
+                    user_id=uid, report_type=ReportType.PRE_MARKET,
+                    business_date="2026-10-01", manual=False,
+                )
+            )
+        r = asyncio.run(
+            reports_service.generate_report(
+                db, settings=app.state.settings, data_dir=app.state.settings.data_dir,
+                user_id=uid, report_type=ReportType.PRE_MARKET,
+                business_date="2026-09-26", manual=False,
+            )
+        )
+        assert r.report.business_date == "2026-09-26"
+        assert md_repository.get_calendar(db, "2026-10-01") is not None
