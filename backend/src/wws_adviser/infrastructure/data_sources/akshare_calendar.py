@@ -1,7 +1,7 @@
 """AKShare 交易日历适配器（TradingCalendarProvider）。
 
-ak.tool_trade_date_hist_sync 返回全历史交易日（trade_date 列）；akshare 懒加载同其他
-适配器。rows_to_days 纯函数可单测（无 pandas）。节假日 = 不在交易日列表中。
+ak.tool_trade_date_hist_sina（新浪源，全历史交易日，trade_date 列）；akshare 懒加载同
+其他适配器。rows_to_days 纯函数可单测（无 pandas）。节假日 = 不在交易日列表中。
 """
 
 import asyncio
@@ -27,5 +27,5 @@ class AKShareCalendarProvider:
     async def fetch_trading_dates(self, start: date, end: date) -> list[date]:
         import akshare as ak  # type: ignore[import-not-found]
 
-        df = await asyncio.to_thread(ak.tool_trade_date_hist_sync)
+        df = await asyncio.to_thread(ak.tool_trade_date_hist_sina)
         return [d for d in rows_to_days(df.to_dict("records")) if start <= d <= end]
