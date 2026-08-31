@@ -173,6 +173,8 @@ async def generate_report(
     summary = analytics_service.summary(db, user_id)
     risk = analytics_service.risk(db, user_id, settings)
     attribution = analytics_service.attribution(db, user_id)
+    # 行为偏差分析（Phase 2 波5 口径；只陈述模式不道德化，FR 第 6 节复盘）
+    bias_findings = _behavioral_bias(db, user_id, settings)
 
     # —— 降级判定（AC-02/AC-04）——
     flags: list[str] = []
@@ -311,6 +313,8 @@ async def generate_report(
     }
     if model_section is not None:
         report_json["model"] = model_section
+    if bias_findings:
+        report_json["behavioral_bias"] = bias_findings
     markdown = render_markdown(report_json)
 
     # —— 原子写文件（data/reports/<date>/<report_id>/）——
@@ -400,6 +404,56 @@ def _doc_linked_to_any(db: DBSession, document_id: str, instrument_ids: list[str
         )
     )
     return row is not None
+
+
+def _behavioral_bias(db: DBSession, user_id: str, settings: Settings) -> list[dict[str, str]]:
+    """行为偏差事实收集 → analyze_behavioral_bias（波5 口径）→ 报告段。
+
+    事实可得性（诚实口径，不可得的事实留 None 由偏差模块跳过）：
+    - SELL：浮盈亏符号以该标的已实现盈亏符号为代理（逐笔回放口径留待后续波）
+    - BUY 近 30 日计数：过度交易口径
+    - 买价分位/交易后权重：需要逐笔历史行情/权重回放，暂不提供（避免伪事实）
+    """
+    from datetime import date as _date
+    from datetime import timedelta as _timedelta
+
+    from sqlalchemy import select as sa_select
+
+    from wws_adviser.modules.advice.evaluation import TradeFact, analyze_behavioral_bias
+    from wws_adviser.modules.instruments.models import Instrument
+    from wws_adviser.modules.portfolio import repository as portfolio_repository
+
+    account = portfolio_service.get_user_account(db, user_id)
+    if account is None:
+        return []
+    txns = portfolio_repository.list_transactions(db, account_id=account.id, limit=1000)
+    if not txns:
+        return []
+    state = portfolio_service.get_position_state(db, account.id)
+    realized_by_inst = {inst: st.realized_pnl for inst, st in state.positions.items()}
+    inst_code = dict(
+        db.execute(sa_select(Instrument.id, Instrument.code)).all()
+    )
+    # 「近 30 日」锚定最近一笔交易日（与报告业务日一致，不依赖真实时钟）
+    latest_trade = max((t.trade_at or "")[:10] for t in txns)
+    cutoff = (
+        _date.fromisoformat(latest_trade) - _timedelta(days=30)
+    ).isoformat() if latest_trade else ""
+    facts: list[TradeFact] = []
+    for t in txns:
+        code = inst_code.get(t.instrument_id, "")
+        kind = getattr(t.kind, "value", t.kind)
+        if kind == "SELL":
+            pnl = realized_by_inst.get(t.instrument_id)
+            sign = 1 if pnl and pnl > 0 else (-1 if pnl and pnl < 0 else None)
+            facts.append(TradeFact(code=code, kind="SELL", price=t.price, unrealized_pnl_sign=sign))
+        elif kind == "BUY" and (t.trade_at or "")[:10] >= cutoff:
+            facts.append(TradeFact(code=code, kind="BUY", price=t.price))
+    findings = analyze_behavioral_bias(facts)
+    return [
+        {"kind": f.kind.value, "code": f.code or "", "evidence": f.evidence}
+        for f in findings
+    ]
 
 
 def get_report_content(data_dir: Path, report: Report) -> dict[str, object] | None:

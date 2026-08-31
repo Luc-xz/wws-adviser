@@ -44,6 +44,13 @@ _POST_MARKET_TEMPLATE = (
     "输出 JSON：{\"summary\": \"...\", \"evidence_ids\": []}"
 )
 
+_INTRADAY_TEMPLATE = (
+    "你是个人投资顾问。基于以下盘中条件式建议的确定性结构（动作、仓位区间、原因链），"
+    "用中文写一句话解读（80字内）：说明该区间建议的依据与注意事项。"
+    "禁止重新计算或修改任何数值，禁止扩大或缩小建议区间，禁止给出区间外的具体仓位数字。"
+    "输出 JSON：{\"summary\": \"...\", \"evidence_ids\": []}"
+)
+
 
 @dataclass(frozen=True)
 class PromptTemplate:
@@ -59,6 +66,7 @@ class PromptTemplate:
 PROMPTS: dict[str, PromptTemplate] = {
     "pre_market": PromptTemplate(name="pre_market", version="v1", text=_PRE_MARKET_TEMPLATE),
     "post_market": PromptTemplate(name="post_market", version="v1", text=_POST_MARKET_TEMPLATE),
+    "intraday": PromptTemplate(name="intraday", version="v1", text=_INTRADAY_TEMPLATE),
 }
 
 

@@ -116,6 +116,32 @@ def test_generate_complete_report_idempotent(migrated_client) -> None:
         assert r1.report.analysis_snapshot_id == r2.report.analysis_snapshot_id
 
 
+def test_generate_post_market_includes_behavioral_bias(migrated_client) -> None:
+    """波5：收市后报告嵌入行为偏差段（过度交易模式 → overtrading 发现）。"""
+    app = migrated_client.app
+    settings = app.state.settings
+    _seed_full(app, with_market=False, with_docs=False)
+    with app.state.session_factory() as db:
+        uid = _user_id(db)
+        inst = instruments_service.get_or_create_instrument(db, code="600519")
+        db.commit()
+        # 月内 16 笔买入（价格逐笔不同保证指纹唯一）→ 过度交易
+        for i in range(15):
+            portfolio_service.record_transaction(
+                db, user_id=uid, instrument_id=inst.id, kind=TransactionKind.BUY,
+                quantity=Decimal("10"), price=Decimal(1000 + i), trade_at="2026-08-14",
+            )
+        r = asyncio.run(reports_service.generate_report(
+            db, settings=Settings(env="test"), data_dir=settings.data_dir, user_id=uid,
+            report_type=ReportType.POST_MARKET, business_date=BD, manual=True,
+        ))
+        content = reports_service.get_report_content(settings.data_dir, r.report)
+        assert content is not None
+        bias = content.get("behavioral_bias")
+        assert isinstance(bias, list) and bias
+        assert any(f["kind"] == "overtrading" for f in bias)
+
+
 def test_generate_degraded_without_market_data(migrated_client) -> None:
     """AC-02/AC-04：缺行情 → PARTIAL + market_data_missing；仍含确定性摘要。"""
     app = migrated_client.app

@@ -73,6 +73,29 @@ async def run_due_jobs(
             break
         executed += 1
         if job.job_type not in _REPORT_JOBS:
+            if job.job_type == JobType.ADVICE_REVIEW.value:
+                try:
+                    from wws_adviser.modules.advice import evaluation_service
+
+                    result = evaluation_service.review_due_advices(db, settings)
+                    jobs_service.complete(
+                        db, job.id, result_ref=f"advice_review://{result.get('reviewed', 0)}"
+                    )
+                except Exception as exc:  # noqa: BLE001 — 执行器边界：失败记 error_code
+                    _logger.warning("建议评价任务失败 job=%s: %s", job.id, exc)
+                    jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+                continue
+            if job.job_type == JobType.CALIBRATION_SCAN.value:
+                try:
+                    result = _run_calibration_scan(db, settings)
+                    jobs_service.complete(
+                        db, job.id,
+                        result_ref=f"calibration://{result.get('instruments', 0)}",
+                    )
+                except Exception as exc:  # noqa: BLE001 — 执行器边界：失败记 error_code
+                    _logger.warning("校准任务失败 job=%s: %s", job.id, exc)
+                    jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+                continue
             if job.job_type == JobType.DATA_MAINTENANCE.value:
                 try:
                     maint = await _run_data_maintenance(db, settings)
@@ -127,6 +150,12 @@ async def run_due_jobs(
             )
     return executed
 
+
+def _run_calibration_scan(db: DBSession, settings: Settings) -> dict[str, object]:
+    """校准扫描任务体（Phase 2 波6）：信号回测 → OOS 门禁 → 校准记录落库。"""
+    from wws_adviser.modules.analytics import calibration_service
+
+    return calibration_service.run_calibration_scan(db, settings)
 
 async def _run_data_maintenance(db: DBSession, settings: Settings) -> dict[str, int]:
     """数据维护任务体：持仓日线批量采集 + 交易日历同步（均幂等，重采安全）。

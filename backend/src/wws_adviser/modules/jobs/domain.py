@@ -19,6 +19,7 @@ class JobType(StrEnum):
     BACKUP = "backup"
     DATA_MAINTENANCE = "data_maintenance"
     CALIBRATION_SCAN = "calibration_scan"
+    ADVICE_REVIEW = "advice_review"
     STUB = "stub"
 
 

@@ -30,6 +30,8 @@ def client(app) -> Iterator[TestClient]:
 def db_session(tmp_path):
     """已建表（Base.metadata.create_all）的 DB session，供 service 层测试。"""
     from wws_adviser.core.db import Base, create_app_engine, make_session_factory
+    from wws_adviser.modules.advice import models as _advice_models  # noqa: F401
+    from wws_adviser.modules.analytics import models as _analytics_models  # noqa: F401
     from wws_adviser.modules.appsettings import models as _appsettings_models  # noqa: F401
     from wws_adviser.modules.audit import models as _audit_models  # noqa: F401
     from wws_adviser.modules.documents import models as _documents_models  # noqa: F401
@@ -67,6 +69,8 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.core.ids import new_id
     from wws_adviser.core.time import now_utc_iso
     from wws_adviser.main import lifespan
+    from wws_adviser.modules.advice import models as _adv  # noqa: F401
+    from wws_adviser.modules.analytics import models as _an  # noqa: F401
     from wws_adviser.modules.appsettings import models as _as  # noqa: F401
     from wws_adviser.modules.audit import models as _a  # noqa: F401
     from wws_adviser.modules.documents import models as _docs  # noqa: F401

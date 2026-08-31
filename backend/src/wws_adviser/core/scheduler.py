@@ -42,6 +42,12 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
     def _post_market() -> None:
         _enqueue_stub(JobType.POST_MARKET, engine, settings)
 
+    def _calibration_scan() -> None:
+        _enqueue_stub(JobType.CALIBRATION_SCAN, engine, settings)
+
+    def _review_scan() -> None:
+        _enqueue_stub(JobType.ADVICE_REVIEW, engine, settings)
+
     def _data_maintenance() -> None:
         _enqueue_stub(JobType.DATA_MAINTENANCE, engine, settings)
 
@@ -55,10 +61,22 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
         CronTrigger(hour=16, minute=0, timezone=SHANGHAI),
         id="post_market",
     )
+    # 校准扫描：开市前重跑（08:00），保证盘中建议用当日校准结论（FR-ANL-003）
+    scheduler.add_job(
+        _calibration_scan,
+        CronTrigger(hour=8, minute=0, timezone=SHANGHAI),
+        id="calibration_scan",
+    )
     # 数据维护：持仓日线采集（15:20 赶在 16:00 收市后报告前拿到当日收盘价）
     scheduler.add_job(
         _data_maintenance,
         CronTrigger(hour=15, minute=20, timezone=SHANGHAI),
         id="data_maintenance",
+    )
+    # 建议评价回填：收市后报告（16:00）完成后，评价观察窗口已过的建议
+    scheduler.add_job(
+        _review_scan,
+        CronTrigger(hour=16, minute=30, timezone=SHANGHAI),
+        id="review",
     )
     return scheduler
