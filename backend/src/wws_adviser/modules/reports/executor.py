@@ -115,7 +115,7 @@ async def run_due_jobs(
             else ReportType.POST_MARKET
         )
         try:
-            result = await generate_report(
+            gen = await generate_report(
                 db,
                 settings=settings,
                 data_dir=data_dir,
@@ -125,16 +125,16 @@ async def run_due_jobs(
                 job_run_id=job.id,
                 model_port=model_port,
             )
-            jobs_service.complete(db, job.id, result_ref=f"report://{result.report.id}")
+            jobs_service.complete(db, job.id, result_ref=f"report://{gen.report.id}")
             await _notify_report_event(
                 db, settings, notifier,
                 event_type=NotificationEvent.REPORT_COMPLETED.value,
                 payload={
                     "report_type": report_type.value,
                     "business_date": job.business_date,
-                    "report_id": result.report.id,
+                    "report_id": gen.report.id,
                     "risk_breach_count": 0,
-                    "degraded": bool(result.degradation_flags),
+                    "degraded": bool(gen.degradation_flags),
                 },
             )
         except NotTradingDayError as exc:

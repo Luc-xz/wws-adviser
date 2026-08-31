@@ -26,6 +26,7 @@ from wws_adviser.modules.advice.domain import (
     Advice,
     IntradayContext,
     build_intraday_advice,
+    is_actionable,
 )
 from wws_adviser.modules.advice.models import AdviceRecord
 from wws_adviser.modules.analytics import calibration_service
@@ -135,7 +136,8 @@ async def intraday_advice(
     """POST /assistant/intraday 的编排（TTL 内重复请求复用缓存）。"""
     now = now_utc_iso()
     cached = _cache.get(code)
-    if cached is not None and cached[1].actionable and cached[0] > now:
+    # 可复用条件：TTL 未过 且 建议仍可操作（PUBLISHED、未失效、窗口内）
+    if cached is not None and cached[0] > now and is_actionable(cached[1], now):
         return cached[1]
     expires_at = (_parse_iso(now) + timedelta(seconds=INTRADAY_TTL_SECONDS)).isoformat()
 

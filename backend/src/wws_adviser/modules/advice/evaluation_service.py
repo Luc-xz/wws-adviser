@@ -35,6 +35,7 @@ from wws_adviser.modules.analytics.calibration import (
     transition,
 )
 from wws_adviser.modules.analytics.models import SignalCalibration
+from wws_adviser.modules.market_data.domain import NormalizedBar
 
 _logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ def _horizon_for(db: DBSession, signal_id: str) -> int:
 
 
 def _direction_return(
-    bars_by_code: dict[str, list[Any]], code: str, advice_date: str, horizon: int
+    bars_by_code: dict[str, list[NormalizedBar]], code: str, advice_date: str, horizon: int
 ) -> Decimal | None:
     """触发后窗口收益：建议日次一交易日收盘入场，持有 horizon 个交易日收盘出场。"""
     bars = bars_by_code.get(code)

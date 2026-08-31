@@ -431,9 +431,9 @@ def _behavioral_bias(db: DBSession, user_id: str, settings: Settings) -> list[di
         return []
     state = portfolio_service.get_position_state(db, account.id)
     realized_by_inst = {inst: st.realized_pnl for inst, st in state.positions.items()}
-    inst_code = dict(
-        db.execute(sa_select(Instrument.id, Instrument.code)).all()
-    )
+    inst_code: dict[str, str] = {
+        row[0]: row[1] for row in db.execute(sa_select(Instrument.id, Instrument.code)).all()
+    }
     # 「近 30 日」锚定最近一笔交易日（与报告业务日一致，不依赖真实时钟）
     latest_trade = max((t.trade_at or "")[:10] for t in txns)
     cutoff = (
@@ -446,9 +446,11 @@ def _behavioral_bias(db: DBSession, user_id: str, settings: Settings) -> list[di
         if kind == "SELL":
             pnl = realized_by_inst.get(t.instrument_id)
             sign = 1 if pnl and pnl > 0 else (-1 if pnl and pnl < 0 else None)
-            facts.append(TradeFact(code=code, kind="SELL", price=t.price, unrealized_pnl_sign=sign))
+            facts.append(
+                TradeFact(code=code, kind="SELL", price=Decimal(t.price), unrealized_pnl_sign=sign)
+            )
         elif kind == "BUY" and (t.trade_at or "")[:10] >= cutoff:
-            facts.append(TradeFact(code=code, kind="BUY", price=t.price))
+            facts.append(TradeFact(code=code, kind="BUY", price=Decimal(t.price)))
     findings = analyze_behavioral_bias(facts)
     return [
         {"kind": f.kind.value, "code": f.code or "", "evidence": f.evidence}

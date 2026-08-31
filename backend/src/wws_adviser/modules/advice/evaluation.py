@@ -211,10 +211,14 @@ def analyze_behavioral_bias(
     findings: list[BiasFinding] = []
 
     sells = [t for t in trades if t.kind == "SELL" and t.unrealized_pnl_sign is not None]
-    holds_signs = [t.unrealized_pnl_sign for t in trades
-                   if t.kind == "BUY" and t.unrealized_pnl_sign is not None]
+    holds_signs = [
+        s for s in (t.unrealized_pnl_sign for t in trades if t.kind == "BUY")
+        if s is not None
+    ]
     if len(sells) >= 3:
-        n_sell_win = sum(1 for t in sells if t.unrealized_pnl_sign > 0)
+        n_sell_win = sum(
+            1 for s in (t.unrealized_pnl_sign for t in sells) if s is not None and s > 0
+        )
         sell_win_ratio = Decimal(n_sell_win) / Decimal(len(sells))
         hold_win_ratio = (Decimal(sum(1 for s in holds_signs if s > 0)) / Decimal(len(holds_signs))
                           if holds_signs else None)

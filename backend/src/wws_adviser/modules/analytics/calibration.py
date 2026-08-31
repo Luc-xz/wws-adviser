@@ -16,7 +16,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import StrEnum
 
-from wws_adviser.modules.analytics.kelly import CalibrationState, KellyInput
+from wws_adviser.modules.analytics.kelly import CalibrationState as CalibrationState
+from wws_adviser.modules.analytics.kelly import KellyInput
 from wws_adviser.modules.analytics.signals import BacktestStats
 
 SCHEMA_VERSION = "1"
