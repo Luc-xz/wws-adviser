@@ -95,9 +95,9 @@ class OpenAICompatibleModelPort:
                     payload = line[len("data: "):]
                     if payload.strip() == "[DONE]":
                         break
-                    content, chunk_usage = parse_sse_chunk(payload)
-                    if content:
-                        chunks.append(content)
+                    delta, chunk_usage = parse_sse_chunk(payload)
+                    if delta:
+                        chunks.append(delta)
                     if chunk_usage:
                         usage = chunk_usage
                 choice = "".join(chunks)

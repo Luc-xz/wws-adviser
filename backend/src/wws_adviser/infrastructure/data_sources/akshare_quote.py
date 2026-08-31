@@ -183,6 +183,8 @@ def _fetch_one_sync(instrument: InstrumentRef, market_time: str) -> RawQuote | N
     try:
         return _fetch_tencent_sync(instrument, market_time)
     except Exception as fallback_exc:  # noqa: BLE001 — 备源也失败才上抛主源异常（可审计）
+        if last_exc is None:  # 理论不可达：走到备源说明主源至少失败一次
+            last_exc = RuntimeError("eastmoney quote failed")
         raise last_exc from fallback_exc
 
 

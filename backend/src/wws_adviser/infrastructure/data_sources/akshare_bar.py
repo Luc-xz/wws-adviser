@@ -122,6 +122,8 @@ class AKShareBarProvider:
                     self._fetch_tencent_bars, instrument, start, end
                 )
             except Exception as fallback_exc:  # noqa: BLE001 — 备源失败上抛主源异常
+                if last_exc is None:  # 空 DF 无异常形态（200+空结果）：以明确错误上抛
+                    last_exc = RuntimeError("eastmoney empty bars")
                 raise last_exc from fallback_exc
         rows: list[dict[str, Any]] = list(df.to_dict("records"))
         return rows_to_dataset(

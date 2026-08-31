@@ -75,8 +75,8 @@ async def run_due_jobs(
         if job.job_type not in _REPORT_JOBS:
             if job.job_type == JobType.DATA_MAINTENANCE.value:
                 try:
-                    result = await _run_data_maintenance(db, settings)
-                    ok_n, fail_n = result.get("ok", 0), result.get("failed", 0)
+                    maint = await _run_data_maintenance(db, settings)
+                    ok_n, fail_n = maint.get("ok", 0), maint.get("failed", 0)
                     jobs_service.complete(
                         db, job.id, result_ref=f"bars://{ok_n}/{fail_n}"
                     )
@@ -129,12 +129,16 @@ async def run_due_jobs(
 
 
 async def _run_data_maintenance(db: DBSession, settings: Settings) -> dict[str, int]:
-    """数据维护任务体：持仓日线批量采集（幂等，重采安全）。
+    """数据维护任务体：持仓日线批量采集 + 交易日历同步（均幂等，重采安全）。
 
     15:20 调度赶在 16:00 收市后报告前拿到当日收盘价；单标的失败不中断批次。
+    日历同步失败不影响日线采集（报告侧尚有 weekday 兜底，但节假日识别依赖本同步）。
     """
+    from datetime import timedelta as _td
+
     from wws_adviser.core.time import business_date as _bd
     from wws_adviser.infrastructure.data_sources.akshare_bar import AKShareBarProvider
+    from wws_adviser.infrastructure.data_sources.akshare_calendar import AKShareCalendarProvider
     from wws_adviser.modules.market_data import service as market_service
 
     if settings.market_data_source != "akshare":
@@ -145,6 +149,17 @@ async def _run_data_maintenance(db: DBSession, settings: Settings) -> dict[str, 
         request_id=f"data-maintenance-{_bd().isoformat()}",
     )
     ok = sum(1 for v in results.values() if v == "OK")
+    try:
+        today = _bd()
+        cal_rows = await market_service.sync_trading_calendar_from_provider(
+            db,
+            provider=AKShareCalendarProvider(env=settings.env),
+            start=today - _td(days=365),
+            end=today + _td(days=400),
+        )
+        _logger.info("交易日历同步完成：%s 行（近一年 + 未来 400 天）", cal_rows)
+    except Exception as exc:  # noqa: BLE001 — 日历失败不阻塞采集结果
+        _logger.warning("交易日历同步失败（不影响日线采集）: %s", exc)
     return {"ok": ok, "failed": len(results) - ok}
 
 
