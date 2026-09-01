@@ -107,6 +107,21 @@ async def list_accounts(db: DBDep, user: UserDep) -> list[AccountOut]:
     return [_account_to_out(a) for a in accounts]
 
 
+@router.post("/accounts/{account_id}/reconcile", response_model=AccountOut)
+async def reconcile_account(
+    account_id: str, request: Request, db: DBDep, user: UserDep
+) -> AccountOut:
+    """对账确认（PRD §19 对账状态）：账本与券商核对一致后置位，
+    解除盘中建议的 ledger_unreconciled 降级；后续新交易入账自动复位。"""
+    account = service.mark_reconciled(
+        db,
+        user_id=user.id,
+        account_id=account_id,
+        request_id=request.headers.get("x-request-id"),
+    )
+    return _account_to_out(account)
+
+
 @router.post("/accounts", response_model=AccountOut)
 async def create_account(
     body: AccountCreate,

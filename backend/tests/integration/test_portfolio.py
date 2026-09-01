@@ -266,3 +266,48 @@ def test_soft_delete_transaction(migrated_client) -> None:
     assert deleted.status_code == 200
     items = migrated_client.get("/api/v1/transactions").json()["items"]
     assert len(items) == 0  # 软删后列表不再可见
+
+
+# —— 对账机制（Phase 2 收官：ledger_unreconciled 降级的解除项）——
+
+
+def _account_id(client) -> str:
+    r = client.get("/api/v1/accounts")
+    assert r.status_code == 200
+    return r.json()[0]["id"]
+
+
+def test_reconcile_marks_and_new_transaction_resets(migrated_client) -> None:
+    _login(migrated_client)
+    _create_account(migrated_client, key="recon-acct")
+    aid = _account_id(migrated_client)
+    assert migrated_client.get("/api/v1/accounts").json()[0]["reconciled"] is False
+
+    # 对账确认 → True + 时间戳
+    r = migrated_client.post(
+        f"/api/v1/accounts/{aid}/reconcile", headers=_csrf(migrated_client)
+    )
+    assert r.status_code == 200
+    assert r.json()["reconciled"] is True and r.json()["reconciled_at"]
+
+    # 新交易入账 → 自动复位（经导入路径建一笔新交易）
+    csv_body = CSV_HEADER + "2026-09-01,600519,贵州茅台,买入,100,1800.50,5.00,1.80\n"
+    pv = _import_preview(migrated_client, csv_body, key="recon-pv")
+    assert len(pv["preview"]) == 1
+    _import_confirm(
+        migrated_client, pv["batch_id"], [pv["preview"][0]["fingerprint"]], key="recon-cf"
+    )
+    acct = migrated_client.get("/api/v1/accounts").json()[0]
+    assert acct["reconciled"] is False and acct["reconciled_at"] is None
+
+
+def test_reconcile_wrong_account_404_and_requires_auth(migrated_client, client) -> None:
+    # 未登录：CSRF/认证中间件先行拦截（401 或 403 均证明不可匿名调用）
+    assert client.post("/api/v1/accounts/x/reconcile").status_code in (401, 403)
+    _login(migrated_client)
+    _create_account(migrated_client, key="recon-acct2")
+    r = migrated_client.post(
+        "/api/v1/accounts/01WRONGACCOUNTID000000/reconcile",
+        headers=_csrf(migrated_client),
+    )
+    assert r.status_code == 404

@@ -156,6 +156,42 @@ def get_accounts(db: DBSession, user_id: str) -> list[Account]:
     return repository.get_accounts_by_user(db, user_id)
 
 
+def mark_reconciled(
+    db: DBSession,
+    *,
+    user_id: str,
+    account_id: str | None = None,
+    request_id: str | None = None,
+) -> Account:
+    """对账确认：账本与券商记录核对一致后置 reconciled=True。
+
+    盘中建议的放行条件之一（ledger_unreconciled 降级的解除项，PRD §19 对账状态）。
+    幂等：重复确认仅刷新 reconciled_at。
+    """
+    account = _get_user_account(db, user_id)
+    if account_id is not None and account.id != account_id:
+        raise AccountNotFoundError(account_id)
+    account.reconciled = True
+    account.reconciled_at = now_utc_iso()
+    audit_service.append_event(
+        db,
+        action="account_reconciled",
+        target_type="account",
+        target_id=account.id,
+        after={"reconciled": True},
+        request_id=request_id,
+    )
+    db.commit()
+    return account
+
+
+def _invalidate_reconciliation(account: Account) -> None:
+    """新交易入账 → 对账状态失效（盘中建议恢复 ledger_unreconciled 降级）。"""
+    if account.reconciled:
+        account.reconciled = False
+        account.reconciled_at = None
+
+
 # —— Transaction ——
 
 
@@ -213,6 +249,7 @@ def record_transaction(
         note=note,
     )
     repository.add_transaction(db, txn)
+    _invalidate_reconciliation(account)
     audit_service.append_event(
         db,
         action="transaction_recorded",
@@ -419,6 +456,7 @@ def import_confirm(
             note=None,
         )
         repository.add_transaction(db, txn)
+        _invalidate_reconciliation(account)
         touched_instruments.add(instrument.id)
         created += 1
         audit_service.append_event(
