@@ -1,29 +1,56 @@
 """交割单 PDF → CSV 导入格式转换器（券商"交割单"导出 PDF → 3_API §3.3 CSV）。
 
 用法：
+    # 空账户首次导入
     uv run --with pdfplumber python scripts/jgd_pdf_to_csv.py 交割单.pdf -o transactions.csv
+    # 增量导入（服务器已有交易历史；状态文件由 import_settlement.py --export-positions 导出）
+    docker exec deploy-wws-1 python /app/backend/scripts/import_settlement.py \
+        --export-positions --username luc > state.json
+    uv run --with pdfplumber python scripts/jgd_pdf_to_csv.py 新单.pdf \
+        --incremental state.json -o tx.csv
 
 处理规则（按实测交割单结构，2026-08）：
-- 证券买入/卖出 → 买入/卖出；费用 = 手续费+印花税（其他杂费实测为 0，如非 0 会并入）
+- 证券买入/卖出 → 买入/卖出；费用 = 手续费+印花税+未单列费用补差（见下）
 - ETF份额分拆 → 拆股（数量=增加份额，零成本）
 - 红利入账 → 分红（qty=1、price=发生金额；qty>0 时 price=金额/qty）
 - 上证LOF申购/开放基金申购 → 买入（数量/价格/费用照抄）
 - 股份转入：同代码 5 日内有"申购"行 → 视为份额到账配对，跳过（避免双计）；
   否则按 0 成本买入并在跳过清单中警告（成本基准未知，需人工修正）
-- 现金事件（银行转账/逆回购/股息红利差异/指定登记/利息归本）→ 不导入，折入初始现金
+- 现金事件（银行转账/逆回购/股息红利差异/指定登记/利息归本）→ 不导入，折入初始现金；
+  增量模式下计入现金闭合校验，并提示服务器现金将与交割单差该合计
+- 未单列费用补差：现金流与 金额±(手续费+印花税) 的正差额（实测沪市个股过户费 0.02）
+  并入手续费——使回放现金与交割单发生金额逐分一致，否则差额被初始/服务器现金
+  吸收成永久漂移
 - 聚合：同（日期,代码,方向,价格）合并一行（数量/费用求和）——消除日内重复成交
   的指纹冲突（导入器按 标的+方向+数量+价格+费用+日期 去重）
 - 初始现金 = 最新资金余额 − Σ(导入行回放现金增量)：回放后现金精确对齐交割单
 - 输出对账锚点：各代码最终股票余额（导入后与 /positions 逐一对账）
+
+时间序（余额链）：
+- PDF 同日行序实测不可靠；股票余额列是唯一可靠序信息，同（日期,代码）内按余额链重构
+- 余额环（日内"买 N→卖 N"回到起点）物理上不可分辨"先买后卖"与"先卖（期初 N）后买回"：
+  环回退「买入优先」（窗口首日、无服务器持仓佐证时）——保证空账户回放不产生负持仓
+- 跨日续接：代码前一日的链尾余额作次日环的链头种子——环歧义至多错在窗口首日，
+  不会跨日传播（实测 2026-08 515120 案例：末日环曾致期末锚点偏 2000 份）
+- 增量模式：代码窗口首日链头种子 = 服务器当前持仓——首日环同样根治
+
+增量模式（--incremental STATE）额外行为：
+- 剔除期初持仓合成（服务器已追踪该持仓，合成即双计）
+- 拦截：区间重叠（PDF 起点须晚于服务器最后交易日期，聚合指纹不同会双计）、
+  卖出超过服务器持仓（回放负持仓）、现金闭合残差 > 0.01
+  （服务器现金 + 回放 + 现金事件 = 交割单期末余额；容差吸收历史交易亚分尾差）
+- 输出：预期导入后期末持仓（服务器现状 + 窗口净变动）、期初衔接警告、期末锚点交叉校验
 """
 
 import argparse
 import csv
+import json
 import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
 from decimal import Decimal
+from pathlib import Path
 
 LINE_RE = re.compile(r"^(\d{8})\s+(\d{6})\s+(\S+)\s+(\S+)\s+(.+)$")
 
@@ -67,6 +94,8 @@ class ConversionResult:
     final_cash: Decimal = Decimal(0)
     final_holdings: dict[str, tuple[str, Decimal]] = field(default_factory=dict)
     replay_check: dict[str, str] = field(default_factory=dict)
+    fee_adjustments: list[str] = field(default_factory=list)
+    expected_finals: dict[str, tuple[str, Decimal]] = field(default_factory=dict)
 
 
 def parse_line(line: str) -> JgdRow | None:
@@ -112,24 +141,59 @@ def _signed_qty(r: JgdRow) -> Decimal:
     return -r.qty if r.op == "证券卖出" else r.qty
 
 
-def _chain_by_share(rows: list[JgdRow]) -> list[JgdRow]:
+CASH_TOLERANCE = Decimal("0.01")  # 现金闭合容差：吸收历史交易的亚分尾差（实测 0.005）
+
+
+def _patch_unlisted_fees(rows: list[JgdRow]) -> list[str]:
+    """现金流与 金额±(费用+税) 的正差额并入手续费（未单列费用，实测沪市个股过户费 0.02）。
+
+    就地修改 rows；返回补差说明。负差额属数据异常（现金流比申报少），仅告警不修改。
+    """
+    notes: list[str] = []
+    for r in rows:
+        if r.op == "证券买入":
+            extra = abs(r.cash_delta) - (r.amount + r.fee + r.tax)
+        elif r.op == "证券卖出":
+            extra = (r.amount - r.fee - r.tax) - r.cash_delta
+        else:
+            continue
+        if extra > 0:
+            r.fee += extra
+            notes.append(f"{r.date} {r.code} {r.name} {r.op}："
+                         f"补未单列费用 {extra} → 手续费 {r.fee}")
+        elif extra < 0:
+            notes.append(f"警告: {r.date} {r.code} {r.name} {r.op}："
+                         f"现金流比申报少 {-extra}（数据异常，未修改）")
+    return notes
+
+
+def _chain_by_share(rows: list[JgdRow], *, opening: Decimal | None = None) -> list[JgdRow]:
     """同（日期,代码）内按股票余额链重构时间序。
 
     PDF 同日行序实测不可靠（既非正序也非倒序）；余额列是唯一可靠的序信息：
     每行 before = after − signed，链头 = before 不在任一 after 中。
 
     余额环（日内"买 N→卖 N"回到起点，before/after 互为镜像）物理上不可分辨
-    "先买后卖"与"先卖（期初 N）后买回"；环回退按「买入优先」排列——保证回放
-    不产生负持仓，成本口径在极少数真·先卖场景下略有偏差（余额列无法区分）。
+    "先买后卖"与"先卖（期初 N）后买回"。环回退顺序：
+    1. opening 种子（增量模式=服务器持仓，否则=前日链尾）命中某行 before → 该行为链头
+       （外部真值破环，实测 2026-08 515120 首日环即此法根治）；
+    2. 否则「买入优先」——保证空账户回放不产生负持仓，成本口径在极少数真·先卖
+       场景下略有偏差（余额列无法区分）。
     """
     afters = {r.share_balance: r for r in rows}
     before_map: dict[Decimal, JgdRow] = {}
     for r in rows:
         before_map.setdefault(r.share_balance - _signed_qty(r), r)
     candidates = [r for r in rows if r.share_balance - _signed_qty(r) not in afters]
-    # 链头歧义（含余额环 candidates 为空）时买入优先——卖出作头需要期初持仓佐证
-    pool = candidates or rows
-    head = next((r for r in pool if r.op != "证券卖出"), pool[0])
+    head: JgdRow | None = None
+    if not candidates and opening is not None:
+        seeded = [r for r in rows if r.share_balance - _signed_qty(r) == opening]
+        if seeded:
+            head = seeded[0]
+    if head is None:
+        # 链头歧义（含余额环 candidates 为空）时买入优先——卖出作头需要期初持仓佐证
+        pool = candidates or rows
+        head = next((r for r in pool if r.op != "证券卖出"), pool[0])
     order: list[JgdRow] = []
     seen: set[int] = set()
     cur: JgdRow | None = head
@@ -144,12 +208,25 @@ def _chain_by_share(rows: list[JgdRow]) -> list[JgdRow]:
     return order
 
 
-def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> ConversionResult:
+def convert(
+    rows: list[JgdRow],
+    *,
+    final_cash: Decimal | None = None,
+    initial_positions: dict[str, Decimal] | None = None,
+    server_cash: Decimal | None = None,
+) -> ConversionResult:
     """解析行集合 → 聚合导入行 + 初始现金 + 对账锚点。纯函数可单测。
 
     final_cash：交割单最终资金余额（由 convert_pdf 经资金余额链定位末笔得出）。
     缺省时取行集合中 fund_balance 的最大可见值（不可靠，仅供测试）。
+    initial_positions：增量模式——服务器各代码当前持仓；给定时不做期初持仓合成
+    （服务器已追踪，合成即双计），并执行增量校验：期初衔接、负持仓拦截、
+    期末锚点交叉校验；配合 server_cash 时加现金闭合校验（容差 CASH_TOLERANCE）。
+    校验不过抛 ValueError（含全部违规明细）。
     """
+    incremental = initial_positions is not None
+    fee_notes = _patch_unlisted_fees(rows)
+
     if final_cash is None:
         for r in reversed(rows):
             if r.fund_balance is not None:
@@ -185,13 +262,21 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
             continue
         imported.append(r)
 
-    # 同（日期,代码）内按股票余额链重构时间序（PDF 行序不可靠）
+    # 同（日期,代码）内按股票余额链重构时间序（PDF 行序不可靠）；跨日续接：
+    # 代码前日链尾作次日环的种子，增量模式首日种子=服务器持仓（外部真值破环）
     chained: list[JgdRow] = []
     groups: dict[tuple[str, str], list[JgdRow]] = defaultdict(list)
     for r in imported:
         groups[(r.date, r.code)].append(r)
-    for date_key in sorted(groups):
-        chained.extend(_chain_by_share(groups[date_key]))
+    day_close: dict[str, Decimal] = {}
+    for date, code in sorted(groups):
+        opening = day_close.get(code)
+        if opening is None and incremental:
+            opening = initial_positions.get(code)
+        day = _chain_by_share(groups[(date, code)], opening=opening)
+        chained.extend(day)
+        if day:
+            day_close[code] = day[-1].share_balance
     seq_of = {id(r): i for i, r in enumerate(chained)}
 
     staged: list[dict[str, Decimal | str]] = []
@@ -209,27 +294,38 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
                            qty=qty, price=price, fee=fee, tax=tax,
                            seq=seq_of[id(r)]))
 
-    # 期初持仓合成：股票余额链反推——某代码时间上首个可导入行的（余额 − 当行增减）> 0
+    # 期初持仓合成：仅空账户首次导入。某代码时间上首个可导入行的（余额 − 当行增减）> 0
     # 说明窗口开始前已有持仓（旧券商转入/更早买入），合成一笔期初买入行：
     # 数量=反推值，成本=首行价格代理（警告标注，待真实更长交割单修正）。
     # 现金口径不变式保持：初始现金 = 期末余额 − Σ回放增量，虚拟购入成本被
     # 初始现金吸收 → 期末现金仍精确，净值不受影响。
+    # 增量模式不合成（服务器已追踪该持仓，合成即双计），改为衔接校验。
     first_seen: dict[str, JgdRow] = {}
     for r in chained:  # 链序即时间序
         first_seen.setdefault(r.code, r)
-    for code, r in first_seen.items():
-        pre = r.share_balance - _signed_qty(r)
-        if pre > 0:
-            skipped.append(
-                f"警告: {code} {r.name} 期初持仓 {pre} 份（交割单窗口前已有），"
-                f"按首行价格 {r.price} 代理成本合成买入——建议导出更长周期交割单修正成本"
-            )
-            staged.append(dict(
-                date=r.date, code=r.code, name=r.name, kind="买入",
-                qty=pre, price=r.price, fee=Decimal(0), tax=Decimal(0),
-                # 期初行排在同代码首行之前（时间更早）
-                seq=seq_of[id(r)] - Decimal("0.5"),
-            ))
+    if incremental:
+        for code, r in first_seen.items():
+            pdf_opening = r.share_balance - _signed_qty(r)
+            server_qty = initial_positions.get(code, Decimal(0))
+            if pdf_opening != server_qty:
+                skipped.append(
+                    f"警告: {code} {r.name} 交割单窗口期初 {pdf_opening} ≠ 服务器持仓 {server_qty}"
+                    "——数据可能不一致，导入前请核对"
+                )
+    else:
+        for code, r in first_seen.items():
+            pre = r.share_balance - _signed_qty(r)
+            if pre > 0:
+                skipped.append(
+                    f"警告: {code} {r.name} 期初持仓 {pre} 份（交割单窗口前已有），"
+                    f"按首行价格 {r.price} 代理成本合成买入——建议导出更长周期交割单修正成本"
+                )
+                staged.append(dict(
+                    date=r.date, code=r.code, name=r.name, kind="买入",
+                    qty=pre, price=r.price, fee=Decimal(0), tax=Decimal(0),
+                    # 期初行排在同代码首行之前（时间更早）
+                    seq=seq_of[id(r)] - Decimal("0.5"),
+                ))
 
     # 聚合：同（日期,代码,方向,价格）→ 数量/费用求和（消除日内重复成交的指纹冲突）
     agg: dict[tuple, dict[str, Decimal | str]] = {}
@@ -263,16 +359,69 @@ def convert(rows: list[JgdRow], *, final_cash: Decimal | None = None) -> Convers
         else:
             final_holdings.pop(r.code, None)
 
+    # —— 增量校验（输出序=链序回放，与导入器 domain._apply_txn 口径一致）——
+    expected_finals: dict[str, tuple[str, Decimal]] = {}
+    errors: list[str] = []
+    cash_residual: Decimal | None = None
+    if incremental:
+        bal: dict[str, Decimal] = dict(initial_positions)
+        name_of = {r.code: r.name for r in chained}
+        for s in out_rows:
+            code, kind, qty = s["证券代码"], s["操作"], Decimal(s["成交数量"])
+            if kind in ("买入", "拆股"):
+                bal[code] = bal.get(code, Decimal(0)) + qty
+            elif kind == "卖出":
+                bal[code] = bal.get(code, Decimal(0)) - qty
+                if bal[code] < 0:
+                    errors.append(
+                        f"{s['成交日期']} {code} 卖出后负持仓 {bal[code]}（服务器持仓不足）"
+                    )
+        for code in sorted(set(initial_positions) | set(bal)):
+            if bal.get(code, Decimal(0)) != 0:
+                expected_finals[code] = (name_of.get(code, "-"), bal[code])
+        for code, (name, qty) in expected_finals.items():
+            anchor = final_holdings.get(code)
+            if anchor is not None and anchor[1] != qty:
+                skipped.append(
+                    f"警告: {code} {name} 预期期末 {qty} ≠ 余额链锚点 {anchor[1]}"
+                    "——链重构跨日不连续，以「服务器+净变动」为准"
+                )
+        if server_cash is not None:
+            events_total = sum(
+                (r.cash_delta for r in rows_asc if r.op in SKIP_OPS or r.code == "799999"),
+                Decimal(0),
+            )
+            cash_residual = server_cash + replay_total + events_total - final_cash
+            if abs(cash_residual) > CASH_TOLERANCE:
+                errors.append(
+                    f"现金闭合失败：服务器现金 {server_cash} + 回放 {replay_total} + 现金事件 "
+                    f"{events_total} − 交割单期末 {final_cash} = 残差 {cash_residual}"
+                    f"（容差 {CASH_TOLERANCE}）——服务器历史与交割单不一致，勿导入"
+                )
+            elif events_total != 0:
+                skipped.append(
+                    f"注意: 窗口现金事件合计 {events_total} 未导入——导入后服务器现金将比"
+                    "交割单少该额（如需对齐可手工补『调整』交易）"
+                )
+        if errors:
+            raise ValueError("增量校验失败：\n  " + "\n  ".join(errors))
+
     initial_cash = (final_cash - replay_total).quantize(Decimal("0.01"))
+    replay_check: dict[str, str] = {
+        "导入行数（聚合后）": str(len(out_rows)),
+        "回放现金合计": str(replay_total.quantize(Decimal("0.01"))),
+        "交割单最终资金余额": str(final_cash),
+    }
+    if incremental:
+        replay_check["现金闭合残差"] = (
+            str(cash_residual) if cash_residual is not None else "未校验（状态缺服务器现金）"
+        )
+    else:
+        replay_check["推算初始现金"] = str(initial_cash)
     return ConversionResult(
         rows=out_rows, skipped=skipped, initial_cash=initial_cash, final_cash=final_cash,
-        final_holdings=final_holdings,
-        replay_check={
-            "导入行数（聚合后）": str(len(out_rows)),
-            "回放现金合计": str(replay_total.quantize(Decimal("0.01"))),
-            "交割单最终资金余额": str(final_cash),
-            "推算初始现金": str(initial_cash),
-        },
+        final_holdings=final_holdings, replay_check=replay_check,
+        fee_adjustments=fee_notes, expected_finals=expected_finals,
     )
 
 
@@ -291,8 +440,33 @@ def _final_cash_by_fund_chain(rows: list[JgdRow]) -> Decimal | None:
     return tails[0] if len(tails) == 1 else max(r.fund_balance for r in day)
 
 
-def convert_pdf(pdf_path: str) -> ConversionResult:
-    """PDF 全文 → ConversionResult（最终现金由资金余额链定位）。"""
+def assert_no_overlap(rows: list[JgdRow], last_trade_date: str) -> None:
+    """区间重叠拦截：PDF 起点 must 晚于服务器最后交易日期（同日也算重叠）。
+
+    日期统一成 8 位数字再比（服务器侧为 YYYY-MM-DD，PDF 行为 YYYYMMDD，
+    直接字符串比较格式不同恒判不重叠）。
+    """
+    if not rows:
+        return
+    last8 = re.sub(r"\D", "", last_trade_date)[:8]
+    if not last8:
+        return
+    pdf_start = min(r.date for r in rows)
+    if pdf_start <= last8:
+        raise ValueError(
+            f"交割单区间重叠：PDF 起点 {pdf_start} ≤ 服务器最后交易日期 {last8}"
+            "——重叠区间聚合边界不同会产生不同指纹导致双计，请导出「上次之后」的交割单"
+        )
+
+
+def convert_pdf(
+    pdf_path: str,
+    *,
+    initial_positions: dict[str, Decimal] | None = None,
+    server_cash: Decimal | None = None,
+    last_trade_date: str | None = None,
+) -> ConversionResult:
+    """PDF 全文 → ConversionResult（最终现金由资金余额链定位；增量模式含重叠拦截）。"""
     import pdfplumber
 
     rows: list[JgdRow] = []
@@ -302,26 +476,74 @@ def convert_pdf(pdf_path: str) -> ConversionResult:
                 r = parse_line(line)
                 if r is not None:
                     rows.append(r)
-    return convert(rows, final_cash=_final_cash_by_fund_chain(rows))
+    if initial_positions is not None and last_trade_date:
+        assert_no_overlap(rows, last_trade_date)
+    return convert(
+        rows, final_cash=_final_cash_by_fund_chain(rows),
+        initial_positions=initial_positions, server_cash=server_cash,
+    )
+
+
+def _load_state(arg: str) -> dict:
+    """--incremental 参数 → 状态 dict（import_settlement.py --export-positions 格式，
+    支持文件路径或内联 JSON）。"""
+    text = arg if arg.lstrip().startswith("{") else Path(arg).read_text(encoding="utf-8")
+    state = json.loads(text)
+    if not isinstance(state.get("positions"), dict):
+        raise ValueError(
+            "状态缺少 positions（应由 import_settlement.py --export-positions 生成）"
+        )
+    return state
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="交割单 PDF → CSV 导入格式")
     ap.add_argument("pdf")
     ap.add_argument("-o", "--output", default="transactions.csv")
+    ap.add_argument(
+        "--incremental", metavar="STATE", default=None,
+        help="增量模式：服务器状态 JSON（import_settlement.py --export-positions 输出，"
+             "支持文件路径或内联 JSON）——剔除期初合成并做对账校验",
+    )
     args = ap.parse_args()
 
-    result = convert_pdf(args.pdf)
+    initial_positions = None
+    server_cash = None
+    last_trade_date = None
+    try:
+        if args.incremental:
+            state = _load_state(args.incremental)
+            initial_positions = {k: Decimal(str(v)) for k, v in state["positions"].items()}
+            server_cash = (
+                Decimal(str(state["cash"])) if state.get("cash") is not None else None
+            )
+            last_trade_date = state.get("last_trade_date")
+        result = convert_pdf(
+            args.pdf, initial_positions=initial_positions,
+            server_cash=server_cash, last_trade_date=last_trade_date,
+        )
+    except (ValueError, OSError, json.JSONDecodeError) as e:
+        print(f"错误：{e}", file=sys.stderr)
+        raise SystemExit(2) from None
+
     with open(args.output, "w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=IMPORT_HEADER)
         writer.writeheader()
         writer.writerows(result.rows)
 
-    print(f"已写出 {args.output}：{len(result.rows)} 行（聚合后）")
+    print(f"已写出 {args.output}：{len(result.rows)} 行"
+          f"（聚合后，{'增量' if args.incremental else '首次'}导入）")
+    for note in result.fee_adjustments:
+        print(f"  {note}")
     for k, v in result.replay_check.items():
         print(f"  {k}: {v}")
-    print("\n各代码最终股票余额（导入后与 /positions 对账）：")
-    for code, (name, bal) in sorted(result.final_holdings.items()):
+    if args.incremental:
+        print("\n预期导入后期末持仓（服务器现状 + 窗口净变动，导入后与 /positions 对账）：")
+        anchors = result.expected_finals
+    else:
+        print("\n各代码最终股票余额（导入后与 /positions 对账）：")
+        anchors = result.final_holdings
+    for code, (name, bal) in sorted(anchors.items()):
         print(f"  {code} {name}: {bal}")
     print(f"\n跳过 {len(result.skipped)} 行：")
     for s in result.skipped:

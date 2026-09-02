@@ -1,9 +1,12 @@
-"""交割单 PDF→CSV 转换器测试：行解析、聚合去重、配对跳过、初始现金对账。"""
+"""交割单 PDF→CSV 转换器测试：行解析、聚合去重、配对跳过、初始现金对账、
+未单列费用补差、余额环种子、增量模式校验。"""
 
 import importlib.util
 import sys
 from decimal import Decimal
 from pathlib import Path
+
+import pytest
 
 _spec = importlib.util.spec_from_file_location(
     "jgd_pdf_to_csv", Path(__file__).resolve().parents[2] / "scripts" / "jgd_pdf_to_csv.py"
@@ -14,6 +17,7 @@ _spec.loader.exec_module(jgd)
 
 parse_line = jgd.parse_line
 convert = jgd.convert
+assert_no_overlap = jgd.assert_no_overlap
 JgdRow = jgd.JgdRow
 
 
@@ -251,3 +255,150 @@ def test_no_opening_position_when_balance_matches_activity() -> None:
     result = convert(rows, final_cash=Decimal("100.000"))
     assert not any("期初持仓" in s for s in result.skipped)
     assert len(result.rows) == 1
+
+
+# —— 未单列费用补差 ——
+
+
+def test_unlisted_fee_patch_ties_replay_to_cash_delta() -> None:
+    """现金流比 金额+费用 多 0.02（沪市过户费未单列）→ 补进手续费，回放逐分一致。"""
+    rows = [_row(amount=Decimal("780.400"), cash_delta=Decimal("-780.520"))]
+    result = convert(rows, final_cash=Decimal("219.480"))
+    assert result.rows[0]["手续费"] == "0.120"
+    assert any("补未单列费用 0.02" in n for n in result.fee_adjustments)
+    assert Decimal(result.replay_check["回放现金合计"]) == Decimal("-780.52")
+
+
+def test_sell_side_no_fee_patch_when_consistent() -> None:
+    """卖出现金流=金额−费用（正常）不补差；差异为负（现金流比申报多）不修改。"""
+    rows = [
+        _row(op="证券卖出", amount=Decimal("780.400"), share_balance=Decimal(0),
+             cash_delta=Decimal("780.300")),
+        _row(op="证券卖出", amount=Decimal("790.000"), share_balance=Decimal(0),
+             cash_delta=Decimal("790.400")),  # 现金流比申报多 0.10——数据异常不修改
+    ]
+    result = convert(rows, final_cash=Decimal("1000.000"))
+    assert not any("补未单列费用" in n for n in result.fee_adjustments)
+    assert any("数据异常" in n for n in result.fee_adjustments)
+
+
+# —— 增量模式 ——
+
+
+def test_incremental_skips_opening_synthesis() -> None:
+    """服务器已有持仓：不做期初合成（合成即双计），期初衔接校验通过。"""
+    rows = [_row(date="20260801", qty=Decimal(100), share_balance=Decimal(1100))]
+    result = convert(rows, final_cash=Decimal("1000.000"),
+                     initial_positions={"510500": Decimal(1000)})
+    assert not any("期初持仓" in s for s in result.skipped)
+    assert len(result.rows) == 1 and result.rows[0]["成交数量"] == "100"
+    assert result.expected_finals["510500"] == ("500ETF", Decimal(1100))
+
+
+def test_incremental_warns_on_opening_mismatch() -> None:
+    rows = [_row(date="20260801", qty=Decimal(100), share_balance=Decimal(1100))]
+    result = convert(rows, final_cash=Decimal("1000.000"),
+                     initial_positions={"510500": Decimal(900)})
+    assert any("期初 1000 ≠ 服务器持仓 900" in s for s in result.skipped)
+
+
+def test_incremental_ring_seeded_by_server_position() -> None:
+    """日内「卖 N→买回 N」余额环：服务器持仓作链头种子——先卖后买被正确还原
+    （2026-08-26 515120 实测场景：6200 →卖2000→ 4200 →买2000→ 6200）。"""
+    rows = [
+        _row(date="20260826", code="515120", name="创新药", op="证券卖出",
+             qty=Decimal(2000), price=Decimal("0.658"), amount=Decimal("1316.000"),
+             share_balance=Decimal(4200), cash_delta=Decimal("1315.900")),
+        _row(date="20260826", code="515120", name="创新药",
+             qty=Decimal(2000), price=Decimal("0.650"), amount=Decimal("1300.000"),
+             share_balance=Decimal(6200), cash_delta=Decimal("-1300.100")),
+    ]
+    result = convert(rows, final_cash=Decimal("1000.000"),
+                     initial_positions={"515120": Decimal(6200)})
+    day = [r for r in result.rows if r["成交日期"] == "20260826"]
+    assert [r["操作"] for r in day] == ["卖出", "买入"]  # 种子定头：先卖后买
+    assert result.final_holdings["515120"] == ("创新药", Decimal(6200))
+    assert result.expected_finals["515120"] == ("创新药", Decimal(6200))
+    assert not any("警告" in s for s in result.skipped)
+
+
+def test_ring_carries_previous_day_close_by_default() -> None:
+    """默认模式跨日续接：前日链尾 4800 作次日环种子——环歧义不跨日传播
+    （2026-08-31 515120 实测场景：4800 →卖2400→ 2400 →买2400→ 4800，
+    旧版独立破环曾误报期末 2400）。"""
+    d1 = _row(date="20260828", code="515120", name="创新药", qty=Decimal(800),
+              price=Decimal("0.649"), amount=Decimal("519.200"),
+              share_balance=Decimal(4800), cash_delta=Decimal("-519.300"))
+    d2_sell = _row(date="20260831", code="515120", name="创新药", op="证券卖出",
+                   qty=Decimal(2400), price=Decimal("0.630"), amount=Decimal("1512.000"),
+                   share_balance=Decimal(2400), cash_delta=Decimal("1511.900"))
+    d2_buy = _row(date="20260831", code="515120", name="创新药", qty=Decimal(2400),
+                  price=Decimal("0.630"), amount=Decimal("1512.000"),
+                  share_balance=Decimal(4800), cash_delta=Decimal("-1512.100"))
+    result = convert([d2_sell, d2_buy, d1], final_cash=Decimal("1000.000"))
+    assert result.final_holdings["515120"][1] == Decimal(4800)
+    day2 = [r for r in result.rows if r["成交日期"] == "20260831"]
+    assert [r["操作"] for r in day2] == ["卖出", "买入"]
+
+
+def test_incremental_rejects_oversell() -> None:
+    rows = [
+        _row(date="20260801", op="证券卖出", qty=Decimal(200), amount=Decimal("1560.800"),
+             share_balance=Decimal(800), cash_delta=Decimal("1560.700")),
+    ]
+    with pytest.raises(ValueError, match="负持仓"):
+        convert(rows, final_cash=Decimal("1000.000"),
+                initial_positions={"510500": Decimal(100)})
+
+
+def test_incremental_cash_closure_with_tolerance_and_events() -> None:
+    """现金闭合：服务器现金 + 回放 + 现金事件 = 交割单期末（容差吸收历史尾差）。"""
+    rows = [
+        _row(date="20260701", qty=Decimal(100), price=Decimal("1.000"),
+             amount=Decimal("100.000"), share_balance=Decimal(100),
+             cash_delta=Decimal("-100.100"), fee=Decimal("0.100")),
+        _row(date="20260702", op="银行转证券", qty=Decimal(0), price=Decimal(0),
+             amount=Decimal(0), share_balance=Decimal(0), cash_delta=Decimal("500.000"),
+             fee=Decimal(0), fund_balance=Decimal("1399.900")),
+    ]
+    # 999.995（含 0.005 历史尾差）− 100.10 + 500 = 1399.895，残差 −0.005 ≤ 容差 → 通过
+    result = convert(rows, final_cash=Decimal("1399.900"),
+                     initial_positions={"510500": Decimal(100)},
+                     server_cash=Decimal("999.995"))
+    assert any("现金事件" in s for s in result.skipped)
+    # 残差 −1.005 > 容差 → 拦截
+    with pytest.raises(ValueError, match="现金闭合失败"):
+        convert(rows, final_cash=Decimal("1399.900"),
+                initial_positions={"510500": Decimal(100)},
+                server_cash=Decimal("998.995"))
+
+
+def test_incremental_expected_final_cross_checks_chain_anchor() -> None:
+    """预期期末（服务器+净变动）与余额链锚点交叉校验；服务器独有代码一并报告。"""
+    rows = [
+        _row(date="20260801", code="159915", name="创业板", qty=Decimal(500),
+             price=Decimal("3.420"), amount=Decimal("1710.000"),
+             share_balance=Decimal(500), cash_delta=Decimal("-1710.100")),
+    ]
+    result = convert(rows, final_cash=Decimal("1000.000"),
+                     initial_positions={"510500": Decimal(3000), "159915": Decimal(0)})
+    assert result.expected_finals["159915"] == ("创业板", Decimal(500))
+    assert result.expected_finals["510500"] == ("-", Decimal(3000))  # 窗口外代码不变
+
+
+# —— 区间重叠拦截 ——
+
+
+def test_overlap_guard_normalizes_date_formats() -> None:
+    """服务器日期 YYYY-MM-DD 与 PDF 日期 YYYYMMDD 直接字符串比较恒判不重叠——
+    必须统一格式后比较。"""
+    rows = [_row(date="20260825")]
+    # PDF 起点 0825 > 服务器最后 0824 → 通过（相邻区间）
+    assert_no_overlap(rows, "2026-08-24")
+    assert_no_overlap(rows, "2026-08-24T15:00:00+08:00")
+    # 同日（含时间戳）→ 重叠
+    with pytest.raises(ValueError, match="区间重叠"):
+        assert_no_overlap(rows, "2026-08-25")
+    with pytest.raises(ValueError, match="区间重叠"):
+        assert_no_overlap(rows, "20260825")
+    assert_no_overlap([], "2026-08-25")  # 空行集不拦截
