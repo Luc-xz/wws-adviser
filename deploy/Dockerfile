@@ -15,10 +15,13 @@ ARG WITH_AKSHARE=1
 # 国内 VM 直连 pypi.org 极慢（pandas/numpy/py-mini-racer 等重依赖）时经构建参数换镜像；
 # 留空则走官方源（compose 已按腾讯云 VM 默认配内网镜像）
 ARG PYPI_INDEX=
-# 弱网绕行：主机 HTTP 供给锁定的轮子（如 VPS 长连接不稳时经 --find-links 取本地副本）
+# 弱网绕行：主机 HTTP 供给锁定的轮子（如 VPS 长连接不稳时经 --find-links 取本地副本）；
+# UV_OFFLINE=1 配合 find-links + cache mount 实现完全断网装包（uv 会优先锁定的
+# pythonhosted URL 滴速下载，--offline 强制走缓存/本地供给）
 ARG UV_FIND_LINKS=
+ARG UV_OFFLINE=0
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev $([ "$WITH_AKSHARE" = "1" ] && echo --extra akshare) $([ -n "$PYPI_INDEX" ] && echo --default-index "$PYPI_INDEX") $([ -n "$UV_FIND_LINKS" ] && echo --find-links "$UV_FIND_LINKS")
+    uv sync --frozen --no-dev $([ "$WITH_AKSHARE" = "1" ] && echo --extra akshare) $([ -n "$PYPI_INDEX" ] && echo --default-index "$PYPI_INDEX") $([ -n "$UV_FIND_LINKS" ] && echo --find-links "$UV_FIND_LINKS") $([ "$UV_OFFLINE" = "1" ] && echo --offline)
 
 # —— 2. OpenAPI 导出 ——
 # openapi.json 与 src/api/generated/ 均被 gitignore：在镜像内生成（与 CI 的 make gen-api 同源），
