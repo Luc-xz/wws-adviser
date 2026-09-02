@@ -35,6 +35,7 @@ from wws_adviser.modules.analytics import signals as sig
 from wws_adviser.modules.analytics.calibration import kelly_input
 from wws_adviser.modules.analytics.kelly import KellyOutcome, compute_kelly
 from wws_adviser.modules.analytics.models import SignalRecord
+from wws_adviser.modules.instruments.domain import infer_market
 from wws_adviser.modules.instruments.models import Instrument
 from wws_adviser.modules.market_data import repository as md_repository
 from wws_adviser.modules.portfolio import service as portfolio_service
@@ -152,7 +153,7 @@ async def intraday_advice(
     if provider is not None:
         try:
             quotes = await provider.fetch_quotes(
-                [InstrumentRef(code=code, market="SSE", kind="stock")]
+                [InstrumentRef(code=code, market=infer_market(code).value, kind="stock")]
             )
             if quotes:
                 lag = (datetime.now(UTC) - _parse_iso(quotes[0].fetched_at)).total_seconds()
