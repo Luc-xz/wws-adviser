@@ -11,6 +11,7 @@ services:
         PYPI_INDEX: ${PYPI_INDEX:-https://mirrors.cloud.tencent.com/pypi/simple}
         UV_FIND_LINKS: ${UV_FIND_LINKS:-}
         UV_OFFLINE: ${UV_OFFLINE:-0}
+        NPM_REGISTRY: ${NPM_REGISTRY:-}
     image: wws-adviser:${WWS_TAG:?需 WWS_TAG（git commit，禁 latest）}
     env_file: ./env.sh
     volumes:

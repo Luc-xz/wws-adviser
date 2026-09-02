@@ -39,8 +39,10 @@ WORKDIR /app/frontend
 # pnpm-workspace.yaml 必须在 install 前就位：pnpm≥10.3 strictDepBuilds 默认拒绝未审核的
 # 依赖构建脚本（esbuild/vue-demi），缺了 allowBuilds 白名单会以 ERR_PNPM_IGNORED_BUILDS 失败
 COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./
+# 弱网绕行：NPM_REGISTRY 换国内源（默认官方）
+ARG NPM_REGISTRY=
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    corepack enable pnpm && pnpm install --frozen-lockfile
+    corepack enable pnpm && pnpm install --frozen-lockfile $([ -n "$NPM_REGISTRY" ] && echo --registry "$NPM_REGISTRY")
 COPY frontend/ ./
 # 用镜像内导出的 openapi.json 覆盖上下文里的本地副本（.dockerignore 已排除，双保险），保证与后端同源
 COPY --from=openapi-export /app/frontend/openapi.json ./openapi.json
