@@ -3,10 +3,11 @@
 GET 行情为公开读（与 Phase-0 demo 一致）；refresh 采集为写操作，需登录(CSRF) + Idempotency-Key。
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, Query, Request
+from sqlalchemy import select
 from sqlalchemy.orm import Session as DBSession
 
 from wws_adviser.api.dependencies import (
@@ -19,6 +20,7 @@ from wws_adviser.api.dependencies import (
 from wws_adviser.core.config import Settings
 from wws_adviser.core.errors import MissingIdempotencyKeyError
 from wws_adviser.modules.market_data import service
+from wws_adviser.modules.market_data.models import TradingCalendar
 from wws_adviser.modules.market_data.schemas import (
     BarOut,
     BarSeriesResponse,
@@ -182,6 +184,38 @@ async def get_quality(
 
 
 @market_router.get("/state", response_model=MarketStateOut)
-async def get_state() -> MarketStateOut:
-    """市场状态骨架：盘中状态机（phase/is_trading_day/next_event_at）留 Phase 2.1。"""
-    return MarketStateOut(phase="unknown", is_trading_day=None, next_event_at=None)
+async def get_state(db: DBDep) -> MarketStateOut:
+    """市场状态机（5_DATA §8）：交易日历判 is_trading_day（无记录走 weekday 兜底），
+    时段表判 phase；closed/非交易日的 next_event_at 取日历下一交易日的集合竞价开始。"""
+    from wws_adviser.core.time import now_shanghai
+    from wws_adviser.modules.market_data import repository as md_repository
+    from wws_adviser.modules.market_data.domain import market_phase, weekday_trading_fallback
+
+    now = now_shanghai()
+    today = now.date().isoformat()
+    cal = md_repository.get_calendar(db, today)
+    is_trading = (
+        cal.is_trading_day if cal is not None else weekday_trading_fallback(now.date())
+    )
+    phase, next_t = market_phase(now, is_trading_day=is_trading)
+    next_event_at: str | None = None
+    if next_t is not None:
+        nxt = now.replace(hour=next_t.hour, minute=next_t.minute, second=0, microsecond=0)
+        next_event_at = nxt.isoformat()
+    else:
+        # 当日无更多边界：取日历下一交易日的 09:15（无日历退化为次日）
+        row = db.scalar(
+            select(TradingCalendar.date)
+            .where(
+                TradingCalendar.market == "CN",
+                TradingCalendar.is_trading_day.is_(True),
+                TradingCalendar.date > today,
+            )
+            .order_by(TradingCalendar.date)
+            .limit(1)
+        )
+        next_day = row or (now.date() + timedelta(days=1)).isoformat()
+        next_event_at = f"{next_day}T09:15:00+08:00"
+    return MarketStateOut(
+        phase=phase, is_trading_day=is_trading, next_event_at=next_event_at
+    )

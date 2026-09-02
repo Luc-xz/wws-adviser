@@ -18,6 +18,7 @@ from wws_adviser.modules.advice.api import router as advice_router
 from wws_adviser.modules.analytics.api import analytics_router, positions_router
 from wws_adviser.modules.appsettings.api import router as settings_router
 from wws_adviser.modules.documents.api import router as documents_router
+from wws_adviser.modules.events.api import router as events_router
 from wws_adviser.modules.identity.api import router as identity_router
 from wws_adviser.modules.instruments.api import router as instruments_router
 from wws_adviser.modules.market_data.api import market_router
@@ -45,6 +46,7 @@ def create_app(
     app.include_router(market_router)
     app.include_router(instruments_router)
     app.include_router(documents_router)
+    app.include_router(events_router)
     app.include_router(portfolio_router)
     app.include_router(positions_router)
     app.include_router(analytics_router)

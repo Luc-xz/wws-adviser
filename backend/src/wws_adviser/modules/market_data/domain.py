@@ -5,7 +5,8 @@ OHLC 合法性校验、质量状态（日线口径）与新鲜度骨架（5_DATA
 """
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
+from datetime import time as dtime
 from decimal import Decimal
 from enum import StrEnum
 
@@ -145,3 +146,37 @@ def weekday_trading_fallback(day: date) -> bool:
     trading_calendar（service.sync_trading_calendar）；有记录时以记录为准、不走本兜底。
     """
     return day.weekday() < 5
+
+
+# —— 市场状态机（5_DATA §8：集合竞价/连续竞价/午休/收盘；A 股 Asia/Shanghai）——
+
+# 当日时段表：(phase, 起始, 结束)；起始 None = 当日零点起，结束 None = 收盘后至午夜
+_SESSIONS: tuple[tuple[str, dtime | None, dtime | None], ...] = (
+    ("pre_open", None, dtime(9, 15)),
+    ("auction", dtime(9, 15), dtime(9, 30)),
+    ("open", dtime(9, 30), dtime(11, 30)),
+    ("lunch_break", dtime(11, 30), dtime(13, 0)),
+    ("open", dtime(13, 0), dtime(15, 0)),
+    ("closed", dtime(15, 0), None),
+)
+
+
+def market_phase(now: datetime, *, is_trading_day: bool) -> tuple[str, dtime | None]:
+    """市场状态机（纯函数）：返回 (phase, 当日下一事件时刻或 None)。
+
+    phase ∈ pre_open / auction / open / lunch_break / closed / non_trading_day；
+    now 须为 Asia/Shanghai 本地时间。next 仅当日边界——跨日事件（次日开盘）由
+    API 层结合交易日历补充。
+    """
+    if not is_trading_day:
+        return "non_trading_day", None
+    t = now.time()
+    for name, start, end in _SESSIONS:
+        if start is None:
+            if t < dtime(9, 15):
+                return name, end
+        elif end is None:
+            return name, None
+        elif start <= t < end:
+            return name, end
+    return "closed", None

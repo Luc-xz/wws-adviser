@@ -78,3 +78,19 @@ def test_intraday_csrf_enforced(migrated_client: TestClient) -> None:
         headers={"Idempotency-Key": headers["Idempotency-Key"]},  # 缺 CSRF 头
     )
     assert r.status_code == 403
+
+
+def test_intraday_advice_validity_ten_minutes(migrated_client: TestClient) -> None:
+    """PRD §20 已确认决策：建议有效期 10 分钟（≠缓存复用窗口 5 分钟）。"""
+    from datetime import datetime
+
+    from wws_adviser.modules.identity import service as identity_service
+
+    identity_service.reset_login_rate_limit()
+    h = _login(migrated_client)
+    r = migrated_client.post("/api/v1/assistant/intraday", json={"code": "600519"}, headers=h)
+    assert r.status_code == 200
+    a = r.json()["advice"]
+    vf = datetime.fromisoformat(a["valid_from"])
+    ex = datetime.fromisoformat(a["expires_at"])
+    assert (ex - vf).total_seconds() == 600

@@ -108,7 +108,11 @@ def test_market_bars_nav_quality_http(migrated_client) -> None:
     assert ("nav", "OK") in series
 
     state = migrated_client.get("/api/v1/market/state").json()
-    assert state["phase"] == "unknown"  # 骨架（盘中状态机留 Phase 2.1）
+    # 状态机（Phase 2.1 补齐）：相位合法、交易日有值、恒有下一事件
+    _PHASES = {"pre_open", "auction", "open", "lunch_break", "closed", "non_trading_day"}
+    assert state["phase"] in _PHASES
+    assert isinstance(state["is_trading_day"], bool)
+    assert state["next_event_at"]
 
 
 def test_market_state_endpoint_open(migrated_client) -> None:

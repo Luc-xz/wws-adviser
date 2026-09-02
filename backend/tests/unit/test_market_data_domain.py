@@ -276,3 +276,31 @@ def test_calendar_sync_service_idempotent(db_session) -> None:
     )
     assert n2 == 8
     assert len(list(db_session.query(md_repository.TradingCalendar).all())) == 8
+
+
+def test_market_phase_state_machine() -> None:
+    from datetime import datetime
+
+    from wws_adviser.modules.market_data.domain import market_phase
+
+    cases = [
+        ("09:00", "pre_open", "09:15"),   # 盘前
+        ("09:20", "auction", "09:30"),    # 集合竞价
+        ("10:00", "open", "11:30"),       # 上午连续竞价
+        ("12:00", "lunch_break", "13:00"),  # 午休
+        ("14:30", "open", "15:00"),       # 下午连续竞价
+        ("15:30", "closed", None),        # 收盘后（当日无边界）
+    ]
+    for t, phase, nxt in cases:
+        now = datetime.fromisoformat(f"2026-09-02T{t}:00+08:00")
+        assert market_phase(now, is_trading_day=True) == (phase, _t(nxt) if nxt else None), t
+    # 非交易日：任何时刻都是 non_trading_day
+    now = datetime.fromisoformat("2026-09-02T10:00:00+08:00")
+    assert market_phase(now, is_trading_day=False) == ("non_trading_day", None)
+
+
+def _t(s: str):
+    from datetime import time
+
+    h, m = s.split(":")
+    return time(int(h), int(m))

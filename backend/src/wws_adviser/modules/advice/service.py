@@ -43,8 +43,10 @@ from wws_adviser.ports.market_data import InstrumentRef
 
 _logger = logging.getLogger(__name__)
 
-# 盘中建议有效期（秒）：TTL 内重复请求复用缓存（§11.3）
+# 进程内缓存复用窗口（秒）：窗口内重复请求复用同一条建议（§11.3）
 INTRADAY_TTL_SECONDS = 300
+# 建议有效期（秒）：PRD §20 已确认决策「10 分钟或失效条件先触发」，与缓存窗口解耦
+ADVICE_VALIDITY_SECONDS = 600
 
 # 进程内 TTL 缓存：code → (expires_at, advice)。单实例单用户形态足够；
 # 缓存命中时不重复刷新行情（重复请求语义一致）。
@@ -140,7 +142,7 @@ async def intraday_advice(
     # 可复用条件：TTL 未过 且 建议仍可操作（PUBLISHED、未失效、窗口内）
     if cached is not None and cached[0] > now and is_actionable(cached[1], now):
         return cached[1]
-    expires_at = (_parse_iso(now) + timedelta(seconds=INTRADAY_TTL_SECONDS)).isoformat()
+    expires_at = (_parse_iso(now) + timedelta(seconds=ADVICE_VALIDITY_SECONDS)).isoformat()
 
     try:
         account = portfolio_service.get_user_account(db, user_id)
@@ -219,7 +221,11 @@ async def intraday_advice(
         )
     _persist(db, user_id, advice)
     if advice.state.value == "published":
-        _cache[code] = (advice.expires_at, advice)
+        # 缓存键为复用窗口（≠建议有效期）：窗口过后重新编排拿最新行情
+        _cache[code] = (
+            (_parse_iso(now) + timedelta(seconds=INTRADAY_TTL_SECONDS)).isoformat(),
+            advice,
+        )
     else:
         _cache.pop(code, None)
     return advice
