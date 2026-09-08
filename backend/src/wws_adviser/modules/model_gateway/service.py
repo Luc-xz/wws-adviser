@@ -102,6 +102,7 @@ async def call_model(
             response.content,
             deterministic_summary=deterministic_summary,
             evidence_whitelist=whitelist,
+            task_type=task_type.value,
         )
         if result.verdict is ValidationVerdict.BLOCKED:
             _save_audit(
@@ -135,6 +136,7 @@ async def call_model(
                 response.content,
                 deterministic_summary=deterministic_summary,
                 evidence_whitelist=whitelist,
+                task_type=task_type.value,
             )
             if result2.verdict is not ValidationVerdict.PASS:
                 _save_audit(
