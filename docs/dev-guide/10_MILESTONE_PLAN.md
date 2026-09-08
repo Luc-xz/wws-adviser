@@ -140,18 +140,25 @@
 
 | # | 工作项 | 主文档 | 关联 AC |
 | --- | --- | --- | --- |
-| 3.1 | 研究任务分解 + 文档解析 + 证据切片 + 引用白名单 | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §4 · [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §7 | AC-05 |
-| 3.2 | 公司/行业模板 + 估值情景（DCF/可比）+ 长期跟踪指标 | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §4 | AC-05 |
-| 3.3 | 多数据源交叉验证 + 事实/计算/判断/未证实标签 | [5_DATA_INGESTION_AND_QUALITY.md](./5_DATA_INGESTION_AND_QUALITY.md) §6 · AC-05 | AC-05 |
-| 3.4 | 离线报告缓存（SW 私有缓存，按 user+report+version 隔离）+ 报告导出 | [7_FRONTEND_AND_PWA.md](./7_FRONTEND_AND_PWA.md) §5 | AC-08 |
-| 3.5 | Web Push + Passkey（P1）+ 隐私通知模式 | [8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §3 · [6](./6_MODEL_AND_REPORT_PIPELINE.md) §10 | AC-08 |
+| 3.1 | 研究任务分解 + 文档解析 + 证据切片 + 引用白名单 ✅ | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §4 · [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §7 | AC-05 |
+| 3.2 | 公司/行业模板 + 估值情景（DCF/可比）+ 长期跟踪指标 ✅ | [6](./6_MODEL_AND_REPORT_PIPELINE.md) §4 | AC-05 |
+| 3.3 | 多数据源交叉验证 + 事实/计算/判断/未证实标签 ✅ | [5_DATA_INGESTION_AND_QUALITY.md](./5_DATA_INGESTION_AND_QUALITY.md) §6 · AC-05 | AC-05 |
+| 3.4 | 离线报告缓存（SW 私有缓存，按 user+report+version 隔离）+ 报告导出 ✅ | [7_FRONTEND_AND_PWA.md](./7_FRONTEND_AND_PWA.md) §5 | AC-08 |
+| 3.5 | Web Push + Passkey（P1）+ 隐私通知模式 ✅ | [8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §3 · [6](./6_MODEL_AND_REPORT_PIPELINE.md) §10 | AC-08 |
+
+**波次进度**（合并与收尾，2026-09-08）：
+
+> - **波1–波4 ✅ 2026-08-27**（phase-3 分支）：研究模块骨架（任务状态机 0012 + 引用校验 + API）→ 证据检索（FTS5 + 元数据过滤 + 切片定位 + 评分排序）→ 确定性分析（指标表/可比公司/三档估值情景含 dcf_simplified/历史分位）→ 公司报告流水线（company-v1 模板 + model_gateway 生成 + 引用防线：无引用降级 inference、单源标注未双源验证、白名单违例 BLOCKED）。
+> - **波5–波7 ✅ 2026-08-27**（phase-3 分支）：行业报告（industry-v1 八段含 value_chain，按行业名全库检索）→ 报告导出（md 原文 + 自包含 HTML 可打印 PDF）→ SSE 任务进度推送（1s 心跳/终态关闭/10 分钟上限）+ 前端研究页（进度条 + 引用清单 + 导出入口）。
+> - **波8 ✅ 2026-08-27**（phase-3 分支）：退出条件自动化——`test_research_exit.py`：引用可追溯（Evidence 行→文档→内容哈希可复盘重算）+ 异步体验（离开页面仍完成 / 完成后订阅立即收终态 / 失败不卡死 / 终态后可重建同任务 / 进度单调不减）。
+> - **合并收尾 ✅ 2026-09-08**（dev）：phase-3 并入 dev（零文本冲突 + strict 清零）后补齐三缺口：①研究终态通知（FR-NOTIFY-002 P0：completed/failed 事件，隐私默认脱敏，通知失败不坏任务）；②多源交叉验证（迁移 0013 data_conflicts + TRUST_LEVEL/字段容差比对 + UNRESOLVED → advice `data_conflict` 降级 + GET/POST /market/conflicts 消解端点）；③离线报告私有缓存（Cache Storage 按 user_id_hash 隔离 + 版本化 key + LRU 10 + 登出清除 + 离线副本横幅 + 盘中入口离线禁用）；④Web Push + Passkey（迁移 0014/0015，fido2/pywebpush optional extra，challenge 一次性 + sign_count 防克隆；VAPID 签名委托 py_vapid，锁屏隐私脱敏）。
 
 **退出条件**：
 
-- [ ] 抽样研究报告关键事实均可追溯，无来源结论标“未证实”（AC-05、PRD §17 阶段 3）。
-- [ ] 移动端阅读与异步任务体验稳定（SSE + 轮询兜底，[7](./7_FRONTEND_AND_PWA.md) §11）。
-- [ ] 离线可打开最近报告并显示缓存时间；盘中/建议入口离线不可用（AC-08）。
-- [ ] 退出登录清除私有缓存；PWA 装机验证 iOS+Android 等效环境（PRD §18）。
+- [x] 抽样研究报告关键事实均可追溯，无来源结论标“未证实”（AC-05、PRD §17 阶段 3）——代码层：`test_research_exit.py` 自动化覆盖引用→文档→哈希复盘链；引用级未双源验证强制显式标注；真实报告抽样待实跑期复核。
+- [x] 移动端阅读与异步任务体验稳定（SSE + 轮询兜底，[7](./7_FRONTEND_AND_PWA.md) §11）——SSE 心跳 + 退避轮询双通道自动化覆盖；iOS/Android 真机体验复核并入 §7 上线门槛 PWA 项。
+- [x] 离线可打开最近报告并显示缓存时间；盘中/建议入口离线不可用（AC-08）——私有缓存 + 离线副本横幅 + Assistant onLine 守卫（缓存单测 6 例；SW 对 /api 保持 NetworkOnly）。
+- [x] 退出登录清除私有缓存；PWA 装机验证 iOS+Android 等效环境（PRD §18）——登出 clearAllReportCaches（前缀 wws-report-*，静态缓存不受影响）；真机装机验证待 §7 上线门槛统一执行（Phase 0 波4 manifest/SW 已就绪）。
 
 ## 6. Phase 4：按需扩展（非 MVP）
 
@@ -189,8 +196,8 @@ Phase 1 各波次注记中的「无期留白」一次性清账（每项原子提
 | 7 | 深色模式（useDark class 策略 + 表面 token + 全页面 dark: 变体） | 波7 前端留白 | 设置页外观开关 |
 | 8 | dev 遗留 mypy strict 报错 ×6（备源 None 上抛防御等） | 近期运行期提交 | 随批清零 |
 
-仍留待后续：交易记录手工录入 UI、CSV 导入 UI、SSE 服务端 `/events`（Phase 2 收口项）、
-离线报告私有缓存与报告导出（Phase 3.4）、企微/Server酱真实联调（VPS+凭据）。
+仍留待后续：交易记录手工录入 UI、CSV 导入 UI、企微/Server酱真实联调（VPS+凭据）。
+（已清账：SSE `/events` 于 Phase 2 收口；离线报告私有缓存与报告导出于 Phase 3.4 交付。）
 
 ### 8.1 运行配置 / 条件触发（2026-08-11 复核）
 
