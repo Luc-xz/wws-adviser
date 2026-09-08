@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useRouter } from "vue-router";
 import client from "@/api/client";
 import { isDark, toggleDark } from "@/shared/theme";
+import { clearAllReportCaches } from "@/shared/offline/reportCache";
 import { useSessionStore } from "@/stores/session";
 
 const session = useSessionStore();
@@ -26,6 +27,8 @@ async function logout() {
   await client.POST("/api/v1/auth/logout");
   session.clear();
   qc.clear();
+  // 退出登录清除报告私有缓存（doc7 §3 规则 3：离线报告不留给下一个登录者）
+  await clearAllReportCaches().catch(() => undefined);
   router.push({ name: "login" });
 }
 

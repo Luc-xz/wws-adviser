@@ -81,7 +81,7 @@ function errorText(code: string | null): string {
 }
 
 // —— 报告阅读 ——
-const { data: reportData, isLoading: reportLoading } = useResearchReport(
+const { data: reportData, isLoading: reportLoading, offlineCachedAt } = useResearchReport(
   () => liveReportId.value,
 );
 const reportHtml = computed(() =>
@@ -230,6 +230,14 @@ function onCancel(id: string) { void cancel(id); }
       class="rounded-xl bg-white p-4 shadow-sm space-y-3"
       data-testid="research-report-panel"
     >
+      <!-- 离线副本横幅（AC-08 / doc7 §5） -->
+      <div
+        v-if="offlineCachedAt"
+        data-testid="offline-copy-banner"
+        class="rounded-lg bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-300"
+      >
+        离线副本 · 缓存于 {{ new Date(offlineCachedAt).toLocaleString() }}
+      </div>
       <div class="flex items-center justify-between">
         <h2 class="text-base font-semibold">
           {{ selectedTask.task_type === 'company' ? '公司研究报告' : '行业研究报告' }} · {{ selectedTask.subject }}

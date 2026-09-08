@@ -15,6 +15,13 @@ const advice = ref<IntradayAdvice | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+// AC-08：盘中建议离线不可用（SW 对 /api NetworkOnly，入口也禁用）
+const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);
+if (typeof navigator !== "undefined") {
+  window.addEventListener("online", () => (online.value = true));
+  window.addEventListener("offline", () => (online.value = false));
+}
+
 const ACTION_META: Record<string, { label: string; cls: string }> = {
   buy: { label: "提升风险预算（区间）", cls: "bg-market-up/10 text-market-up" },
   reduce: { label: "降低风险预算", cls: "bg-market-down/10 text-market-down" },
@@ -105,11 +112,18 @@ async function ask() {
           type="submit"
           class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
           data-testid="intraday-ask"
-          :disabled="loading || !code.trim()"
+          :disabled="loading || !code.trim() || !online"
         >
-          {{ loading ? "查询中…" : "查询建议" }}
+          {{ loading ? "查询中…" : online ? "查询建议" : "离线——盘中建议不可用" }}
         </button>
       </form>
+      <p
+        v-if="!online"
+        class="mt-2 text-sm text-gray-400"
+        data-testid="intraday-offline"
+      >
+        当前离线：盘中行情与建议须实时数据，恢复网络后可用（AC-08）。
+      </p>
       <p
         v-if="error"
         class="mt-2 text-sm text-risk-warning"

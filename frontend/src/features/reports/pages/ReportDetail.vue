@@ -15,7 +15,9 @@ const router = useRouter();
 const qc = useQueryClient();
 
 const reportId = computed(() => String(route.params.id ?? ""));
-const { data: reportData, isLoading: reportLoading } = useReport(() => reportId.value);
+const { data: reportData, isLoading: reportLoading, offlineCachedAt } = useReport(
+  () => reportId.value
+);
 
 const detail = computed(() => reportData.value);
 const content = computed(() => {
@@ -89,6 +91,14 @@ watch(
 
 <template>
   <div class="space-y-3">
+    <!-- 离线副本横幅（AC-08 / doc7 §5：离线打开最近报告须显示缓存时间） -->
+    <div
+      v-if="offlineCachedAt"
+      data-testid="offline-copy-banner"
+      class="rounded-xl bg-gray-100 dark:bg-gray-700 px-4 py-2 text-xs text-gray-600 dark:text-gray-300"
+    >
+      离线副本 · 缓存于 {{ new Date(offlineCachedAt).toLocaleString() }}（盘中行情与建议离线不可用）
+    </div>
     <!-- 头部 -->
     <div class="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm">
       <div class="flex items-center justify-between">

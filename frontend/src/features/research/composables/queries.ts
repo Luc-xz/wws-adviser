@@ -1,6 +1,7 @@
 // 研究任务与报告查询（Phase 3 波7）
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import client from "@/api/client";
+import { useOfflineFallback } from "@/shared/offline/useOfflineFallback";
 
 export type ResearchTaskType = "company" | "industry";
 export type ResearchDepth = "quick" | "standard" | "deep";
@@ -36,21 +37,44 @@ export function useResearchTasks() {
   return { data: q.data, isLoading: q.isLoading };
 }
 
+async function fetchResearchReport(id: string) {
+  const { data, error } = await client.GET("/api/v1/research/reports/{report_id}", {
+    params: { path: { report_id: id } },
+  });
+  if (error || !data) throw new Error("报告获取失败");
+  return data;
+}
+
 export function useResearchReport(reportId: () => string | null) {
+  // Network First + 私有缓存离线回退（Phase 3.4）：研究报告生成后不可变，version=created_at
+  type ReportData = Awaited<ReturnType<typeof fetchResearchReport>>;
+  const offline = useOfflineFallback<ReportData>("research", () => reportId() ?? "");
   const q = useQuery({
     queryKey: ["research-report", reportId()],
     queryFn: async () => {
       const id = reportId();
       if (!id) throw new Error("无报告");
-      const { data, error } = await client.GET("/api/v1/research/reports/{report_id}", {
-        params: { path: { report_id: id } },
-      });
-      if (error || !data) throw new Error("报告获取失败");
-      return data;
+      offline.offlineCachedAt.value = null;
+      try {
+        const data = await fetchResearchReport(id);
+        offline.writeThrough(
+          data,
+          String(Date.parse(data.created_at ?? "") || 1),
+        );
+        return data;
+      } catch (err) {
+        const cached = await offline.readBack();
+        if (cached !== null) return cached;
+        throw err;
+      }
     },
     enabled: () => !!reportId(),
   });
-  return { data: q.data, isLoading: q.isLoading };
+  return {
+    data: q.data,
+    isLoading: q.isLoading,
+    offlineCachedAt: offline.offlineCachedAt,
+  };
 }
 
 export function useCreateResearchTask() {
