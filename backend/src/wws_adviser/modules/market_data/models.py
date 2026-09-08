@@ -1,7 +1,8 @@
 """Market data ORM：trading_calendar、market_records、nav_records（波2，2_DATA_MODEL §6.4）。
 
 OHLC/NAV/volume 存无损 decimal 字符串；SQLite 行为元数据索引 + 日线序列，完整历史另存
-Parquet（2_DATA_MODEL §8）。intraday_quotes / data_conflicts 随后续波次引入。
+Parquet（2_DATA_MODEL §8）。intraday_quotes 随后续波次引入；
+data_conflicts 见迁移 0013（Phase 3.3 多源交叉验证）。
 """
 
 import sqlalchemy as sa
@@ -83,3 +84,42 @@ class NavRecord(Base):
     created_at: Mapped[str] = mapped_column(sa.Text, nullable=False)
     updated_at: Mapped[str] = mapped_column(sa.Text, nullable=False)
     version: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=1)
+
+
+class DataConflict(Base):
+    """字段级多源冲突（2_DATA_MODEL §6.7 · 5_DATA §6）。
+
+    每源原始值在 market_records 各自保留（UNIQUE 含 source），本表只记超容差的
+    字段级差异。status：OPEN / RESOLVED（自动规则或人工选源）/ UNRESOLVED
+    （同等级无法消解——advice 持续 data_conflict 暂停直到数据恢复）。
+    """
+
+    __tablename__ = "data_conflicts"
+    __table_args__ = (
+        sa.UniqueConstraint(
+            "instrument_id",
+            "business_date",
+            "field",
+            "source_a",
+            "source_b",
+            name="uq_data_conflicts_key",
+        ),
+        sa.Index("ix_data_conflicts_instrument_status", "instrument_id", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(sa.String(26), primary_key=True)
+    instrument_id: Mapped[str] = mapped_column(
+        sa.String(26), sa.ForeignKey("instruments.id"), nullable=False
+    )
+    business_date: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    field: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    source_a: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    source_b: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    value_a: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    value_b: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    comparison: Mapped[str] = mapped_column(sa.Text, nullable=False, default="fail")
+    resolved_by: Mapped[str | None] = mapped_column(sa.Text)
+    resolved_at: Mapped[str | None] = mapped_column(sa.Text)
+    status: Mapped[str] = mapped_column(sa.Text, nullable=False, default="OPEN")
+    created_at: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    updated_at: Mapped[str] = mapped_column(sa.Text, nullable=False)

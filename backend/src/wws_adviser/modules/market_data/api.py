@@ -19,8 +19,8 @@ from wws_adviser.api.dependencies import (
 )
 from wws_adviser.core.config import Settings
 from wws_adviser.core.errors import MissingIdempotencyKeyError
-from wws_adviser.modules.market_data import service
-from wws_adviser.modules.market_data.models import TradingCalendar
+from wws_adviser.modules.market_data import schemas, service
+from wws_adviser.modules.market_data.models import DataConflict, TradingCalendar
 from wws_adviser.modules.market_data.schemas import (
     BarOut,
     BarSeriesResponse,
@@ -218,4 +218,52 @@ async def get_state(db: DBDep) -> MarketStateOut:
         next_event_at = f"{next_day}T09:15:00+08:00"
     return MarketStateOut(
         phase=phase, is_trading_day=is_trading, next_event_at=next_event_at
+    )
+
+
+# —— 多源冲突（Phase 3.3，DATA-01 数据状态中心 / SET-02 消解） ——
+
+
+@market_router.get("/conflicts", response_model=schemas.ConflictListResponse)
+async def list_conflicts(
+    db: DBDep,
+    status: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+) -> schemas.ConflictListResponse:
+    from wws_adviser.modules.market_data import repository as md_repository
+
+    rows = md_repository.list_conflicts(db, status=status, limit=limit)
+    return schemas.ConflictListResponse(items=[_conflict_out(r) for r in rows])
+
+
+@market_router.post("/conflicts/{conflict_id}/resolve", response_model=schemas.ConflictOut)
+async def resolve_conflict(
+    conflict_id: str,
+    body: schemas.ConflictResolveRequest,
+    db: DBDep,
+    _key: Annotated[str, Depends(_require_idempotency_key)],
+) -> schemas.ConflictOut:
+    """人工消解（SET-02）：选源 + 理由。幂等——已 RESOLVED 直接返回。"""
+    from wws_adviser.core.errors import DomainError
+    from wws_adviser.modules.market_data import repository as md_repository
+
+    row = db.get(DataConflict, conflict_id)
+    if row is None:
+        raise DomainError("冲突记录不存在")
+    if body.winner not in (row.source_a, row.source_b):
+        raise DomainError(f"winner 须为 {row.source_a} 或 {row.source_b}")
+    resolved = md_repository.resolve_conflict(
+        db, conflict_id, resolved_by=body.note or "manual", winner=body.winner
+    )
+    db.commit()
+    assert resolved is not None
+    return _conflict_out(resolved)
+
+
+def _conflict_out(row: DataConflict) -> schemas.ConflictOut:
+    return schemas.ConflictOut(
+        id=row.id, instrument_id=row.instrument_id, business_date=row.business_date,
+        field=row.field, source_a=row.source_a, source_b=row.source_b,
+        value_a=row.value_a, value_b=row.value_b, status=row.status,
+        resolved_by=row.resolved_by, resolved_at=row.resolved_at, created_at=row.created_at,
     )

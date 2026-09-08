@@ -180,3 +180,85 @@ def market_phase(now: datetime, *, is_trading_day: bool) -> tuple[str, dtime | N
         elif start <= t < end:
             return name, end
     return "closed", None
+
+
+# —— 多源交叉验证（Phase 3.3，5_DATA §6 · PRD §9.5） ——
+
+# 可信等级：L1 交易所/监管/官方披露 > L2 授权行情/专业供应商 > L3 可信新闻/协会
+# > L4 聚合转载 > L5 社交媒体。source 名 → 等级；未知源按 L4 聚合转载处理。
+TRUST_LEVEL: dict[str, int] = {
+    "exchange": 1,
+    "official": 1,
+    "akshare_l2": 2,
+    "akshare": 3,
+    "news": 3,
+    "aggregator": 4,
+    "social": 5,
+}
+_UNKNOWN_SOURCE_LEVEL = 4
+
+# 字段级容差（相对误差）：价格类 0.1%，量类 1%——容差内视为一致选高等级源，
+# 超容差写 data_conflicts。字段缺任一侧值不比对（MISSING 路径另行处理）。
+FIELD_TOLERANCE: dict[str, Decimal] = {
+    "open": Decimal("0.001"),
+    "high": Decimal("0.001"),
+    "low": Decimal("0.001"),
+    "close": Decimal("0.001"),
+    "nav": Decimal("0.000001"),
+    "volume": Decimal("0.01"),
+    "amount": Decimal("0.01"),
+}
+
+
+def trust_level(source: str) -> int:
+    """来源 → 可信等级（1 最高）。未注册源保守按 L4。"""
+    return TRUST_LEVEL.get(source, _UNKNOWN_SOURCE_LEVEL)
+
+
+@dataclass(frozen=True)
+class FieldComparison:
+    """单字段两源比对结果。"""
+
+    field: str
+    value_a: str
+    value_b: str
+    outcome: str                    # "pass" | "fail" | "skip"
+    deviation_pct: Decimal | None   # 相对误差（%），skip 为 None
+    winner: str | None              # 消解胜出源；同等级无法消解 → None
+
+
+def compare_field(
+    field: str,
+    value_a: str | None,
+    value_b: str | None,
+    *,
+    source_a: str,
+    source_b: str,
+) -> FieldComparison:
+    """字段级比对（5_DATA §6 规则 2–5）。
+
+    任一侧缺值 → skip（不构成本表冲突）；容差内 → pass 且高等级源胜出；
+    超容差 → fail：等级可分 → 胜出源（可自动 RESOLVED），同等级 → None（UNRESOLVED）。
+    """
+    if value_a is None or value_b is None:
+        return FieldComparison(field, value_a or "", value_b or "", "skip", None, None)
+
+    a, b = Decimal(value_a), Decimal(value_b)
+    denom = max(abs(a), abs(b))
+    tolerance = FIELD_TOLERANCE.get(field, Decimal("0.001"))
+    deviation = (Decimal(0) if denom == 0 else abs(a - b) / denom * Decimal(100))
+
+    la, lb = trust_level(source_a), trust_level(source_b)
+    winner = source_a if la < lb else (source_b if lb < la else None)
+    outcome = "pass" if deviation <= tolerance * Decimal(100) else "fail"
+    if outcome == "pass" and winner is None:
+        winner = source_a  # 容差内同等级：一致数据任取其一
+    return FieldComparison(field, value_a, value_b, outcome, deviation, winner)
+
+
+def initial_status(comparison: FieldComparison) -> str:
+    """冲突行初始状态：等级可分 → RESOLVED（记录胜出源）；同等级 → UNRESOLVED。
+
+    仅 fail 比对会落冲突行；本函数只在 fail 分支被调用。
+    """
+    return "RESOLVED" if comparison.winner is not None else "UNRESOLVED"

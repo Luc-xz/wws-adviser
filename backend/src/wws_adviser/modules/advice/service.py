@@ -62,6 +62,14 @@ def _is_tradable(db: DBSession, code: str) -> bool:
     return bool(row.tradable) if row is not None else True
 
 
+def _market_data_clean(db: DBSession, code: str) -> bool:
+    """多源日线无未消解冲突（Phase 3.3；data_conflict → 建议 DEGRADED）。"""
+    inst = db.scalar(select(Instrument).where(Instrument.code == code))
+    if inst is None:
+        return True
+    return not md_repository.has_open_conflict(db, inst.id)
+
+
 def _active_signal_for_code(
     db: DBSession, code: str
 ) -> tuple[sig.SignalDefinition, sig.SignalInstance] | None:
@@ -164,6 +172,7 @@ async def intraday_advice(
             _logger.warning("盘中行情获取失败 code=%s: %s", code, exc)
 
     tradable = _is_tradable(db, code)
+    market_data_clean = _market_data_clean(db, code)
 
     try:
         active = _active_signal_for_code(db, code)
@@ -175,7 +184,8 @@ async def intraday_advice(
     if active is None:
         ctx = IntradayContext(
             code=code, signal_id="", quote_fresh=quote_fresh, tradable=tradable,
-            ledger_reconciled=ledger_reconciled, kelly_accepted=None,
+            ledger_reconciled=ledger_reconciled, market_data_clean=market_data_clean,
+            kelly_accepted=None,
         )
     else:
         definition, _inst = active
@@ -186,7 +196,8 @@ async def intraday_advice(
         if outcome is None:
             ctx = IntradayContext(
                 code=code, signal_id=definition.signal_id, quote_fresh=quote_fresh,
-                tradable=tradable, ledger_reconciled=ledger_reconciled, kelly_accepted=None,
+                tradable=tradable, ledger_reconciled=ledger_reconciled,
+                market_data_clean=market_data_clean, kelly_accepted=None,
             )
         else:
             trail = tuple(
@@ -196,6 +207,7 @@ async def intraday_advice(
             ctx = IntradayContext(
                 code=code, signal_id=definition.signal_id, quote_fresh=quote_fresh,
                 tradable=tradable, ledger_reconciled=ledger_reconciled,
+                market_data_clean=market_data_clean,
                 kelly_accepted=outcome.accepted, kelly_rejected=not outcome.accepted,
                 kelly_f_min=outcome.f_min, kelly_f_max=outcome.f_max,
                 kelly_value_min=outcome.value_min, kelly_value_max=outcome.value_max,

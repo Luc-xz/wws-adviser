@@ -8,7 +8,13 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DBSession
 
-from wws_adviser.modules.market_data.models import MarketRecord, NavRecord, TradingCalendar
+from wws_adviser.core.time import now_utc_iso
+from wws_adviser.modules.market_data.models import (
+    DataConflict,
+    MarketRecord,
+    NavRecord,
+    TradingCalendar,
+)
 
 # —— market_records ——
 
@@ -157,3 +163,59 @@ def latest_nav_record_any_source(db: DBSession, instrument_id: str) -> NavRecord
         .order_by(NavRecord.nav_date.desc())
         .limit(1)
     )
+
+
+# —— data_conflicts（Phase 3.3） ——
+
+
+def record_conflict(db: DBSession, conflict: DataConflict) -> DataConflict:
+    """写入冲突行（幂等：UNIQUE 键已存在 → 返回既有行）。"""
+    existing = db.scalar(
+        select(DataConflict).where(
+            DataConflict.instrument_id == conflict.instrument_id,
+            DataConflict.business_date == conflict.business_date,
+            DataConflict.field == conflict.field,
+            DataConflict.source_a == conflict.source_a,
+            DataConflict.source_b == conflict.source_b,
+        )
+    )
+    if existing is not None:
+        return existing
+    db.add(conflict)
+    db.flush()
+    return conflict
+
+
+def list_conflicts(
+    db: DBSession, *, status: str | None = None, limit: int = 50
+) -> list[DataConflict]:
+    stmt = select(DataConflict).order_by(DataConflict.created_at.desc()).limit(limit)
+    if status is not None:
+        stmt = stmt.where(DataConflict.status == status)
+    return list(db.scalars(stmt).all())
+
+
+def has_open_conflict(db: DBSession, instrument_id: str) -> bool:
+    """标的是否有待消解冲突（OPEN/UNRESOLVED）——advice 降级判定用。"""
+    row = db.scalar(
+        select(DataConflict.id).where(
+            DataConflict.instrument_id == instrument_id,
+            DataConflict.status.in_(["OPEN", "UNRESOLVED"]),
+        ).limit(1)
+    )
+    return row is not None
+
+
+def resolve_conflict(
+    db: DBSession, conflict_id: str, *, resolved_by: str, winner: str
+) -> DataConflict | None:
+    """人工消解：记录选源与理由（SET-02）。终态不可逆。"""
+    row = db.get(DataConflict, conflict_id)
+    if row is None or row.status == "RESOLVED":
+        return row
+    row.resolved_by = f"{resolved_by}:{winner}"
+    row.resolved_at = now_utc_iso()
+    row.status = "RESOLVED"
+    row.updated_at = now_utc_iso()
+    db.flush()
+    return row

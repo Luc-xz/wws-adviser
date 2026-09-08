@@ -23,11 +23,18 @@ from wws_adviser.modules.market_data.domain import (
     NormalizedQuote,
     QualityStatus,
     QuoteUnavailableError,
+    compare_field,
+    initial_status,
     parse_bars,
     parse_nav,
     parse_quote,
 )
-from wws_adviser.modules.market_data.models import MarketRecord, NavRecord, TradingCalendar
+from wws_adviser.modules.market_data.models import (
+    DataConflict,
+    MarketRecord,
+    NavRecord,
+    TradingCalendar,
+)
 from wws_adviser.ports.market_data import (
     BarProvider,
     InstrumentRef,
@@ -103,39 +110,44 @@ async def ingest_daily_bars(
         )
 
     now = now_utc_iso()
+    conflicts_written = 0
     for b in bars:
-        repository.upsert_market_record(
-            db,
-            MarketRecord(
-                id=new_id(),
-                instrument_id=instrument.id,
-                business_date=b.business_date.isoformat(),
-                open=format(b.open, "f"),
-                high=format(b.high, "f"),
-                low=format(b.low, "f"),
-                close=format(b.close, "f"),
-                volume=format(b.volume, "f"),
-                amount=None,
-                source=raw.source,
-                source_url=raw.source_url,
-                market_time=raw.market_time,
-                fetched_at=raw.fetched_at,
-                received_at=raw.received_at,
-                source_delay_class=raw.source_delay_class.value,
-                quality_status=QualityStatus.OK.value,
-                content_hash=content_hash,
-                adjustment_type=adjustment_type,
-                created_at=now,
-                updated_at=now,
-                version=1,
-            ),
+        record = MarketRecord(
+            id=new_id(),
+            instrument_id=instrument.id,
+            business_date=b.business_date.isoformat(),
+            open=format(b.open, "f"),
+            high=format(b.high, "f"),
+            low=format(b.low, "f"),
+            close=format(b.close, "f"),
+            volume=format(b.volume, "f"),
+            amount=None,
+            source=raw.source,
+            source_url=raw.source_url,
+            market_time=raw.market_time,
+            fetched_at=raw.fetched_at,
+            received_at=raw.received_at,
+            source_delay_class=raw.source_delay_class.value,
+            quality_status=QualityStatus.OK.value,
+            content_hash=content_hash,
+            adjustment_type=adjustment_type,
+            created_at=now,
+            updated_at=now,
+            version=1,
         )
+        repository.upsert_market_record(db, record)
+        conflicts_written += cross_validate_record(db, record)
     audit_service.append_event(
         db,
         action="market_bars_ingested",
         target_type="instrument",
         target_id=instrument.id,
-        after={"n": len(bars), "source": raw.source, "adjustment_type": adjustment_type},
+        after={
+            "n": len(bars),
+            "source": raw.source,
+            "adjustment_type": adjustment_type,
+            "conflicts": conflicts_written,
+        },
         request_id=request_id,
     )
     db.commit()
@@ -385,3 +397,75 @@ async def sync_trading_calendar_from_provider(
     if not days:
         return 0
     return sync_trading_calendar(db, trading_days=days, start=start, end=end)
+
+
+# —— 多源交叉验证（Phase 3.3，5_DATA §6） ——
+
+_COMPARE_FIELDS = ("open", "high", "low", "close", "volume")
+
+
+def cross_validate_record(db: DBSession, record: MarketRecord) -> int:
+    """新入库日线与其余来源同日记录做字段级比对，超容差写 data_conflicts。
+
+    - 容差内：不落行（选高等级源是读取侧的事，不污染）。
+    - 超容差且等级可分：RESOLVED（resolved_by=auto:trust_level，胜出源记录在案）。
+    - 超容差且同等级：UNRESOLVED——两侧记录 quality_status 改 CONFLICT，
+      advice 对该标的持续 data_conflict 暂停（PRD §9.5）。
+    返回新写入的冲突行数。
+    """
+    others = list(
+        db.scalars(
+            select(MarketRecord).where(
+                MarketRecord.instrument_id == record.instrument_id,
+                MarketRecord.business_date == record.business_date,
+                MarketRecord.adjustment_type == record.adjustment_type,
+                MarketRecord.source != record.source,
+            )
+        ).all()
+    )
+    written = 0
+    now = now_utc_iso()
+    unresolved_ids: set[str] = set()
+    for other in others:
+        for field in _COMPARE_FIELDS:
+            cmp = compare_field(
+                field,
+                getattr(record, field),
+                getattr(other, field),
+                source_a=record.source,
+                source_b=other.source,
+            )
+            if cmp.outcome != "fail":
+                continue
+            status = initial_status(cmp)
+            repository.record_conflict(
+                db,
+                DataConflict(
+                    id=new_id(),
+                    instrument_id=record.instrument_id,
+                    business_date=record.business_date,
+                    field=field,
+                    source_a=record.source,   # a = 新入库，b = 既有（稳定顺序）
+                    source_b=other.source,
+                    value_a=getattr(record, field) or "",
+                    value_b=getattr(other, field) or "",
+                    comparison="fail",
+                    resolved_by=(
+                        f"auto:trust_level:{cmp.winner}" if status == "RESOLVED" else None
+                    ),
+                    resolved_at=now if status == "RESOLVED" else None,
+                    status=status,
+                    created_at=now,
+                    updated_at=now,
+                ),
+            )
+            written += 1
+            if status == "UNRESOLVED":
+                unresolved_ids.update({record.id, other.id})
+    if unresolved_ids:
+        for row_id in unresolved_ids:
+            row = db.get(MarketRecord, row_id)
+            if row is not None and row.quality_status == QualityStatus.OK.value:
+                row.quality_status = QualityStatus.CONFLICT.value
+                row.updated_at = now
+    return written

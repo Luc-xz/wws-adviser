@@ -77,6 +77,7 @@ class DegradedReason(StrEnum):
     """降级原因码（PRD FR-ANL-004：数据过期/市场异常不静默隐藏）。"""
 
     DATA_STALE = "data_stale"            # 行情过期/不可用
+    DATA_CONFLICT = "data_conflict"      # 多源超容差冲突且无法消解（Phase 3.3）
     MARKET_ABNORMAL = "market_abnormal"  # 标的停牌/不可交易/异常状态
     LEDGER_UNRECONCILED = "ledger_unreconciled"
     NO_CALIBRATED_SIGNAL = "no_calibrated_signal"
@@ -196,6 +197,8 @@ class IntradayContext:
     quote_fresh: bool
     tradable: bool
     ledger_reconciled: bool
+    # 多源日线无未消解冲突（Phase 3.3：data_conflicts OPEN/UNRESOLVED → False）
+    market_data_clean: bool = True
     # 凯利结果（None = 无已校准信号可用）
     kelly_accepted: bool | None = None
     kelly_f_min: Decimal | None = None
@@ -225,6 +228,8 @@ def build_intraday_advice(
         data_failures.append(DegradedReason.LEDGER_UNRECONCILED.value)
     if not ctx.quote_fresh:
         data_failures.append(DegradedReason.DATA_STALE.value)
+    if not ctx.market_data_clean:
+        data_failures.append(DegradedReason.DATA_CONFLICT.value)
     if not ctx.tradable:
         data_failures.append(DegradedReason.MARKET_ABNORMAL.value)
     if ctx.kelly_accepted is None:

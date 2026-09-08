@@ -65,3 +65,29 @@ class MarketStateOut(BaseModel):
     is_trading_day: bool | None = None
     next_event_at: str | None = None
 
+
+
+class ConflictOut(BaseModel):
+    """data_conflicts 行（Phase 3.3）。"""
+
+    id: str
+    instrument_id: str
+    business_date: str
+    field: str
+    source_a: str
+    source_b: str
+    value_a: str
+    value_b: str
+    status: str
+    resolved_by: str | None = None
+    resolved_at: str | None = None
+    created_at: str
+
+
+class ConflictListResponse(BaseModel):
+    items: list[ConflictOut]
+
+
+class ConflictResolveRequest(BaseModel):
+    winner: str                  # 选 source_a | source_b
+    note: str | None = None      # 消解理由（落 resolved_by）
