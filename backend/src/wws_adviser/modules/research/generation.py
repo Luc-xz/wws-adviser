@@ -13,6 +13,7 @@
 import logging
 from dataclasses import dataclass, field
 from decimal import Decimal
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy.orm import Session as DBSession
@@ -302,7 +303,7 @@ async def run_company_research(
     port: ModelPort,
     *,
     task: ResearchTask,
-    data_dir,
+    data_dir: Path,
     det_inputs: DeterministicInputs | None = None,
 ) -> str:
     """执行公司研究任务全流程。成功 → report_id；失败 → 抛异常（调用方 fail_task）。"""
@@ -318,7 +319,7 @@ async def run_industry_research(
     port: ModelPort,
     *,
     task: ResearchTask,
-    data_dir,
+    data_dir: Path,
     det_inputs: DeterministicInputs | None = None,
 ) -> str:
     """执行行业研究任务全流程（证据按行业名全库检索，不限标的）。"""
@@ -334,7 +335,7 @@ async def _run_research(
     port: ModelPort,
     *,
     task: ResearchTask,
-    data_dir,
+    data_dir: Path,
     report_kind: str,
     det_inputs: DeterministicInputs | None,
 ) -> str:

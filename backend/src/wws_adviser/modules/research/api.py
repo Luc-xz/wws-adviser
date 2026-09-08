@@ -1,7 +1,8 @@
 """Research API：创建/查询/取消研究任务 + 报告读取（Phase 3 波1/波4）。"""
 
 import json
-from typing import Annotated
+from collections.abc import AsyncIterator
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header
 from fastapi.responses import Response, StreamingResponse
@@ -13,6 +14,7 @@ from wws_adviser.core.config import Settings
 from wws_adviser.core.errors import DomainError, MissingIdempotencyKeyError
 from wws_adviser.modules.identity.models import User
 from wws_adviser.modules.research import service
+from wws_adviser.modules.research.models import ResearchTask
 
 router = APIRouter(prefix="/api/v1/research", tags=["research"])
 
@@ -104,8 +106,8 @@ class ReportOut(BaseModel):
     report_type: str
     subject: str
     content_md: str
-    citations: list[dict]
-    generation_config: dict
+    citations: list[dict[str, Any]]
+    generation_config: dict[str, Any]
     created_at: str
 
 
@@ -129,7 +131,7 @@ async def task_events(
 
     terminal = {"COMPLETED", "FAILED", "CANCELLED"}
 
-    async def gen():
+    async def gen() -> AsyncIterator[str]:
         deadline = asyncio.get_event_loop().time() + max(1, max_seconds)
         while asyncio.get_event_loop().time() < deadline:
             db.expire_all()  # 执行器线程在另一 session 写入，强制重读
@@ -218,7 +220,7 @@ async def export_report(
     )
 
 
-def _to_out(t) -> TaskOut:
+def _to_out(t: ResearchTask) -> TaskOut:
     return TaskOut(
         id=t.id, task_type=t.task_type, subject=t.subject, depth=t.depth,
         status=t.status, progress=t.progress, error_code=t.error_code,

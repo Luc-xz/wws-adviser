@@ -1,5 +1,7 @@
 """StubModelPort：返回预设结构化输出 + 审计（source="stub"），禁生产。"""
 
+from typing import Any
+
 from wws_adviser.core.time import now_utc_iso
 from wws_adviser.infrastructure import assert_not_prod
 from wws_adviser.ports.model import ModelAudit, ModelRequest, ModelResponse
@@ -26,7 +28,7 @@ class StubModelPort:
         return ModelResponse(content=content, audit=audit)
 
 
-def _stub_content(request: ModelRequest) -> dict:
+def _stub_content(request: ModelRequest) -> dict[str, Any]:
     """研究类任务返回 sections 结构（引用输入白名单前两条）；其余返回 summary。"""
     if request.task_type.value.startswith("research_"):
         plan = request.structured_context.get("section_plan", [])
