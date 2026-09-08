@@ -23,6 +23,7 @@ from wws_adviser.modules.identity.api import router as identity_router
 from wws_adviser.modules.instruments.api import router as instruments_router
 from wws_adviser.modules.market_data.api import market_router
 from wws_adviser.modules.market_data.api import router as market_data_router
+from wws_adviser.modules.notifications.push_api import router as push_router
 from wws_adviser.modules.portfolio.api import router as portfolio_router
 from wws_adviser.modules.reports.api import router as reports_router
 from wws_adviser.modules.research.api import router as research_router
@@ -55,6 +56,7 @@ def create_app(
     app.include_router(settings_router)
     app.include_router(advice_router)
     app.include_router(research_router)
+    app.include_router(push_router)
 
     write_methods = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
@@ -62,10 +64,13 @@ def create_app(
     async def csrf_middleware(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        # 登录建立 session 前豁免；其余写操作校验 double-submit CSRF token
+        # 登录建立 session 前豁免（Passkey 登录仪式自带 challenge+origin 绑定）；
+        # 其余写操作校验 double-submit CSRF token
+        path = request.url.path
         if (
             request.method in write_methods
-            and not request.url.path.startswith("/api/v1/auth/login")
+            and not path.startswith("/api/v1/auth/login")
+            and not path.startswith("/api/v1/auth/passkey/login")
         ):
             cookie_tok = request.cookies.get("csrf_token")
             header_tok = request.headers.get("x-csrf-token")

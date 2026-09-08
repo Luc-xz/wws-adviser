@@ -70,6 +70,13 @@ class Settings(BaseModel):
     # Phase 2：校准有效期（交易日，FR-ANL-003 默认 60）与凯利折扣默认（PRD §FR-ANL-004）
     calibration_ttl_trading_days: int = 60
     kelly_discount_default: str = "0.20"
+    # Phase 3.5（P1）：Passkey——RP ID/origin 未配置即视为关闭（端点 501）；
+    # Web Push——VAPID 私钥未配置即不派发（订阅仍可登记，登录后重试推送）。
+    passkey_rp_id: str = ""
+    passkey_origin: str = ""
+    push_vapid_subject: str = ""        # 如 mailto:me@example.com
+    push_vapid_private_pem: str = ""    # EC P-256 私钥 PEM（env 注入，绝不落库）
+    push_vapid_public_key_b64: str = "" # 未压缩 P-256 公钥点 b64url（订阅时下发浏览器）
 
     @property
     def is_prod(self) -> bool:
@@ -180,4 +187,9 @@ def load_settings(
         nav_published_freshness_hours=int(os.environ.get("WWSE_NAV_FRESHNESS_HOURS", "24")),
         calibration_ttl_trading_days=int(os.environ.get("WWSE_CALIBRATION_TTL_DAYS", "60")),
         kelly_discount_default=os.environ.get("WWSE_KELLY_DISCOUNT", "0.20"),
+        passkey_rp_id=os.environ.get("WWSE_PASSKEY_RP_ID", ""),
+        passkey_origin=os.environ.get("WWSE_PASSKEY_ORIGIN", ""),
+        push_vapid_subject=os.environ.get("WWSE_PUSH_VAPID_SUBJECT", ""),
+        push_vapid_private_pem=os.environ.get("WWSE_PUSH_VAPID_PRIVATE_PEM", ""),
+        push_vapid_public_key_b64=os.environ.get("WWSE_PUSH_VAPID_PUBLIC_KEY", ""),
     )

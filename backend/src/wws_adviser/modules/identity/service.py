@@ -47,6 +47,26 @@ def _record_failure(ip: str) -> None:
     _login_failures[ip].append(time.monotonic())
 
 
+def _issue_session(
+    db: DBSession, settings: Settings, user: User, user_agent: str
+) -> tuple[str, str, str]:
+    """签发新会话 → (token, session_id, expires_at)。密码与 Passkey 登录共用。"""
+    token = generate_session_token()
+    expires_at = (
+        datetime.now(UTC) + timedelta(days=settings.session_ttl_days)
+    ).isoformat()
+    sess = SessionRow(
+        id=new_id(),
+        user_id=user.id,
+        token_hash=hash_token(token),
+        issued_at=now_utc_iso(),
+        expires_at=expires_at,
+        user_agent_hash=hash_token(user_agent or ""),
+    )
+    repository.add_session(db, sess)
+    return token, sess.id, expires_at
+
+
 def login(
     db: DBSession,
     settings: Settings,
@@ -72,19 +92,7 @@ def login(
         raise AuthenticationError("用户名或密码错误")
     assert user is not None  # 通过上面校验，user 必非 None（mypy narrow）
 
-    token = generate_session_token()
-    expires_at = (
-        datetime.now(UTC) + timedelta(days=settings.session_ttl_days)
-    ).isoformat()
-    sess = SessionRow(
-        id=new_id(),
-        user_id=user.id,
-        token_hash=hash_token(token),
-        issued_at=now_utc_iso(),
-        expires_at=expires_at,
-        user_agent_hash=hash_token(user_agent or ""),
-    )
-    repository.add_session(db, sess)
+    token, session_id, expires_at = _issue_session(db, settings, user, user_agent)
     audit_service.append_event(
         db,
         action="login_success",
@@ -96,7 +104,7 @@ def login(
     db.commit()
     return {
         "token": token,
-        "session_id": sess.id,
+        "session_id": session_id,
         "user_id": user.id,
         "user_id_hash": hash_user_id(user.id),
         "expires_at": expires_at,
@@ -166,3 +174,26 @@ def get_session_info(db: DBSession, token: str | None) -> dict[str, str] | None:
     if sess is None:
         return None
     return {"user_id_hash": hash_user_id(user.id), "expires_at": sess.expires_at}
+
+
+def login_with_passkey(
+    db: DBSession, settings: Settings, user: User, user_agent: str, *, request_id: str | None = None
+) -> dict[str, Any]:
+    """Passkey 登录成功后的会话签发（与密码登录同构：同 Cookie/同审计）。"""
+    token, session_id, expires_at = _issue_session(db, settings, user, user_agent)
+    audit_service.append_event(
+        db,
+        action="login_success_passkey",
+        actor=user.username,
+        target_type="user",
+        target_id=user.id,
+        request_id=request_id,
+    )
+    db.commit()
+    return {
+        "token": token,
+        "session_id": session_id,
+        "user_id": user.id,
+        "user_id_hash": hash_user_id(user.id),
+        "expires_at": expires_at,
+    }

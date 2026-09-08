@@ -6,11 +6,13 @@ import { useRouter } from "vue-router";
 import client from "@/api/client";
 import { isDark, toggleDark } from "@/shared/theme";
 import { clearAllReportCaches } from "@/shared/offline/reportCache";
+import { usePushManager } from "@/shared/push/usePushManager";
 import { useSessionStore } from "@/stores/session";
 
 const session = useSessionStore();
 const router = useRouter();
 const qc = useQueryClient();
+const push = usePushManager();
 
 const { data: riskSettingsData, isSuccess: riskSettingsOk } = useQuery({
   queryKey: ["settings", "risk"],
@@ -78,6 +80,36 @@ const riskRows = computed(() =>
       </div>
       <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
         默认跟随系统，切换后本地记忆。
+      </p>
+    </section>
+
+    <section
+      v-if="push.supported.value"
+      class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800"
+    >
+      <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+        通知
+      </h2>
+      <div class="mt-2 flex items-center justify-between gap-3">
+        <span class="text-gray-500 dark:text-gray-400 text-sm">浏览器推送（报告 / 研究完成）</span>
+        <button
+          type="button"
+          class="rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+          :class="push.state.value === 'enabled'
+            ? 'bg-success/10 text-success'
+            : 'bg-primary text-white'"
+          :disabled="push.state.value === 'enabling' || push.state.value === 'enabled'"
+          data-testid="push-enable"
+          @click="push.enable()"
+        >
+          {{ push.state.value === 'enabled'
+            ? '已开启' : push.state.value === 'denied'
+              ? '权限被拒' : push.state.value === 'enabling'
+                ? '开启中…' : '开启推送' }}
+        </button>
+      </div>
+      <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+        隐私模式：锁屏只显示事件类型与计数，不含标的与金额（FR-NOTIFY-003）。
       </p>
     </section>
 

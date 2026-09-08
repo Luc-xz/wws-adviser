@@ -8,13 +8,14 @@
 from datetime import UTC, datetime
 from typing import Any
 
+import httpx
 from sqlalchemy.orm import Session as DBSession
 
 from wws_adviser.core.config import Settings
 from wws_adviser.core.ids import new_id
 from wws_adviser.core.time import now_utc_iso
 from wws_adviser.modules.notifications import repository
-from wws_adviser.modules.notifications.domain import compute_payload_hash
+from wws_adviser.modules.notifications.domain import compute_payload_hash, mask_payload
 from wws_adviser.modules.notifications.models import Notification
 from wws_adviser.ports.notifier import NotificationChannel, NotificationResult, NotifierPort
 
@@ -94,4 +95,69 @@ async def notify(
     else:
         repository.mark_failed(db, row.id, result.error_code or "send_failed", now_utc_iso())
     db.commit()
+    await dispatch_push(db, settings, event_type=event_type, payload=payload)
     return result
+
+
+# —— Web Push 扇出（Phase 3.5 P1）：通知事件同步推到全部活跃订阅 ——
+
+_PUSH_TITLES = {
+    "report_completed": "报告已完成",
+    "report_failed": "报告生成失败",
+    "research_completed": "研究任务已完成",
+    "research_failed": "研究任务失败",
+    "hard_risk_breach": "硬风险限制触发",
+}
+
+
+async def dispatch_push(
+    db: DBSession,
+    settings: Settings,
+    *,
+    event_type: str,
+    payload: dict[str, Any],
+    push_client: Any | None = None,
+) -> int:
+    """向该用户全部活跃 Web Push 订阅投递（隐私模式→脱敏）；失败逐条吞掉。
+
+    返回成功条数。VAPID 未配置 → 0（订阅仍保留，配置后可推送）。
+    push_client 供测试注入 httpx 桩；缺省自建短连接 client。
+    """
+    from wws_adviser.modules.notifications import push_repository
+
+    subs = push_repository.list_active(db, user_id=payload.get("user_id"))
+    if not subs:
+        return 0
+    visible = (
+        mask_payload(payload) if settings.notification_privacy_mode else payload
+    )
+    title = _PUSH_TITLES.get(event_type, "通知")
+    push_payload: dict[str, Any] = {"title": title, "event_type": event_type, **visible}
+
+    sent = 0
+    if push_client is not None:
+        sent = await _push_all(push_client, settings, subs, push_payload, db)
+    else:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            sent = await _push_all(client, settings, subs, push_payload, db)
+    return sent
+
+
+async def _push_all(
+    client: Any, settings: Settings, subs: list[Any], push_payload: dict[str, Any], db: DBSession
+) -> int:
+    from wws_adviser.infrastructure.notifications import web_push
+    from wws_adviser.modules.notifications import push_repository
+
+    sent = 0
+    for sub in subs:
+        outcome = await web_push.send_web_push(
+            client,
+            endpoint=sub.endpoint, p256dh=sub.p256dh, auth=sub.auth,
+            payload=push_payload, settings=settings,
+        )
+        if outcome == "sent":
+            sent += 1
+        elif outcome == "gone":
+            push_repository.revoke(db, sub.id)
+    return sent

@@ -12,7 +12,7 @@ from wws_adviser.main import lifespan
 
 @pytest.fixture
 def settings(tmp_path) -> Settings:
-    return Settings(env="test", data_dir=tmp_path)
+    return Settings(env="test", data_dir=tmp_path, passkey_rp_id="test.local", passkey_origin="https://test.local")
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def db_session(tmp_path):
     from wws_adviser.modules.reports import models as _reports_models  # noqa: F401
     from wws_adviser.modules.research import models as _res  # noqa: F401
 
-    s = Settings(env="test", data_dir=tmp_path)
+    s = Settings(env="test", data_dir=tmp_path, passkey_rp_id="test.local", passkey_origin="https://test.local")
     engine = create_app_engine(s)
     Base.metadata.create_all(engine)
     from wws_adviser.modules.documents.repository import create_fts_if_missing
@@ -86,7 +86,7 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.modules.reports import models as _r  # noqa: F401
     from wws_adviser.modules.research import models as _res  # noqa: F401
 
-    settings = Settings(env="test", data_dir=tmp_path)
+    settings = Settings(env="test", data_dir=tmp_path, passkey_rp_id="test.local", passkey_origin="https://test.local")
     engine = create_app_engine(settings)
     Base.metadata.create_all(engine)
     from wws_adviser.modules.documents.repository import create_fts_if_missing

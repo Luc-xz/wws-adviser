@@ -24,6 +24,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
+        // Web Push 事件处理器（public/sw-push.js，Phase 3.5 P1）
+        importScripts: ["/sw-push.js"],
         runtimeCaching: [
           {
             // hashed 静态资源：Cache First

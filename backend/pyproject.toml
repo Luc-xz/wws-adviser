@@ -22,6 +22,12 @@ dependencies = [
 # 行情真实数据源（重依赖：pandas/numpy/JS 引擎）。`uv sync` 默认不装；
 # 启用：uv sync --extra akshare 并设 WWSE_MARKET_DATA_SOURCE=akshare。
 akshare = ["akshare>=1.18"]
+passkey = [
+    "fido2>=1.1",
+]
+webpush = [
+    "pywebpush>=2.0",
+]
 
 [dependency-groups]
 dev = [
@@ -30,6 +36,8 @@ dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
     "hypothesis>=6.115",
+    "fido2>=1.1",
+    "pywebpush>=2.0",
 ]
 
 [build-system]
@@ -69,6 +77,9 @@ select = ["E", "F", "W", "I", "B", "UP", "TID251"]
 "src/wws_adviser/infrastructure/**/*.py" = ["TID251"]
 "src/wws_adviser/modules/*/schemas.py" = ["TID251"]
 "src/wws_adviser/modules/*/api.py" = ["TID251"]
+"src/wws_adviser/modules/*/push_api.py" = ["TID251"]
+"src/wws_adviser/modules/*/push_repository.py" = ["TID251"]
+"src/wws_adviser/modules/*/passkey.py" = ["TID251"]
 "src/wws_adviser/modules/research/*.py" = ["TID251"]
 "src/wws_adviser/modules/*/cli.py" = ["TID251"]
 "migrations/**/*.py" = ["TID251"]
@@ -78,6 +89,11 @@ select = ["E", "F", "W", "I", "B", "UP", "TID251"]
 python_version = "3.12"
 strict = true
 packages = ["src/wws_adviser"]
+
+[[tool.mypy.overrides]]
+# pywebpush / py_vapid 无类型标注（optional extra，懒加载使用）
+module = ["pywebpush.*", "py_vapid.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
