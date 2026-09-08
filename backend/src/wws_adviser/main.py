@@ -133,6 +133,7 @@ def _start_executor_worker(app: FastAPI, settings: Settings) -> threading.Thread
                             settings,
                             settings.data_dir,
                             model_port=getattr(app.state, "model_port", None),
+                            notifier=getattr(app.state, "notifier", None),
                         )
                     )
             except Exception:  # noqa: BLE001 — 工作线程边界：单轮失败仅记日志续跑

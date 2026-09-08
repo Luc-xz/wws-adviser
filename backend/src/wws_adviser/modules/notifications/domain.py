@@ -9,6 +9,8 @@ from typing import Any
 class NotificationEvent(StrEnum):
     REPORT_COMPLETED = "report_completed"
     REPORT_FAILED = "report_failed"
+    RESEARCH_COMPLETED = "research_completed"
+    RESEARCH_FAILED = "research_failed"
 
 
 def compute_payload_hash(payload: dict[str, Any]) -> str:
