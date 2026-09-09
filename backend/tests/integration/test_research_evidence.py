@@ -135,3 +135,24 @@ def test_retrieve_with_since_filter(db_session) -> None:
         db_session, query="数据", since="2026-07-01",
     )
     assert all(s.published_at >= "2026-07-01" for s in result.slices)
+
+
+def test_slice_relative_text_path_resolved_via_data_dir(db_session, tmp_path) -> None:
+    """相对 text_path 按 data_dir 解析（生产库存相对路径，容器 CWD 下不可达）。"""
+    from pathlib import Path
+
+    rel = Path("documents") / "te" / "abc123.txt"
+    abs_p = tmp_path / rel
+    abs_p.parent.mkdir(parents=True)
+    abs_p.write_text("营业收入增长15%。", encoding="utf-8")
+    doc = _mk_doc(db_session, title="相对路径文档", pub="2026-08-01")
+    doc.text_path = rel.as_posix()
+    db_session.flush()
+
+    # 无 data_dir：相对路径不可读 → 回退标题
+    slices = evidence_service.slice_document(doc, "营业收入")
+    assert slices and slices[0].text == "相对路径文档"
+
+    # 有 data_dir：正文经内容寻址存储解析可读
+    slices2 = evidence_service.slice_document(doc, "营业收入", data_dir=tmp_path)
+    assert slices2 and "营业收入增长15%" in slices2[0].text

@@ -348,6 +348,7 @@ async def _run_research(
     # 1) 证据检索（波2）
     result = retrieve_evidence(
         db, query=subject_name, instrument_code=instrument_code, max_results=12,
+        data_dir=data_dir,
     )
     research_service.update_progress(db, task, 20)
     if not result.slices:

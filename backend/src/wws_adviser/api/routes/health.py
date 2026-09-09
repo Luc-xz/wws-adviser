@@ -5,6 +5,8 @@
 - /health/dependencies：数据源/模型/通知近况，仅认证用户可见（Phase 0 占位）。
 """
 
+from functools import lru_cache
+from pathlib import Path
 from typing import cast
 
 from fastapi import APIRouter, Request
@@ -21,15 +23,30 @@ def _engine(request: Request) -> Engine:
     return cast(Engine, request.app.state.engine)
 
 
+@lru_cache(maxsize=1)
+def _migration_head() -> str | None:
+    """代码侧 alembic head：由 alembic.ini + migrations/ 解析，进程内不变故缓存。"""
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    ini = Path(__file__).resolve().parents[4] / "alembic.ini"
+    if not ini.exists():
+        return None
+    cfg = Config(str(ini))
+    cfg.set_main_option("script_location", str(ini.parent / "migrations"))
+    return ScriptDirectory.from_config(cfg).get_current_head()
+
+
 def _migration_applied(engine: Engine) -> bool:
-    """alembic_version 表存在且有版本记录。"""
+    """alembic_version 存在且与代码 head 一致（停在旧版本 = 未就绪）。"""
     try:
         with engine.connect() as conn:
             version = conn.execute(text("SELECT version_num FROM alembic_version")).scalar()
-        return version is not None
     except Exception:
         # 表不存在或查询失败 = 未迁移
         return False
+    head = _migration_head()
+    return version is not None and head is not None and version == head
 
 
 @router.get("/live")

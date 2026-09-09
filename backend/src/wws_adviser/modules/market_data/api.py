@@ -1,6 +1,7 @@
 """/api/v1/market-data（Phase-0 demo）与 /api/v1/market（§3.6 契约：bars/nav/quality/state）端点。
 
-GET 行情为公开读（与 Phase-0 demo 一致）；refresh 采集为写操作，需登录(CSRF) + Idempotency-Key。
+GET 行情为公开读（与 Phase-0 demo 一致）；conflicts 列表/消解需登录；
+refresh 采集为写操作，需登录(CSRF) + Idempotency-Key。
 """
 
 from datetime import datetime, timedelta
@@ -12,6 +13,7 @@ from sqlalchemy.orm import Session as DBSession
 
 from wws_adviser.api.dependencies import (
     get_bar_provider,
+    get_current_user,
     get_nav_provider,
     get_quote_provider,
     get_session,
@@ -19,6 +21,7 @@ from wws_adviser.api.dependencies import (
 )
 from wws_adviser.core.config import Settings
 from wws_adviser.core.errors import MissingIdempotencyKeyError
+from wws_adviser.modules.identity.models import User
 from wws_adviser.modules.market_data import schemas, service
 from wws_adviser.modules.market_data.models import DataConflict, TradingCalendar
 from wws_adviser.modules.market_data.schemas import (
@@ -227,6 +230,7 @@ async def get_state(db: DBDep) -> MarketStateOut:
 @market_router.get("/conflicts", response_model=schemas.ConflictListResponse)
 async def list_conflicts(
     db: DBDep,
+    _user: Annotated[User, Depends(get_current_user)],
     status: str | None = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
 ) -> schemas.ConflictListResponse:
@@ -241,6 +245,7 @@ async def resolve_conflict(
     conflict_id: str,
     body: schemas.ConflictResolveRequest,
     db: DBDep,
+    _user: Annotated[User, Depends(get_current_user)],
     _key: Annotated[str, Depends(_require_idempotency_key)],
 ) -> schemas.ConflictOut:
     """人工消解（SET-02）：选源 + 理由。幂等——已 RESOLVED 直接返回。"""

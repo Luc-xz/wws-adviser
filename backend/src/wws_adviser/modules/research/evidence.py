@@ -11,6 +11,7 @@ import hashlib
 import logging
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DBSession
@@ -64,6 +65,7 @@ def retrieve_evidence(
     trust_levels: list[str] | None = None,
     since: str | None = None,
     max_results: int = 20,
+    data_dir: Path | None = None,
 ) -> SearchResult:
     """检索证据：FTS5 关键词 → 元数据过滤 → 切片 → 排序。
 
@@ -73,6 +75,7 @@ def retrieve_evidence(
         trust_levels: 可信等级过滤（None = 不过滤）
         since: ISO 日期，仅取此后的文档
         max_results: 最大返回切片数
+        data_dir: 数据根目录（相对 text_path 由此解析；None = 仅绝对路径可读）
     """
     # 1) FTS5 关键词检索
     docs = documents_repository.search_documents(db, query, limit=100)
@@ -97,7 +100,7 @@ def retrieve_evidence(
     # 3) 切片 + 评分
     all_slices: list[EvidenceSlice] = []
     for doc in docs:
-        slices = slice_document(doc, query)
+        slices = slice_document(doc, query, data_dir=data_dir)
         all_slices.extend(slices)
 
     # 4) 排序（来源等级 + 新鲜度 + 关键词命中密度）
@@ -111,13 +114,15 @@ def retrieve_evidence(
     )
 
 
-def slice_document(doc: Document, query: str) -> list[EvidenceSlice]:
+def slice_document(
+    doc: Document, query: str, *, data_dir: Path | None = None
+) -> list[EvidenceSlice]:
     """将文档按段落切片，保留定位信息，计算与查询的相关度。
 
     切片策略：按空行分段 → 超长段落按句号二次切 → 每片 ≤ _SLICE_MAX_CHARS。
     评分 = 可信等级权重 × (1 + 关键词密度 + 新鲜度加成)。
     """
-    text = _load_document_text(doc)
+    text = _load_document_text(doc, data_dir)
     if not text:
         return []
 
@@ -173,12 +178,17 @@ def slice_document(doc: Document, query: str) -> list[EvidenceSlice]:
     return out
 
 
-def _load_document_text(doc: Document) -> str | None:
-    """从磁盘加载文档正文。text_path 优先，fallback title。"""
+def _load_document_text(doc: Document, data_dir: Path | None) -> str | None:
+    """从磁盘加载文档正文。text_path 优先（相对路径按 data_dir 解析），fallback title。"""
     if doc.text_path:
         try:
-            from pathlib import Path
             p = Path(doc.text_path)
+            if not p.is_absolute():
+                if data_dir is None:
+                    return doc.title
+                # 与采集写入口径一致：经内容寻址存储解析（含防穿越）
+                from wws_adviser.infrastructure.storage.local_object_store import LocalObjectStore
+                return LocalObjectStore(data_dir).get(doc.text_path).decode("utf-8")
             if p.exists():
                 return p.read_text(encoding="utf-8")
         except Exception as exc:  # noqa: BLE001
