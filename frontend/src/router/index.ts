@@ -11,49 +11,49 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: () => import("@/features/home/pages/HomeOverview.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, title: "首页" },
     },
     // PORT-01 持仓与自选
     {
       path: "/portfolio",
       name: "portfolio",
       component: () => import("@/features/portfolio/pages/Portfolio.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, title: "持仓与自选" },
     },
     // REP-01/REP-02 报告详情（开市前/收市后共用，按 report_type 区分）
     {
       path: "/reports/:id",
       name: "report-detail",
       component: () => import("@/features/reports/pages/ReportDetail.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, title: "报告" },
     },
     // DATA-01 数据状态中心（DataStatusBar 跳转目标）
     {
       path: "/data-status",
       name: "data-status",
       component: () => import("@/features/data/pages/DataStatus.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, title: "数据状态" },
     },
     // CHAT-01 助手首页/对话
     {
       path: "/assistant",
       name: "assistant",
       component: () => import("@/features/assistant/pages/Assistant.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, title: "助手" },
     },
     // LIB-01 研究与报告库
     {
       path: "/research",
       name: "research",
       component: () => import("@/features/research/pages/Library.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, title: "研究" },
     },
     // SET-00 设置首页
     {
       path: "/settings",
       name: "settings",
       component: () => import("@/features/settings/pages/Settings.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, title: "设置" },
     },
   ],
 });
@@ -65,6 +65,12 @@ router.beforeEach((to) => {
       return { name: "login", query: { redirect: to.fullPath } };
     }
   }
+});
+
+// 文档标题跟随路由（顶栏面包屑同源 meta.title）
+router.afterEach((to) => {
+  const title = to.meta.title as string | undefined;
+  document.title = title ? `${title} · WWS Adviser` : "WWS Adviser";
 });
 
 export default router;
