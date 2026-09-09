@@ -156,3 +156,19 @@ def test_slice_relative_text_path_resolved_via_data_dir(db_session, tmp_path) ->
     # 有 data_dir：正文经内容寻址存储解析可读
     slices2 = evidence_service.slice_document(doc, "营业收入", data_dir=tmp_path)
     assert slices2 and "营业收入增长15%" in slices2[0].text
+
+
+def test_code_query_falls_back_to_linked_docs(db_session) -> None:
+    """按代码检索：公告标题只含公司名（FTS 零命中）→ 兜底退回标的关联文档。"""
+    _mk_doc(db_session, title="百合花:2025年年度报告", code="603823",
+            text="营业收入增长。", pub="2026-08-01")
+    _mk_doc(db_session, title="百合花:利润分配公告", code="603823",
+            text="每10股派息2元。", pub="2026-08-01")
+    _mk_doc(db_session, title="贵州茅台:2025年年度报告", code="600519",
+            text="茅台营业收入。", pub="2026-08-01")
+
+    result = evidence_service.retrieve_evidence(
+        db_session, query="603823", instrument_code="603823",
+    )
+    assert result.slices, "代码零命中时应回退标的关联文档"
+    assert all("603823" in s.title or "百合花" in s.title for s in result.slices)

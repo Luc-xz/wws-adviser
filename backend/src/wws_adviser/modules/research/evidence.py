@@ -80,6 +80,20 @@ def retrieve_evidence(
     # 1) FTS5 关键词检索
     docs = documents_repository.search_documents(db, query, limit=100)
 
+    # 1b) 标的兜底：公告标题只含公司名时按代码检索可零命中，退回标的关联文档
+    if not docs and instrument_code:
+        inst = db.scalar(select(Instrument).where(Instrument.code == instrument_code))
+        if inst is not None:
+            docs = list(
+                db.scalars(
+                    select(Document)
+                    .join(DocumentLink, DocumentLink.document_id == Document.id)
+                    .where(DocumentLink.instrument_id == inst.id)
+                    .order_by(Document.published_at.desc())
+                    .limit(100)
+                )
+            )
+
     # 2) 元数据过滤
     if trust_levels:
         docs = [d for d in docs if d.trust_level in trust_levels]

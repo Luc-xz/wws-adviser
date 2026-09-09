@@ -16,9 +16,11 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session as DBSession
 
 from wws_adviser.core.config import Settings
+from wws_adviser.modules.instruments.models import Instrument
 from wws_adviser.modules.model_gateway.service import ModelCallResult, call_model
 from wws_adviser.modules.research import service as research_service
 from wws_adviser.modules.research.analysis import (
@@ -345,9 +347,15 @@ async def _run_research(
     # 公司研究限定标的公告；行业研究按行业名全库检索
     instrument_code = task.subject if report_kind == "company" else None
 
-    # 1) 证据检索（波2）
+    # 1) 证据检索（波2）。公告标题含公司名不含代码：按代码研究时先解析标的名称作检索词
+    query = subject_name
+    if instrument_code is not None:
+        inst = db.scalar(select(Instrument).where(Instrument.code == instrument_code))
+        if inst is not None and inst.name:
+            query = inst.name
+            subject_name = inst.name  # 报告标题/提示词用公司名
     result = retrieve_evidence(
-        db, query=subject_name, instrument_code=instrument_code, max_results=12,
+        db, query=query, instrument_code=instrument_code, max_results=12,
         data_dir=data_dir,
     )
     research_service.update_progress(db, task, 20)
