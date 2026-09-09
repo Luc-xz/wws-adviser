@@ -63,6 +63,15 @@ describe("HOME-01 空账户与离线契约", () => {
     expect(w.find("[data-testid='metric-card']").exists()).toBe(false);
   });
 
+  it("TC-GS-02 summary 404（无账户）空标记 null 同样落导入引导，不落入数据模板", async () => {
+    mockQueries.useSummary.mockReturnValue(okQuery(null));
+    const w = mountHome();
+    await flushPromises();
+    expect(w.find("[data-testid='empty-guide']").exists()).toBe(true);
+    // 数据模板以 total-assets 占位暴露（全 — 的假数据卡）
+    expect(w.find("[data-testid='total-assets']").exists()).toBe(false);
+  });
+
   it("离线（navigator.onLine=false）禁用刷新按钮", async () => {
     const spy = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
     mockQueries.useSummary.mockReturnValue(

@@ -8,6 +8,8 @@ export function useSummary() {
     queryKey: ["analytics", "summary"],
     queryFn: async () => {
       const { data, error } = await client.GET("/api/v1/analytics/summary");
+      // 404 = 尚无账户（后端账户域语义）→ null 空标记而非错误（同 TX-01 决策）
+      if ((error as { status?: number } | undefined)?.status === 404) return null;
       if (error || !data) throw new Error("摘要获取失败");
       return data;
     },

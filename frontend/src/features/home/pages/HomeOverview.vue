@@ -24,8 +24,9 @@ const { data: qualityData } = useMarketQuality();
 const { data: positionsData } = usePositions();
 const { data: reportsData } = useReports();
 
+// null = 尚无账户（summary 404 空标记）→ 空账户导入引导
 const hasAccount = computed(
-  () => summaryData.value !== undefined && summaryData.value.total_assets !== "0"
+  () => summaryData.value != null && summaryData.value.total_assets !== "0"
 );
 
 const pnlTotal = computed(() => summaryData.value?.pnl_total ?? null);
