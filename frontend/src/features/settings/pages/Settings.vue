@@ -52,13 +52,13 @@ const riskRows = computed(() =>
 </script>
 
 <template>
-  <div class="space-y-3">
-    <h1 class="text-lg font-semibold">
+  <div class="space-y-6">
+    <h1 class="text-h1 font-bold lg:text-h1-d">
       设置
     </h1>
 
-    <section class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
-      <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <h2 class="text-h3 font-semibold">
         外观
       </h2>
       <div class="mt-2 flex items-center justify-between">
@@ -85,16 +85,16 @@ const riskRows = computed(() =>
 
     <section
       v-if="push.supported.value"
-      class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
     >
-      <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+      <h2 class="text-h3 font-semibold">
         通知
       </h2>
       <div class="mt-2 flex items-center justify-between gap-3">
         <span class="text-gray-500 dark:text-gray-400 text-sm">浏览器推送（报告 / 研究完成）</span>
         <button
           type="button"
-          class="rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+          class="appearance-none rounded-lg bg-transparent px-3 py-1.5 text-xs font-medium disabled:opacity-50"
           :class="push.state.value === 'enabled'
             ? 'bg-success/10 text-success'
             : 'bg-primary text-white'"
@@ -113,8 +113,8 @@ const riskRows = computed(() =>
       </p>
     </section>
 
-    <section class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
-      <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <h2 class="text-h3 font-semibold">
         风险阈值
       </h2>
       <dl
@@ -147,7 +147,7 @@ const riskRows = computed(() =>
 
     <button
       type="button"
-      class="w-full rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
+      class="w-full rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
       data-testid="logout"
       @click="logout"
     >

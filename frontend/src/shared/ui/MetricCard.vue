@@ -14,7 +14,7 @@ defineProps<{
     class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
     data-testid="metric-card"
   >
-    <div class="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+    <div class="text-xs text-gray-500 dark:text-gray-400">
       {{ label }}
     </div>
     <div

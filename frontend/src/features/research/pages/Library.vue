@@ -94,13 +94,13 @@ function onCancel(id: string) { void cancel(id); }
 
 <template>
   <div class="space-y-4">
-    <h1 class="text-lg font-semibold">
+    <h1 class="text-h1 font-bold lg:text-h1-d">
       研究
     </h1>
 
     <!-- 创建任务 -->
     <form
-      class="rounded-xl bg-white p-4 shadow-sm space-y-3"
+      class="rounded-lg bg-white p-4 shadow-sm space-y-6"
       data-testid="research-create-form"
       @submit.prevent="submit"
     >
@@ -168,14 +168,14 @@ function onCancel(id: string) { void cancel(id); }
     <!-- 任务列表 -->
     <div
       v-if="!tasks.length"
-      class="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm"
+      class="rounded-lg bg-white p-6 text-center text-sm text-gray-400 shadow-sm"
     >
       {{ tasksLoading ? "加载中…" : "暂无研究任务——创建一个试试" }}
     </div>
     <div
       v-for="t in tasks"
       :key="t.id"
-      class="rounded-xl bg-white p-3 shadow-sm flex items-center justify-between gap-3 cursor-pointer"
+      class="rounded-lg bg-white p-3 shadow-sm flex items-center justify-between gap-3 cursor-pointer"
       :class="{ 'ring-2 ring-primary/40': t.id === selectedId }"
       data-testid="research-task-row"
       @click="selectedId = t.id"
@@ -227,7 +227,7 @@ function onCancel(id: string) { void cancel(id); }
     <!-- 报告阅读 -->
     <div
       v-if="selectedTask && (selectedTask.report_id || liveReportId)"
-      class="rounded-xl bg-white p-4 shadow-sm space-y-3"
+      class="rounded-lg bg-white p-4 shadow-sm space-y-6"
       data-testid="research-report-panel"
     >
       <!-- 离线副本横幅（AC-08 / doc7 §5） -->

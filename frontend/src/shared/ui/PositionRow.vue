@@ -24,7 +24,7 @@ defineProps<{
         <span class="text-xs text-gray-400 dark:text-gray-500">{{ code }}</span>
       </div>
       <div
-        class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 num"
+        class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 num"
         data-num
       >
         数量 {{ quantity }} · 成本 {{ avgCost }}
@@ -38,7 +38,7 @@ defineProps<{
         {{ marketValue ?? EMPTY }}
       </div>
       <div
-        class="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 num"
+        class="text-xs text-gray-500 dark:text-gray-400 num"
         data-num
       >
         {{ weight ? formatPercent(weight) : EMPTY }}

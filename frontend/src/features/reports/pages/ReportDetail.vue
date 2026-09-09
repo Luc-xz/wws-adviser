@@ -5,14 +5,20 @@
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQueryClient } from "@tanstack/vue-query";
-import { DataFooter, MetricCard, PositionRow, RiskAlert } from "@/shared/ui";
+import { DataFooter, DataStatusBar, MetricCard, PageHeader, PositionRow, RiskAlert } from "@/shared/ui";
 import { EMPTY, formatMoney, formatPercent } from "@/shared/format/number";
 import { useReport, useGenerateReport } from "@/features/reports/composables/queries";
 import { useJobStatus } from "@/shared/sse/useJobStatus";
+import { useMarketQuality } from "@/features/home/composables/queries";
 
 const route = useRoute();
 const router = useRouter();
 const qc = useQueryClient();
+
+// 数据状态条（基准卡：REP 稿顶部缺 DataStatusBar——实现必须补，REVIEW_REPORT §5）
+const { data: qualityData } = useMarketQuality();
+const qualityEntries = computed(() => qualityData.value?.items ?? []);
+const offlineRef = ref(typeof navigator !== "undefined" ? !navigator.onLine : false);
 
 const reportId = computed(() => String(route.params.id ?? ""));
 const { data: reportData, isLoading: reportLoading, offlineCachedAt } = useReport(
@@ -90,48 +96,55 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="space-y-6">
     <!-- 离线副本横幅（AC-08 / doc7 §5：离线打开最近报告须显示缓存时间） -->
     <div
       v-if="offlineCachedAt"
       data-testid="offline-copy-banner"
-      class="rounded-xl bg-gray-100 dark:bg-gray-700 px-4 py-2 text-xs text-gray-600 dark:text-gray-300"
+      class="rounded-lg bg-gray-100 dark:bg-gray-700 px-4 py-2 text-caption text-gray-600 dark:text-gray-300"
     >
       离线副本 · 缓存于 {{ new Date(offlineCachedAt).toLocaleString() }}（盘中行情与建议离线不可用）
     </div>
-    <!-- 头部 -->
-    <div class="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm">
-      <div class="flex items-center justify-between">
-        <h1 class="text-lg font-semibold">
-          {{ title }}
-        </h1>
+    <!-- 头部：二级页返回 + 状态徽标（基准卡 §2：REP 稿缺 DataStatusBar——实现补齐） -->
+    <PageHeader
+      :title="title"
+      :subtitle="`${detail?.business_date ?? '—'} · v${detail?.version ?? '—'} · 生成于 ${detail?.generated_at ?? '—'}`"
+      back
+      @back="router.back()"
+    >
+      <template #actions>
         <span
-          class="rounded px-1.5 py-0.5 text-xs"
+          class="rounded-sm px-1.5 py-0.5 text-caption"
           :class="incomplete ? 'bg-risk-warning/10 text-risk-warning' : 'bg-success/10 text-success'"
           :data-testid="incomplete ? 'report-incomplete' : 'report-complete'"
         >
           {{ incomplete ? "不完整" : "已完成" }}
         </span>
-      </div>
-      <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-        {{ detail?.business_date }} · v{{ detail?.version }} · 生成于 {{ detail?.generated_at }}
-      </p>
+      </template>
+    </PageHeader>
+
+    <DataStatusBar
+      :entries="qualityEntries"
+      :offline="offlineRef"
+    />
+
+    <div class="rounded-lg bg-white dark:bg-gray-800 p-4 shadow-sm">
       <!-- 降级标记（AC-02：公告源失败→标记不完整） -->
       <div
         v-if="degradationFlags.length"
-        class="mt-2 space-y-1"
+        class="space-y-1"
       >
         <p
           v-for="f in degradationFlags"
           :key="f"
-          class="rounded bg-risk-warning/5 px-2 py-1 text-xs text-risk-warning"
+          class="rounded bg-risk-warning/5 px-2 py-1 text-caption text-risk-warning"
         >
           ⚠ {{ FLAG_NAMES[f] ?? f }}
         </p>
       </div>
       <button
         type="button"
-        class="mt-3 w-full rounded-lg border border-primary py-2 text-sm font-medium text-primary disabled:opacity-40"
+        class="mt-3 w-full appearance-none rounded-lg border border-primary bg-transparent py-2 text-body font-medium text-primary disabled:opacity-40"
         data-testid="regenerate"
         :disabled="jobState.source !== 'idle' && !jobState.status"
         @click="regenerate"
@@ -140,7 +153,7 @@ watch(
       </button>
       <p
         v-if="jobState.source === 'polling'"
-        class="mt-2 text-center text-xs text-gray-400 dark:text-gray-500"
+        class="mt-2 text-center text-caption text-gray-400 dark:text-gray-500"
       >
         任务进行中（{{ jobState.status ?? "..." }}）· 可离开此页
       </p>
@@ -148,7 +161,7 @@ watch(
 
     <div
       v-if="!content"
-      class="rounded-xl bg-white dark:bg-gray-800 p-6 text-center text-sm text-gray-400 dark:text-gray-500 shadow-sm"
+      class="rounded-lg bg-white dark:bg-gray-800 p-6 text-center text-body text-gray-400 dark:text-gray-500 shadow-sm"
     >
       {{ reportLoading ? "加载中…" : "报告内容不可用" }}
     </div>
@@ -159,7 +172,7 @@ watch(
         v-if="summarySection"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+        <h2 class="text-h3 font-semibold">
           执行摘要
         </h2>
         <div class="grid grid-cols-2 gap-2">
@@ -184,7 +197,7 @@ watch(
 
       <!-- 风险 -->
       <section class="space-y-2">
-        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+        <h2 class="text-h3 font-semibold">
           风险
         </h2>
         <RiskAlert
@@ -199,7 +212,7 @@ watch(
         />
         <p
           v-if="!riskItems.length"
-          class="rounded-xl bg-white dark:bg-gray-800 p-3 text-sm text-gray-400 dark:text-gray-500 shadow-sm"
+          class="rounded-lg bg-white dark:bg-gray-800 p-3 text-body text-gray-400 dark:text-gray-500 shadow-sm"
         >
           未触发风险限制
         </p>
@@ -210,7 +223,7 @@ watch(
         v-if="positionItems.length"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+        <h2 class="text-h3 font-semibold">
           持仓
         </h2>
         <PositionRow
@@ -231,10 +244,10 @@ watch(
         v-if="modelSection"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+        <h2 class="text-h3 font-semibold">
           解读
         </h2>
-        <div class="rounded-xl bg-white dark:bg-gray-800 p-3 text-sm leading-relaxed shadow-sm">
+        <div class="rounded-lg bg-white dark:bg-gray-800 p-3 text-body leading-relaxed shadow-sm">
           {{ modelSection.summary }}
         </div>
       </section>
@@ -242,10 +255,10 @@ watch(
         v-else-if="degradationFlags.includes('model_unavailable')"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+        <h2 class="text-h3 font-semibold">
           解读
         </h2>
-        <div class="rounded-xl bg-risk-warning/5 p-3 text-sm text-risk-warning">
+        <div class="rounded-lg bg-risk-warning/5 p-3 text-body text-risk-warning">
           模型暂不可用，以上为确定性摘要（可点击「重新生成」重试）。
         </div>
       </section>
@@ -255,26 +268,26 @@ watch(
         v-if="biasItems.length"
         class="space-y-2"
       >
-        <h2 class="text-sm font-medium text-gray-600">
+        <h2 class="text-body font-medium text-gray-600">
           行为偏差
         </h2>
         <p
           v-for="(b, i) in biasItems"
           :key="i"
-          class="rounded-xl bg-white p-3 text-sm shadow-sm"
+          class="rounded-lg bg-white p-3 text-body shadow-sm"
           data-testid="bias-finding"
         >
           <span class="font-medium">{{ BIAS_NAMES[String(b.kind)] ?? b.kind }}</span>
           <span
             v-if="b.code"
-            class="ml-1 text-xs text-gray-400"
+            class="ml-1 text-caption text-gray-400"
           >{{ b.code }}</span>
-          <span class="block mt-0.5 text-xs text-gray-500">{{ b.evidence }}</span>
+          <span class="block mt-0.5 text-caption text-gray-500">{{ b.evidence }}</span>
         </p>
       </section>
 
       <!-- 来源与版本尾注 -->
-      <div class="rounded-xl bg-white dark:bg-gray-800 p-3 text-xs text-gray-400 dark:text-gray-500 shadow-sm">
+      <div class="rounded-lg bg-white dark:bg-gray-800 p-3 text-caption text-gray-400 dark:text-gray-500 shadow-sm">
         <p>来源 {{ detail?.sources_count ?? 0 }} 项</p>
         <p class="mt-1">
           schema {{ header?.schema_version ?? detail?.schema_version }} ·

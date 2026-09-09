@@ -17,7 +17,7 @@ const emit = defineEmits<{ back: [] }>();
       <button
         v-if="back"
         type="button"
-        class="mt-0.5 rounded-md p-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+        class="mt-0.5 appearance-none rounded-md bg-transparent p-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
         aria-label="返回"
         data-testid="page-back"
         @click="emit('back')"

@@ -8,6 +8,7 @@ import { ref } from "vue";
 const mockQueries = vi.hoisted(() => ({
   usePositions: vi.fn(),
   useRisk: vi.fn(),
+  useSummary: vi.fn(),
   usePositionsHistory: vi.fn(),
   useTransactions: vi.fn(),
   useInstrumentMap: vi.fn(),
@@ -19,6 +20,7 @@ const mockQueries = vi.hoisted(() => ({
 vi.mock("@/features/home/composables/queries", () => ({
   usePositions: mockQueries.usePositions,
   useRisk: mockQueries.useRisk,
+  useSummary: mockQueries.useSummary,
 }));
 vi.mock("../composables/queries", () => mockQueries);
 
@@ -40,6 +42,9 @@ beforeEach(() => {
     okQuery({ items: [], cash: "60000", total_assets: "60000" })
   );
   mockQueries.useRisk.mockReturnValue(okQuery({ breaches: [] }));
+  mockQueries.useSummary.mockReturnValue(
+    okQuery({ total_assets: "0", cash_ratio: null, concentration: null })
+  );
   mockQueries.usePositionsHistory.mockReturnValue(okQuery({ items: [] }));
   mockQueries.useTransactions.mockReturnValue(okQuery({ items: [], has_more: false }));
   const instMap = new Map([

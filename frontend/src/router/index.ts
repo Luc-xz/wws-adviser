@@ -58,9 +58,17 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to) => {
+// 会话探针只跑一次：硬刷新/直链进受保护页时，守卫须等 cookie 会话探明再判
+// （否则有效会话也被踢回登录页——PWA 重开必现，波V3 走查发现）
+let sessionProbed = false;
+
+router.beforeEach(async (to) => {
   if (to.meta.requiresAuth) {
     const session = useSessionStore();
+    if (!session.isAuthenticated && !sessionProbed) {
+      sessionProbed = true;
+      await session.fetchSession();
+    }
     if (!session.isAuthenticated) {
       return { name: "login", query: { redirect: to.fullPath } };
     }

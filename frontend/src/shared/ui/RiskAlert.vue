@@ -41,7 +41,7 @@ const subject = computed(() => props.code ?? props.industry ?? null);
     <span class="font-medium">{{ ruleName }}</span>
     <span
       v-if="subject"
-      class="text-gray-500 dark:text-gray-400 dark:text-gray-500"
+      class="text-gray-500 dark:text-gray-400"
     >（{{ subject }}）</span>
     <div
       class="mt-1 num text-xs text-gray-600 dark:text-gray-300"
