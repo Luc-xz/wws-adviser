@@ -274,7 +274,7 @@ watch(
         <p
           v-for="(b, i) in biasItems"
           :key="i"
-          class="rounded-lg bg-white p-3 text-body shadow-sm"
+          class="rounded-lg bg-white p-3 text-body shadow-sm dark:bg-gray-800"
           data-testid="bias-finding"
         >
           <span class="font-medium">{{ BIAS_NAMES[String(b.kind)] ?? b.kind }}</span>

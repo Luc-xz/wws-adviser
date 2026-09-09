@@ -118,7 +118,7 @@
 - **波 V2 ✅**（9a69167）：AppShellDesktop（侧栏 224px + 顶栏 64px + @iconify-json/carbon）；移动底导航按 §5.1；PageHeader；路由 meta.title + document.title 同步；tabular-nums :root 全局。实机双视口走查通过。
 - **波 V3 ✅**（b8330dc）：8 页对齐（HOME 摘要大卡/风险聚合条/日期修复；PORT 下划线 Tab/4 指标摘要；REP 补 DataStatusBar；DATA conflicts 区块；CHAT/LIB/SET/AUTH token 化）。顺修三真 bug：路由守卫会话竞态（PWA 重开被踢登录）、日期 toLocaleDateString 格式、Tab UA 默认按钮样式暴露（计算样式实证）。
 - **波 V4 ✅**（afce597）：11 新路由（TX-01/02/03、ACC-01、PORT-02、SET-01/02/03/04/06/08）全交付；SET-02 conflicts 消解 UI 闭环（Phase 3.3 落点）；SET-06 Passkey 真注册流程；PORT-02 接 PositionRow 整行跳转。
-- **波 V5 ⬜ 待执行**：全页三截图走查 + 深色核验 + 真机合流。
+- **波 V5 ◐ 本地部分完成（2026-09-09）**：桌面全路由巡检（14 条：标题/渲染/API 错误文案扫描全绿，含不存在 id 的异常态不白屏）；深色全页核验（真实持久化 key 扫白底残留——修复 11 处漏 dark: 的卡/空态 + Home 刷新按钮，复扫清零，截图留档）；真机装机验证移交 `deploy/PWA_DEVICE_CHECKLIST.md` 清单（A–G 七组，与 §7 上线门槛合流执行）。
 - **偏差记录**：HOME-02/CHAT-02 归 P2——`advice_records` 查询 API 后端未开放（openapi 仅 `POST /assistant/intraday`），按 §10-Q3 规则不阻塞；若要完整另立后端工作项。SET-05/07 维持 P2 裁剪线（后端缺 settings 子资源/REST）。
 
 ---

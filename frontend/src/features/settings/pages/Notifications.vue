@@ -98,7 +98,7 @@ async function savePrivacy() {
           @click="privacyMode = !privacyMode"
         >
           <span
-            class="absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all"
+            class="absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all dark:bg-gray-800"
             :class="privacyMode ? 'left-[22px]' : 'left-0.5'"
           />
         </button>

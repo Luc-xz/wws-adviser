@@ -92,7 +92,7 @@ function reportTitle(t: string): string {
       </div>
       <button
         type="button"
-        class="appearance-none rounded-md border border-gray-200 bg-white px-3 py-2 text-label text-gray-600 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300"
+        class="appearance-none rounded-md border border-gray-200 bg-white px-3 py-2 text-label text-gray-600 disabled:opacity-40 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
         :disabled="offline"
         data-testid="refresh"
         @click="refresh"

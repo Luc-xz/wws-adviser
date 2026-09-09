@@ -89,7 +89,7 @@ async function ask() {
 
 <template>
   <div class="space-y-6">
-    <section class="rounded-lg bg-white p-4 shadow-sm">
+    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
       <h1 class="text-h1 font-bold lg:text-h1-d">
         盘中问询
       </h1>
@@ -135,7 +135,7 @@ async function ask() {
 
     <template v-if="advice">
       <!-- 动作与状态 -->
-      <section class="rounded-lg bg-white p-4 shadow-sm">
+      <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
         <div class="flex items-center justify-between">
           <span
             class="rounded px-2 py-1 text-sm font-medium"
@@ -204,7 +204,7 @@ async function ask() {
           <p
             v-for="r in advice.reasons"
             :key="r"
-            class="rounded-lg bg-white p-2 text-xs shadow-sm"
+            class="rounded-lg bg-white p-2 text-xs shadow-sm dark:bg-gray-800"
             :class="advice.action === 'suspend' ? 'text-risk-warning' : 'text-gray-500'"
             data-testid="intraday-reason"
           >
@@ -221,7 +221,7 @@ async function ask() {
         <h2 class="text-sm font-medium text-gray-600">
           计算轨迹
         </h2>
-        <div class="rounded-lg bg-white p-3 text-xs shadow-sm">
+        <div class="rounded-lg bg-white p-3 text-xs shadow-sm dark:bg-gray-800">
           <p
             v-for="(s, i) in advice.trail"
             :key="i"
@@ -244,12 +244,12 @@ async function ask() {
         <h2 class="text-sm font-medium text-gray-600">
           解读
         </h2>
-        <div class="rounded-lg bg-white p-3 text-sm leading-relaxed shadow-sm">
+        <div class="rounded-lg bg-white p-3 text-sm leading-relaxed shadow-sm dark:bg-gray-800">
           {{ advice.model_explanation }}
         </div>
       </section>
 
-      <p class="rounded-lg bg-white p-3 text-xs text-gray-400 shadow-sm">
+      <p class="rounded-lg bg-white p-3 text-xs text-gray-400 shadow-sm dark:bg-gray-800">
         区间来自全市场同类信号回测（Wilson 置信区间）与分数凯利折扣，为风险预算参考，
         不构成投资建议；模型语言不参与概率估计。
       </p>
