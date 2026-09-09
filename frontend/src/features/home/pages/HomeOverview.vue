@@ -255,6 +255,7 @@ function reportTitle(t: string): string {
           :market-value="p.market_value"
           :weight="p.weight"
           :freshness="p.freshness"
+          :to="`/instruments/${p.instrument_id}`"
         />
       </section>
 

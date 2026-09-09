@@ -55,6 +55,84 @@ const router = createRouter({
       component: () => import("@/features/settings/pages/Settings.vue"),
       meta: { requiresAuth: true, title: "设置" },
     },
+    // ===== 波 V4 P0 缺页 =====
+    // TX-01 交易流水（全量 + 筛选）
+    {
+      path: "/transactions",
+      name: "transactions",
+      component: () => import("@/features/transactions/pages/TxList.vue"),
+      meta: { requiresAuth: true, title: "交易流水" },
+    },
+    // TX-02 新建/编辑交易
+    {
+      path: "/transactions/new",
+      name: "tx-new",
+      component: () => import("@/features/transactions/pages/TxNew.vue"),
+      meta: { requiresAuth: true, title: "记录交易" },
+    },
+    // TX-03 CSV 导入向导
+    {
+      path: "/transactions/import",
+      name: "tx-import",
+      component: () => import("@/features/transactions/pages/TxImport.vue"),
+      meta: { requiresAuth: true, title: "CSV 导入" },
+    },
+    // ACC-01 账户与对账
+    {
+      path: "/account",
+      name: "account",
+      component: () => import("@/features/account/pages/Account.vue"),
+      meta: { requiresAuth: true, title: "账户与对账" },
+    },
+    // PORT-02 标的/持仓详情
+    {
+      path: "/instruments/:id",
+      name: "instrument-detail",
+      component: () => import("@/features/instruments/pages/InstrumentDetail.vue"),
+      meta: { requiresAuth: true, title: "标的详情" },
+    },
+    // SET-01 风险与约束
+    {
+      path: "/settings/risk",
+      name: "settings-risk",
+      component: () => import("@/features/settings/pages/Risk.vue"),
+      meta: { requiresAuth: true, title: "风险与约束" },
+    },
+    // SET-02 数据源与质量（conflicts 消解）
+    {
+      path: "/settings/data-sources",
+      name: "settings-data-sources",
+      component: () => import("@/features/settings/pages/DataSources.vue"),
+      meta: { requiresAuth: true, title: "数据源与质量" },
+    },
+    // SET-03 模型与任务路由
+    {
+      path: "/settings/models",
+      name: "settings-models",
+      component: () => import("@/features/settings/pages/Models.vue"),
+      meta: { requiresAuth: true, title: "模型设置" },
+    },
+    // SET-04 通知与隐私
+    {
+      path: "/settings/notifications",
+      name: "settings-notifications",
+      component: () => import("@/features/settings/pages/Notifications.vue"),
+      meta: { requiresAuth: true, title: "通知与隐私" },
+    },
+    // SET-06 安全与会话（Passkey 管理）
+    {
+      path: "/settings/security",
+      name: "settings-security",
+      component: () => import("@/features/settings/pages/Security.vue"),
+      meta: { requiresAuth: true, title: "安全与会话" },
+    },
+    // SET-08 系统状态
+    {
+      path: "/settings/system",
+      name: "settings-system",
+      component: () => import("@/features/settings/pages/System.vue"),
+      meta: { requiresAuth: true, title: "系统状态" },
+    },
   ],
 });
 

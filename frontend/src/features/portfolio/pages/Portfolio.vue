@@ -297,6 +297,7 @@ function removeWatch(code: string) {
               :market-value="p.market_value"
               :weight="p.weight"
               :freshness="p.freshness"
+              :to="`/instruments/${p.instrument_id}`"
             />
           </div>
         </div>
@@ -354,7 +355,13 @@ function removeWatch(code: string) {
         </div>
       </div>
       <p class="text-center text-xs text-gray-400 dark:text-gray-500">
-        最新 50 条 · 更多历史经 API 分页获取
+        <router-link
+          to="/transactions"
+          class="block text-center text-caption text-primary"
+          data-testid="goto-tx-list"
+        >
+          查看全部流水 ›
+        </router-link>
       </p>
     </template>
 
