@@ -26,7 +26,12 @@ body {
   margin: 0;
 }
 
-/* ENFORCEMENT_CONTRACT §2.2：全局 tabular-nums 兜底（数字等宽） */
+/* ENFORCEMENT_CONTRACT §2.2 + VISUAL_ALIGNMENT_PLAN 波V2：tabular-nums 全局默认开启
+   （:root 生效面覆盖全部文本数字；下方选择器保留为审计标记与旧组件兜底） */
+:root {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
 table,
 .num,
 [data-num] {

@@ -1,6 +1,7 @@
 // HOME-01 页面契约（ENFORCEMENT_CONTRACT TC-GS/离线规则）：空账户导入引导、绝不显示假 ¥0、
 // 离线禁用刷新。通过 vi.mock 屏蔽 queries 组合式（不依赖服务端）。
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { ref } from "vue";
 import { mount, flushPromises } from "@vue/test-utils";
 import { createRouter, createMemoryHistory } from "vue-router";
 import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
@@ -36,7 +37,13 @@ function mountHome() {
   });
 }
 
-const okQuery = (data: unknown) => ({ data: { value: data }, isSuccess: true, isLoading: false });
+// 真 ref：模板对 setup 绑定的 ref 自动解包——平对象 {value} 不会解包，
+// 曾使数值断言恒为 —（波V3 基准卡数值断言暴露）。
+const okQuery = (data: unknown) => ({
+  data: ref(data),
+  isSuccess: true,
+  isLoading: false,
+});
 
 beforeEach(() => {
   mockQueries.useSummary.mockReturnValue(okQuery(null));
@@ -54,6 +61,15 @@ describe("HOME-01 空账户与离线契约", () => {
     expect(w.find("[data-testid='empty-guide']").exists()).toBe(true);
     expect(w.text()).not.toContain("¥0");
     expect(w.find("[data-testid='metric-card']").exists()).toBe(false);
+  });
+
+  it("TC-GS-02 summary 404（无账户）空标记 null 同样落导入引导，不落入数据模板", async () => {
+    mockQueries.useSummary.mockReturnValue(okQuery(null));
+    const w = mountHome();
+    await flushPromises();
+    expect(w.find("[data-testid='empty-guide']").exists()).toBe(true);
+    // 数据模板以 total-assets 占位暴露（全 — 的假数据卡）
+    expect(w.find("[data-testid='total-assets']").exists()).toBe(false);
   });
 
   it("离线（navigator.onLine=false）禁用刷新按钮", async () => {
@@ -90,7 +106,10 @@ describe("HOME-01 空账户与离线契约", () => {
     );
     const w = mountHome();
     await flushPromises();
-    expect(w.findAll("[data-testid='metric-card']").length).toBeGreaterThanOrEqual(3);
+    // 波V3 基准卡：摘要为单张大卡（Display 总资产 + 盈亏 tone + 两列副指标）
+    expect(w.find("[data-testid='total-assets']").text()).toContain("100000.00");
+    expect(w.find("[data-testid='pnl-total']").text()).not.toBe("—");
+    expect(w.find("[data-testid='risk-summary-bar']").exists()).toBe(false); // 无风险数据不出聚合条
     expect(w.find("[data-testid='data-status-bar']").exists()).toBe(true);
     expect(w.find("[data-testid='position-row']").exists()).toBe(true);
   });

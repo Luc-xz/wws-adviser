@@ -1,6 +1,6 @@
-# WWS Adviser 前端视觉对齐与补页批次计划（草案）
+# WWS Adviser 前端视觉对齐与补页批次计划（执行中）
 
-> **文档状态：** 草案，待排期确认（2026-09-09 起草）
+> **文档状态：** V1–V5 已交付（2026-09-09，分支 `visual-alignment`）；批次审计 + 三缺口回填完成（11 张新页基准卡、空账户 HOME 404 修复、§8.3 里程碑回填）；仅余 PWA 真机验证（与 §7 上线门槛合流）
 > **背景：** Phase 3 验收期用户直观反馈"前端和设计稿很不一样"。核实结论：前端语义层（色彩/数字/风险/PAUSE 硬规则）由代码强制、全部正确；但**视觉层从未以还原设计稿为验收目标**，且 UI §4.3 的 31 页中仅实现 8 个路由。
 > **上游：** [UI_DESIGN_SPECIFICATION.md](../UI_DESIGN_SPECIFICATION.md)（§4.3 页面清单 / §5 外壳 / §7 tokens / §18 交付清单）
 > **配套：** [REVIEW_REPORT.md](./REVIEW_REPORT.md)（稿的问题在哪）· [ENFORCEMENT_CONTRACT.md](./ENFORCEMENT_CONTRACT.md)（代码怎么强制做对）· [COMPONENT_STATES.md](./COMPONENT_STATES.md)（组件状态清单）· [ADR-0009](../adr/0009-action-and-online-color-tokens.md)（token 决策）
@@ -111,6 +111,16 @@
 | 页面标题区（UI §5.3） | 不统一 | 波 V2 统一组件 |
 | 深色模式 | 已有（useDark + surface token + dark: 变体，技术债 7 已清） | 每页走查时核验 dark: 覆盖（稿无深色，按 token 映射人工核） |
 | 离线行为 | SW NetworkOnly /api + 离线报告缓存已有 | 不动，仅回归 |
+
+**执行记录（2026-09-09，`visual-alignment` 分支）：**
+
+- **波 V1 ✅**（7dd1b96）：版式 token（fontSize 12 档 + radius 覆盖 preset）；基准卡模板 + 既有 8 页基准卡；演示稿硬伤核验（3 处已于 08-12 修）+ 补漏 REP-01-desktop「立即执行」。
+- **波 V2 ✅**（9a69167）：AppShellDesktop（侧栏 224px + 顶栏 64px + @iconify-json/carbon）；移动底导航按 §5.1；PageHeader；路由 meta.title + document.title 同步；tabular-nums :root 全局。实机双视口走查通过。
+- **波 V3 ✅**（b8330dc）：8 页对齐（HOME 摘要大卡/风险聚合条/日期修复；PORT 下划线 Tab/4 指标摘要；REP 补 DataStatusBar；DATA conflicts 区块；CHAT/LIB/SET/AUTH token 化）。顺修三真 bug：路由守卫会话竞态（PWA 重开被踢登录）、日期 toLocaleDateString 格式、Tab UA 默认按钮样式暴露（计算样式实证）。
+- **波 V4 ✅**（afce597）：11 新路由（TX-01/02/03、ACC-01、PORT-02、SET-01/02/03/04/06/08）全交付；SET-02 conflicts 消解 UI 闭环（Phase 3.3 落点）；SET-06 Passkey 真注册流程；PORT-02 接 PositionRow 整行跳转。
+- **波 V5 ◐ 本地部分完成（2026-09-09）**：桌面全路由巡检（14 条：标题/渲染/API 错误文案扫描全绿，含不存在 id 的异常态不白屏）；深色全页核验（真实持久化 key 扫白底残留——修复 11 处漏 dark: 的卡/空态 + Home 刷新按钮，复扫清零，截图留档）；真机装机验证移交 `deploy/PWA_DEVICE_CHECKLIST.md` 清单（A–G 七组，与 §7 上线门槛合流执行）。
+- **批次审计 + 三缺口回填（2026-09-09）**：按 §7 六条退出条件文档侧逐项核验 + 稿侧 5 页实拍比对（HOME/DATA/SET/CHAT 移动 375 + PORT 桌面 1440，浏览器实拍 vs Stitch PNG 结构 diff）。当日闭环：①审计发现的空账户 HOME bug——`analytics/summary` 404 落入数据模板渲染全 `—` 假数据卡，修复为 404→null 空标记走导入引导（同 TX-01 口径，+TC-GS-02，14375a7）；②V1 任务 5 欠账补齐——11 张 V4 新页基准卡（TX-01/02/03、ACC-01、PORT-02、SET-01/02/03/04/06/08，追溯卡口径：结构/四态以实现为准、稿作密度参照）；③§8.3 里程碑卡执行回填。稿侧比对主要差异均为「规范/路由优先于 Stitch 占位稿」的有意偏离（稿底导航/品牌占位与 PRD 路由不符、CHAT 对话形态依赖 CHAT-02 后端、稿英文文案），逐页记入各卡 §5 违例覆盖注记。
+- **偏差记录**：HOME-02/CHAT-02 归 P2——`advice_records` 查询 API 后端未开放（openapi 仅 `POST /assistant/intraday`），按 §10-Q3 规则不阻塞；若要完整另立后端工作项。SET-05/07 维持 P2 裁剪线（后端缺 settings 子资源/REST）。
 
 ---
 

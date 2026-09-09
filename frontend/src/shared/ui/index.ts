@@ -4,3 +4,5 @@ export { default as MetricCard } from "./MetricCard.vue";
 export { default as PositionRow } from "./PositionRow.vue";
 export { default as RiskAlert } from "./RiskAlert.vue";
 export { default as TrendChart } from "./TrendChart.vue";
+export { default as AppShellDesktop } from "./AppShellDesktop.vue";
+export { default as PageHeader } from "./PageHeader.vue";

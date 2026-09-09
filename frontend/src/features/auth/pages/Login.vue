@@ -85,6 +85,7 @@ async function onSubmit(): Promise<void> {
 </template>
 
 <style scoped>
+/* 基准卡 AUTH-01：卡片 ≤420px 居中；圆角/色值走 token（radius.md=10px / brand.primary） */
 .login-wrap {
   min-height: 100vh;
   display: flex;
@@ -98,11 +99,22 @@ async function onSubmit(): Promise<void> {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 6%);
+}
+h1 {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0;
 }
 input {
   padding: 12px;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
 }
 button {
@@ -110,7 +122,7 @@ button {
   background: #3157d5;
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   cursor: pointer;
 }

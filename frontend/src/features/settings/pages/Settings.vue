@@ -14,6 +14,16 @@ const router = useRouter();
 const qc = useQueryClient();
 const push = usePushManager();
 
+// 子页入口（SET-01~08；SET-05/07 后端缺资源，波 V4 P2 裁剪线）
+const SUB_PAGES = [
+  { to: "/settings/risk", label: "风险与约束", icon: "i-carbon-warning-alt" },
+  { to: "/settings/data-sources", label: "数据源与质量", icon: "i-carbon-data-base" },
+  { to: "/settings/models", label: "模型设置", icon: "i-carbon-model-alt" },
+  { to: "/settings/notifications", label: "通知与隐私", icon: "i-carbon-notification" },
+  { to: "/settings/security", label: "安全与会话", icon: "i-carbon-security" },
+  { to: "/settings/system", label: "系统状态", icon: "i-carbon-information" },
+] as const;
+
 const { data: riskSettingsData, isSuccess: riskSettingsOk } = useQuery({
   queryKey: ["settings", "risk"],
   queryFn: async () => {
@@ -52,13 +62,13 @@ const riskRows = computed(() =>
 </script>
 
 <template>
-  <div class="space-y-3">
-    <h1 class="text-lg font-semibold">
+  <div class="space-y-6">
+    <h1 class="text-h1 font-bold lg:text-h1-d">
       设置
     </h1>
 
-    <section class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
-      <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <h2 class="text-h3 font-semibold">
         外观
       </h2>
       <div class="mt-2 flex items-center justify-between">
@@ -73,7 +83,7 @@ const riskRows = computed(() =>
           @click="toggleDark()"
         >
           <span
-            class="absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all"
+            class="absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all dark:bg-gray-800"
             :class="isDark ? 'left-[22px]' : 'left-0.5'"
           />
         </button>
@@ -85,16 +95,16 @@ const riskRows = computed(() =>
 
     <section
       v-if="push.supported.value"
-      class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
     >
-      <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+      <h2 class="text-h3 font-semibold">
         通知
       </h2>
       <div class="mt-2 flex items-center justify-between gap-3">
         <span class="text-gray-500 dark:text-gray-400 text-sm">浏览器推送（报告 / 研究完成）</span>
         <button
           type="button"
-          class="rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+          class="appearance-none rounded-lg bg-transparent px-3 py-1.5 text-xs font-medium disabled:opacity-50"
           :class="push.state.value === 'enabled'
             ? 'bg-success/10 text-success'
             : 'bg-primary text-white'"
@@ -113,8 +123,8 @@ const riskRows = computed(() =>
       </p>
     </section>
 
-    <section class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
-      <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
+    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <h2 class="text-h3 font-semibold">
         风险阈值
       </h2>
       <dl
@@ -145,9 +155,35 @@ const riskRows = computed(() =>
       </p>
     </section>
 
+    <!-- 子页入口（波 V4：SET-01~08 落点） -->
+    <section class="rounded-lg bg-white p-2 shadow-sm dark:bg-gray-800">
+      <div
+        v-for="item in SUB_PAGES"
+        :key="item.to"
+      >
+        <router-link
+          :to="item.to"
+          class="flex items-center justify-between rounded-md px-3 py-3 text-body text-gray-700 no-underline hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
+          :data-testid="`goto-${item.to.slice(1).replaceAll('/', '-')}`"
+        >
+          <span class="flex items-center gap-2.5">
+            <span
+              :class="[item.icon, 'text-xl text-gray-400']"
+              aria-hidden="true"
+            />
+            {{ item.label }}
+          </span>
+          <span
+            class="i-carbon-chevron-right text-xl text-gray-300"
+            aria-hidden="true"
+          />
+        </router-link>
+      </div>
+    </section>
+
     <button
       type="button"
-      class="w-full rounded-xl border border-gray-200 py-3 text-sm font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
+      class="w-full appearance-none rounded-lg border border-gray-200 bg-transparent py-3 text-body font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
       data-testid="logout"
       @click="logout"
     >

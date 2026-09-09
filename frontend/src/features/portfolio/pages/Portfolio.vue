@@ -4,8 +4,12 @@
 // 流水=交易列表（keyset 首页）；自选=watchlist 增删+快照价（技术债清理：波7 留白）。
 import { computed, ref } from "vue";
 import { formatMoney, formatPercent } from "@/shared/format/number";
-import { DataFooter, PositionRow, TrendChart } from "@/shared/ui";
-import { usePositions, useRisk } from "@/features/home/composables/queries";
+import { DataFooter, PageHeader, PositionRow, TrendChart } from "@/shared/ui";
+import {
+  usePositions,
+  useRisk,
+  useSummary,
+} from "@/features/home/composables/queries";
 import {
   useInstrumentMap,
   usePositionsHistory,
@@ -26,6 +30,7 @@ const tabs: { key: Tab; label: string }[] = [
 // —— 持仓 ——
 const { data: positionsData, isSuccess: positionsOk } = usePositions();
 const { data: riskData } = useRisk();
+const { data: summaryData } = useSummary();
 
 const hardHitCodes = computed(
   () =>
@@ -55,7 +60,10 @@ const summaryStrip = computed(() => {
   );
   return {
     marketValue: formatMoney(mv.toFixed(2)),
-    cash: formatMoney(d.cash),
+    cashRatio: summaryData.value?.cash_ratio
+      ? formatPercent(summaryData.value.cash_ratio)
+      : null,
+    concentration: summaryData.value?.concentration ?? null,
     count: d.items?.length ?? 0,
   };
 });
@@ -142,25 +150,24 @@ function removeWatch(code: string) {
 </script>
 
 <template>
-  <div class="space-y-3">
-    <div class="flex items-center justify-between">
-      <h1 class="text-lg font-semibold">
-        持仓
-      </h1>
-      <button
-        v-if="activeTab === 'positions'"
-        type="button"
-        class="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white"
-        data-testid="record-trade"
-        @click="recordTrade"
-      >
-        记录交易
-      </button>
-    </div>
+  <div class="space-y-6">
+    <PageHeader title="持仓与自选">
+      <template #actions>
+        <button
+          v-if="activeTab === 'positions'"
+          type="button"
+          class="rounded-md bg-primary px-3 py-2 text-label font-medium text-white"
+          data-testid="record-trade"
+          @click="recordTrade"
+        >
+          记录交易
+        </button>
+      </template>
+    </PageHeader>
 
-    <!-- Tab 栏 -->
+    <!-- Tab 栏（基准卡：品牌色下划线激活态） -->
     <div
-      class="flex rounded-xl bg-white p-1 shadow-sm dark:bg-gray-800"
+      class="flex border-b border-gray-200 dark:border-gray-700"
       role="tablist"
     >
       <button
@@ -168,11 +175,11 @@ function removeWatch(code: string) {
         :key="t.key"
         type="button"
         role="tab"
-        class="flex-1 rounded-lg py-2 text-sm font-medium transition-colors"
+        class="-mb-px flex-1 appearance-none border-x-0 border-t-0 border-b-2 bg-transparent py-2.5 text-body font-medium transition-colors"
         :class="
           activeTab === t.key
-            ? 'bg-primary text-white'
-            : 'text-gray-600 dark:text-gray-300'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-gray-500 dark:text-gray-400'
         "
         :data-testid="`tab-${t.key}`"
         :aria-selected="activeTab === t.key"
@@ -187,7 +194,7 @@ function removeWatch(code: string) {
       <!-- 空态引导 -->
       <div
         v-if="positionsOk && !positionsData?.items?.length"
-        class="rounded-xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
+        class="rounded-lg bg-white p-6 text-center shadow-sm dark:bg-gray-800"
         data-testid="empty-guide"
       >
         <p class="font-medium">
@@ -199,39 +206,50 @@ function removeWatch(code: string) {
       </div>
 
       <template v-else>
-        <!-- 摘要条 -->
+        <!-- 摘要条（基准卡：4 指标，移动两列） -->
         <div
           v-if="summaryStrip"
-          class="grid grid-cols-3 gap-2 text-center"
+          class="grid grid-cols-2 gap-2 text-center sm:grid-cols-4"
         >
-          <div class="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-800">
-            <div class="text-xs text-gray-500 dark:text-gray-400">
+          <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+            <div class="text-label text-gray-500 dark:text-gray-400">
               持仓市值
             </div>
             <div
-              class="mt-1 font-semibold num"
+              class="mt-1 text-body-lg font-semibold num"
               data-num
             >
               {{ summaryStrip.marketValue }}
             </div>
           </div>
-          <div class="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-800">
-            <div class="text-xs text-gray-500 dark:text-gray-400">
-              现金
+          <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+            <div class="text-label text-gray-500 dark:text-gray-400">
+              现金占比
             </div>
             <div
-              class="mt-1 font-semibold num"
+              class="mt-1 text-body-lg font-semibold num"
               data-num
             >
-              {{ summaryStrip.cash }}
+              {{ summaryStrip.cashRatio ?? "—" }}
             </div>
           </div>
-          <div class="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-800">
-            <div class="text-xs text-gray-500 dark:text-gray-400">
+          <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+            <div class="text-label text-gray-500 dark:text-gray-400">
+              集中度
+            </div>
+            <div
+              class="mt-1 text-body-lg font-semibold num"
+              data-num
+            >
+              {{ summaryStrip.concentration ?? "—" }}
+            </div>
+          </div>
+          <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+            <div class="text-label text-gray-500 dark:text-gray-400">
               持仓数
             </div>
             <div
-              class="mt-1 font-semibold num"
+              class="mt-1 text-body-lg font-semibold num"
               data-num
             >
               {{ summaryStrip.count }}
@@ -242,7 +260,7 @@ function removeWatch(code: string) {
         <!-- 累计已实现盈亏趋势 -->
         <div
           v-if="trend"
-          class="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-800"
+          class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800"
           data-testid="realized-trend"
         >
           <div class="mb-1 flex items-baseline justify-between">
@@ -279,6 +297,7 @@ function removeWatch(code: string) {
               :market-value="p.market_value"
               :weight="p.weight"
               :freshness="p.freshness"
+              :to="`/instruments/${p.instrument_id}`"
             />
           </div>
         </div>
@@ -292,7 +311,7 @@ function removeWatch(code: string) {
     <template v-else-if="activeTab === 'transactions'">
       <div
         v-if="txOk && !txRows.length"
-        class="rounded-xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
+        class="rounded-lg bg-white p-6 text-center shadow-sm dark:bg-gray-800"
         data-testid="tx-empty"
       >
         <p class="font-medium">
@@ -304,7 +323,7 @@ function removeWatch(code: string) {
       </div>
       <div
         v-else
-        class="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
+        class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
         data-testid="tx-list"
       >
         <div
@@ -336,14 +355,20 @@ function removeWatch(code: string) {
         </div>
       </div>
       <p class="text-center text-xs text-gray-400 dark:text-gray-500">
-        最新 50 条 · 更多历史经 API 分页获取
+        <router-link
+          to="/transactions"
+          class="block text-center text-caption text-primary"
+          data-testid="goto-tx-list"
+        >
+          查看全部流水 ›
+        </router-link>
       </p>
     </template>
 
     <!-- ===== 自选 Tab ===== -->
     <template v-else>
       <!-- 新增 -->
-      <div class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
+      <div class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
         <form
           class="flex gap-2"
           @submit.prevent="addWatch"
@@ -375,7 +400,7 @@ function removeWatch(code: string) {
 
       <div
         v-if="watchOk && !watchCodesRef.length"
-        class="rounded-xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
+        class="rounded-lg bg-white p-6 text-center shadow-sm dark:bg-gray-800"
         data-testid="watch-empty"
       >
         <p class="font-medium">
@@ -387,7 +412,7 @@ function removeWatch(code: string) {
       </div>
       <div
         v-else
-        class="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
+        class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
         data-testid="watch-list"
       >
         <div
