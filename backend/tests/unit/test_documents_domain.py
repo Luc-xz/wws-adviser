@@ -130,3 +130,14 @@ def test_cursor_malformed_rejected() -> None:
         from wws_adviser.modules.documents.domain import encode_cursor
 
         decode_cursor(encode_cursor(published_at="2026-08-20", document_id=""))
+
+
+def test_art_code_from_url() -> None:
+    from wws_adviser.infrastructure.data_sources.akshare_document import _art_code_from_url
+
+    assert (
+        _art_code_from_url("https://data.eastmoney.com/notices/detail/603823/AN202604-1.html")
+        == "AN202604-1"
+    )
+    assert _art_code_from_url("akshare://announcement/600519/x") is None
+    assert _art_code_from_url("") is None

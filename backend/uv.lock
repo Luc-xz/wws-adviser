@@ -1892,6 +1892,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pypdf"
+version = "6.18.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c2/c3/9fa0666f280552bd3833562d985b785fce1ddb3804937edd2fd6a3f2bdb3/pypdf-6.18.0.tar.gz", hash = "sha256:ae58b7d93c22c169ffb02c3b06321c45c4f223b4916536568adb57d789d95d01", size = 7024871, upload-time = "2026-09-07T16:48:16.444Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/a5/d5922a078c9a612327681d4793404f82998f4d66213add6fdc0659245856/pypdf-6.18.0-py3-none-any.whl", hash = "sha256:05b762b77bcb9dcb4a7c91fcf5dded585b25bee7269ab3d3001d7c55fa1b324b", size = 393848, upload-time = "2026-09-07T16:48:14.254Z" },
+]
+
+[[package]]
 name = "pytest"
 version = "9.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2473,6 +2482,9 @@ akshare = [
 passkey = [
     { name = "fido2" },
 ]
+pdf = [
+    { name = "pypdf" },
+]
 webpush = [
     { name = "pywebpush" },
 ]
@@ -2482,6 +2494,7 @@ dev = [
     { name = "fido2" },
     { name = "hypothesis" },
     { name = "mypy" },
+    { name = "pypdf" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pywebpush" },
@@ -2500,19 +2513,21 @@ requires-dist = [
     { name = "polars", specifier = ">=1.0" },
     { name = "pydantic", specifier = ">=2.9" },
     { name = "pydantic-settings", specifier = ">=2.6" },
+    { name = "pypdf", marker = "extra == 'pdf'", specifier = ">=5.1" },
     { name = "python-multipart", specifier = ">=0.0.9" },
     { name = "python-ulid", specifier = ">=3.0" },
     { name = "pywebpush", marker = "extra == 'webpush'", specifier = ">=2.0" },
     { name = "sqlalchemy", specifier = ">=2.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32" },
 ]
-provides-extras = ["akshare", "passkey", "webpush"]
+provides-extras = ["akshare", "passkey", "pdf", "webpush"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "fido2", specifier = ">=1.1" },
     { name = "hypothesis", specifier = ">=6.115" },
     { name = "mypy", specifier = ">=1.13" },
+    { name = "pypdf", specifier = ">=5.1" },
     { name = "pytest", specifier = ">=8.3" },
     { name = "pytest-asyncio", specifier = ">=0.24" },
     { name = "pywebpush", specifier = ">=2.0" },

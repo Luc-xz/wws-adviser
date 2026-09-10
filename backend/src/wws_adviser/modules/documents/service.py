@@ -31,6 +31,7 @@ class IngestResult:
     discovered: int
     ingested: int
     skipped: int
+    updated: int = 0
 
 
 async def ingest_documents(
@@ -52,12 +53,38 @@ async def ingest_documents(
 
     ingested = 0
     skipped = 0
+    updated = 0
     for ref in refs:
         raw = await provider.download(ref)
         norm = parse_document(raw)
         content_sha = hashlib.sha256(raw.content).hexdigest()
         if repository.get_by_sha256(db, content_sha) is not None:
             skipped += 1
+            continue
+        # 同源同 URL 已存在（标题占位 → 真实正文等场景）：原行就地升级，防同公告重复入库
+        existing = repository.get_by_source_url(db, raw.source, ref.source_url)
+        if existing is not None:
+            old_text: str | None = None
+            if existing.text_path:
+                try:
+                    old_text = object_store.get(existing.text_path).decode("utf-8")
+                except Exception:  # noqa: BLE001 — 原文不可得则跳 FTS 删除（宁陈旧不损坏）
+                    old_text = None
+            old_title = existing.title
+            local_path = object_store.put(raw.content, kind=ref.kind, ext="bin")
+            text_path = object_store.put(norm.text.encode("utf-8"), kind="text", ext="txt")
+            now = now_utc_iso()
+            existing.local_path = local_path
+            existing.text_path = text_path
+            existing.content_sha256 = content_sha
+            existing.fetched_at = raw.fetched_at
+            existing.updated_at = now
+            existing.version = (existing.version or 1) + 1
+            repository.reindex_document_fts(
+                db, existing.id, existing.title, norm.text,
+                old_title=old_title, old_body=old_text,
+            )
+            updated += 1
             continue
         local_path = object_store.put(raw.content, kind=ref.kind, ext="bin")
         text_path = object_store.put(norm.text.encode("utf-8"), kind="text", ext="txt")
@@ -69,7 +96,7 @@ async def ingest_documents(
             issuer=None,
             published_at=ref.published_at,
             source=raw.source,
-            source_url=raw.source_url,
+            source_url=ref.source_url,
             content_sha256=content_sha,
             local_path=local_path,
             text_path=text_path,
@@ -90,11 +117,16 @@ async def ingest_documents(
         db,
         action="documents_ingested",
         target_type="document",
-        after={"discovered": len(refs), "ingested": ingested, "skipped": skipped},
+        after={
+            "discovered": len(refs), "ingested": ingested,
+            "skipped": skipped, "updated": updated,
+        },
         request_id=request_id,
     )
     db.commit()
-    return IngestResult(discovered=len(refs), ingested=ingested, skipped=skipped)
+    return IngestResult(
+        discovered=len(refs), ingested=ingested, skipped=skipped, updated=updated
+    )
 
 
 def list_documents(

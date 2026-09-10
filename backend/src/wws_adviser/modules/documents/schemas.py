@@ -40,3 +40,4 @@ class IngestResponse(BaseModel):
     discovered: int
     ingested: int
     skipped: int
+    updated: int = 0

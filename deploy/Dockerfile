@@ -21,7 +21,7 @@ ARG PYPI_INDEX=
 ARG UV_FIND_LINKS=
 ARG UV_OFFLINE=0
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --extra passkey --extra webpush $([ "$WITH_AKSHARE" = "1" ] && echo --extra akshare) $([ -n "$PYPI_INDEX" ] && echo --default-index "$PYPI_INDEX") $([ -n "$UV_FIND_LINKS" ] && echo --find-links "$UV_FIND_LINKS") $([ "$UV_OFFLINE" = "1" ] && echo --offline)
+    uv sync --frozen --no-dev --extra passkey --extra webpush --extra pdf $([ "$WITH_AKSHARE" = "1" ] && echo --extra akshare) $([ -n "$PYPI_INDEX" ] && echo --default-index "$PYPI_INDEX") $([ -n "$UV_FIND_LINKS" ] && echo --find-links "$UV_FIND_LINKS") $([ "$UV_OFFLINE" = "1" ] && echo --offline)
 
 # —— 2. OpenAPI 导出 ——
 # openapi.json 与 src/api/generated/ 均被 gitignore：在镜像内生成（与 CI 的 make gen-api 同源），

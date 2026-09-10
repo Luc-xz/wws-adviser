@@ -7,8 +7,8 @@ from wws_adviser.infrastructure.data_sources.stub_document import StubDocumentPr
 from wws_adviser.infrastructure.storage.local_object_store import LocalObjectStore
 from wws_adviser.modules.documents import service as docs_service
 from wws_adviser.modules.instruments import service as instruments_service
-from wws_adviser.ports.document_source import DocumentScope
-from wws_adviser.ports.market_data import InstrumentRef
+from wws_adviser.ports.document_source import DocumentRef, DocumentScope, RawDocument
+from wws_adviser.ports.market_data import InstrumentRef, SourceDelayClass
 
 
 def _scope(code: str = "600519") -> DocumentScope:
@@ -193,3 +193,68 @@ def test_documents_pagination_http(migrated_client) -> None:
     )
     assert bad.status_code == 400
     assert bad.json()["code"] == "INVALID_CURSOR"
+
+
+class _UpgradingProvider:
+    """两轮同公告：先标题占位（与历史 MVP 口径一致），再真实 HTML 正文。"""
+
+    def __init__(self) -> None:
+        self._calls = 0
+
+    async def discover(self, scope: DocumentScope, since: datetime) -> list[DocumentRef]:
+        return [
+            DocumentRef(
+                source_url="https://data.eastmoney.com/notices/detail/600519/ART1.html",
+                kind="announcement",
+                title="600519 年度报告",
+                published_at="2026-04-17",
+            )
+        ]
+
+    async def download(self, ref: DocumentRef) -> RawDocument:
+        from wws_adviser.core.time import now_utc_iso
+
+        self._calls += 1
+        content = (
+            "<html><body><p>营业收入增长15%</p></body></html>"
+            if self._calls > 1
+            else ref.title
+        ).encode("utf-8")
+        now = now_utc_iso()
+        return RawDocument(
+            source="akshare", source_url=ref.source_url, market_time=now,
+            fetched_at=now, received_at=now,
+            source_delay_class=SourceDelayClass.DELAYED,
+            kind=ref.kind, title=ref.title, content=content, text="",
+        )
+
+
+async def test_ingest_upgrades_existing_by_source_url(db_session, tmp_path) -> None:
+    """同源同 URL 重采：原行就地升级（version+1/正文/FTS），不产生重复文档。"""
+    store = LocalObjectStore(tmp_path)
+    provider = _UpgradingProvider()
+    inst = instruments_service.get_or_create_instrument(db_session, code="600519")
+    db_session.commit()
+    since = datetime.min.replace(tzinfo=UTC)
+
+    r1 = await docs_service.ingest_documents(
+        db_session, object_store=store, provider=provider,
+        scope=_scope("600519"), since=since,
+    )
+    assert (r1.ingested, r1.updated, r1.skipped) == (1, 0, 0)
+
+    r2 = await docs_service.ingest_documents(
+        db_session, object_store=store, provider=provider,
+        scope=_scope("600519"), since=since,
+    )
+    assert (r2.ingested, r2.updated, r2.skipped) == (0, 1, 0)
+
+    # 不重复入库；原行升级
+    docs = docs_service.list_documents(db_session, instrument_id=inst.id)
+    assert len(docs) == 1
+    d = docs[0]
+    assert d.version == 2
+    assert store.get(d.text_path or "").decode("utf-8") == "营业收入增长15%"
+    # FTS 重建后正文关键词可命中（占位期索引只含标题）
+    hits = docs_service.search_documents(db_session, "营业收入")
+    assert len(hits) == 1 and hits[0].id == d.id

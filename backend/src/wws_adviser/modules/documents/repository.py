@@ -46,12 +46,54 @@ def index_document_fts(
     )
 
 
+def reindex_document_fts(
+    db: DBSession,
+    document_id: str,
+    title: str,
+    body_text: str,
+    *,
+    old_title: str,
+    old_body: str | None,
+) -> None:
+    """正文升级后重建该行索引：先按原值删 contentless 行，再插新值。
+
+    contentless FTS5 的 delete 命令要求与原插入完全一致的值（错值会损索引）；
+    old_body 为 None（原文不可得）时跳过删除只插新行，宁可索引暂陈旧不可损坏。
+    """
+    rid = db.execute(
+        text("SELECT rowid FROM documents WHERE id = :id"), {"id": document_id}
+    ).scalar()
+    if rid is None:
+        return
+    if old_body is not None:
+        db.execute(
+            text(
+                "INSERT INTO documents_fts(documents_fts, rowid, title, body_text) "
+                "VALUES('delete', :r, :t, :b)"
+            ),
+            {"r": rid, "t": _segment_cjk(old_title), "b": _segment_cjk(old_body)},
+        )
+    db.execute(
+        text("INSERT INTO documents_fts (rowid, title, body_text) VALUES (:r, :t, :b)"),
+        {"r": rid, "t": _segment_cjk(title), "b": _segment_cjk(body_text)},
+    )
+
+
 # —— documents ——
 
 
 def get_by_sha256(db: DBSession, content_sha256: str) -> Document | None:
     return db.scalar(
         select(Document).where(Document.content_sha256 == content_sha256)
+    )
+
+
+def get_by_source_url(db: DBSession, source: str, source_url: str) -> Document | None:
+    """同源同 URL 的既有文档（正文升级路径：更新原行而非新插，防同公告重复入库）。"""
+    return db.scalar(
+        select(Document).where(
+            Document.source == source, Document.source_url == source_url
+        )
     )
 
 

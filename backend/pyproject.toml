@@ -25,6 +25,9 @@ akshare = ["akshare>=1.18"]
 passkey = [
     "fido2>=1.1",
 ]
+pdf = [
+    "pypdf>=5.1",
+]
 webpush = [
     "pywebpush>=2.0",
 ]
@@ -38,6 +41,7 @@ dev = [
     "hypothesis>=6.115",
     "fido2>=1.1",
     "pywebpush>=2.0",
+    "pypdf>=5.1",
 ]
 
 [build-system]

@@ -140,7 +140,8 @@ async def refresh_documents(
         request_id=request.headers.get("x-request-id"),
     )
     return IngestResponse(
-        discovered=result.discovered, ingested=result.ingested, skipped=result.skipped
+        discovered=result.discovered, ingested=result.ingested, skipped=result.skipped,
+        updated=result.updated
     )
 
 

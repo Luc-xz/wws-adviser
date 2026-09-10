@@ -7,6 +7,7 @@ VPS 实测（2026-08）：akshare 的 stock_notice_report(symbol=…) 参数语�
 """
 
 import asyncio
+import re
 from datetime import datetime
 from typing import Any
 
@@ -87,8 +88,14 @@ class AKShareDocumentProvider:
 
     async def download(self, ref: DocumentRef) -> RawDocument:
         now = now_utc_iso()
-        # MVP：公告正文需按 source_url 抓取（akshare 无直接正文接口），此处返回标题占位
-        body = ref.title
+        # 正文抓取：东财公告内容 API（HTML 正文）→ 附件 PDF → 全失败退标题占位
+        #（与历史占位字节一致，content_sha256 不变 → 采入去重 skipped）。
+        content: bytes | None = None
+        art_code = _art_code_from_url(ref.source_url)
+        if art_code:
+            content = await asyncio.to_thread(_fetch_notice_content_sync, art_code)
+        if content is None:
+            content = ref.title.encode("utf-8")
         return RawDocument(
             source="akshare",
             source_url=ref.source_url,
@@ -98,9 +105,42 @@ class AKShareDocumentProvider:
             source_delay_class=SourceDelayClass.DELAYED,
             kind=ref.kind,
             title=ref.title,
-            content=body.encode("utf-8"),
-            text=body,
+            content=content,
+            text="",  # 抽取统一走 domain.extract_text（魔数嗅探）
         )
+
+
+def _art_code_from_url(url: str) -> str | None:
+    """东财详情页 URL → art_code（/notices/detail/{code}/{art_code}.html）。"""
+    m = re.search(r"/notices/detail/[^/]+/([0-9A-Za-z_-]+)\.html", url)
+    return m.group(1) if m else None
+
+
+_NOTICE_CONTENT_URL = "https://np-cnotice-stock.eastmoney.com/api/content/ann"
+
+
+def _fetch_notice_content_sync(art_code: str) -> bytes | None:
+    """公告正文原始字节：notice_content HTML 优先，退附件 PDF。全失败 None。"""
+    import httpx
+
+    params = {"art_code": art_code, "client_source": "web", "page_index": "1"}
+    resp = httpx.get(_NOTICE_CONTENT_URL, params=params, timeout=15.0)
+    resp.raise_for_status()
+    data = resp.json().get("data") or {}
+    html_body = str(data.get("notice_content") or "").strip()
+    if html_body:
+        return html_body.encode("utf-8")
+    for att in data.get("attach_list") or []:
+        att_url = str(att.get("attach_url") or att.get("url") or "")
+        if not att_url:
+            continue
+        try:
+            pdf = httpx.get(att_url, timeout=30.0, follow_redirects=True).content
+        except Exception:  # noqa: BLE001 — 附件下载失败试下一个
+            continue
+        if pdf[:5] == b"%PDF-":
+            return pdf
+    return None
 
 
 def _fetch_notices_sync(code: str) -> list[dict[str, Any]]:

@@ -1,12 +1,15 @@
 """Documents 领域：可信等级、文档类型、文本抽取、解析。纯领域，禁框架 import。
 
-公告/网页/新闻属不可信输入（技术架构 §17）；文本抽取 MVP 直取 raw.text 或解码 content，
-结构化 PDF/HTML 解析留后续波次。
+公告/网页/新闻属不可信输入（技术架构 §17）；文本抽取按字节魔数嗅探：
+PDF 走 pypdf（pdf extra 懒加载），HTML 剥标签，未知格式 UTF-8 容错解码。
 """
 
 import base64
+import html as html_lib
+import re
 from dataclasses import dataclass
 from enum import StrEnum
+from io import BytesIO
 
 from wws_adviser.ports.document_source import RawDocument
 
@@ -50,10 +53,50 @@ class NormalizedDocument:
 
 
 def extract_text(raw: RawDocument) -> str:
-    """抽取纯文本：优先 raw.text；否则解码 content（MVP；PDF/HTML 解析留后续）。"""
+    """抽取纯文本：raw.text 优先；否则按 content 魔数嗅探（PDF→pypdf，HTML→剥标签）。"""
     if raw.text:
         return raw.text
-    return raw.content.decode("utf-8", errors="replace")
+    return extract_bytes_text(raw.content)
+
+
+def extract_bytes_text(content: bytes) -> str:
+    """原始字节 → 纯文本（魔数嗅探；未知格式按 UTF-8 容错解码）。"""
+    if content[:5] == b"%PDF-":
+        pdf_text = extract_pdf_text(content)
+        return pdf_text if pdf_text else ""
+    head = content[:512].lstrip().lower()
+    if head.startswith((b"<!doctype html", b"<html")) or b"<body" in head:
+        return strip_html_text(content.decode("utf-8", errors="replace"))
+    return content.decode("utf-8", errors="replace")
+
+
+def extract_pdf_text(content: bytes) -> str | None:
+    """PDF 字节 → 文本（pypdf 懒加载，未安装/解析失败返回 None——退占位不阻断采集）。"""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        return None
+    try:
+        reader = PdfReader(BytesIO(content))
+        return "\n".join((page.extract_text() or "") for page in reader.pages).strip()
+    except Exception:  # noqa: BLE001 — 损坏 PDF 不阻断采集
+        return None
+
+
+_RE_SCRIPT_STYLE = re.compile(r"<(script|style)\b[^>]*>.*?</\1>", re.IGNORECASE | re.DOTALL)
+_RE_BLOCK_BREAK = re.compile(r"<(?:br|/p|/div|/tr|/li|/h[1-6])\b[^>]*>", re.IGNORECASE)
+_RE_TAG = re.compile(r"<[^>]+>")
+_RE_WS = re.compile("[ \t\f\v\xa0]+")
+
+
+def strip_html_text(html: str) -> str:
+    """HTML → 纯文本：去 script/style、块级标签换行、剥标签、还原实体、压空白。"""
+    text = _RE_SCRIPT_STYLE.sub(" ", html)
+    text = _RE_BLOCK_BREAK.sub("\n", text)
+    text = _RE_TAG.sub(" ", text)
+    text = html_lib.unescape(text)
+    lines = [_RE_WS.sub(" ", ln).strip() for ln in text.splitlines()]
+    return "\n".join(ln for ln in lines if ln)
 
 
 def parse_document(raw: RawDocument) -> NormalizedDocument:
