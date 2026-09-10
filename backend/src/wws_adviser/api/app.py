@@ -104,19 +104,36 @@ def create_app(
 
 
 class SPAStaticFiles(StaticFiles):
-    """SPA history 模式回退：非文件型深链（如 /transactions/new）返回应用壳。
+    """SPA history 模式回退 + PWA 缓存策略头。
 
-    - `api/` 前缀不回退——未知 API 路径保持 404，不被 HTML 掩盖；
-    - 文件型路径（末段含扩展名分隔点，如 /assets/missing.js）不回退——缺资源就该 404。
+    - 回退：非文件型深链（如 /transactions/new）返回应用壳；`api/` 前缀与文件型
+      路径（末段含扩展名分隔点）不回退——API 404 与缺资源 404 均不被 HTML 掩盖；
+    - 缓存：hashed 资源（assets/）放行一年不可变；其余（index.html / sw.js /
+      manifest）一律 no-cache 强制协商——否则浏览器启发式缓存会拖住 SW 更新，
+      部署后用户长时间看到旧壳。
     """
 
+    _IMMUTABLE = "public, max-age=31536000, immutable"
+    _REVALIDATE = "no-cache"
+
     async def get_response(self, path: str, scope: Scope) -> Response:
+        response = await self._response_with_fallback(path, scope)
+        response.headers["Cache-Control"] = (
+            self._IMMUTABLE if self._is_hashed_asset(path) else self._REVALIDATE
+        )
+        return response
+
+    async def _response_with_fallback(self, path: str, scope: Scope) -> Response:
         try:
             return await super().get_response(path, scope)
         except HTTPException as exc:
             if exc.status_code == 404 and self._should_fallback(path):
                 return await super().get_response("index.html", scope)
             raise
+
+    @staticmethod
+    def _is_hashed_asset(path: str) -> bool:
+        return path.replace("\\", "/").lstrip("/").startswith("assets/")
 
     @staticmethod
     def _should_fallback(path: str) -> bool:

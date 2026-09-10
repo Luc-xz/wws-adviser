@@ -17,6 +17,7 @@ def spa_client(tmp_path: Path) -> Iterator[TestClient]:
     static_dir = tmp_path / "static"
     (static_dir / "assets").mkdir(parents=True)
     (static_dir / "index.html").write_text(_SHELL, encoding="utf-8")
+    (static_dir / "sw.js").write_text("// sw", encoding="utf-8")
     (static_dir / "assets" / "app.js").write_text("console.log(1)", encoding="utf-8")
     settings = Settings(
         env="test",
@@ -65,3 +66,12 @@ def test_real_asset_served(spa_client: TestClient) -> None:
     r = spa_client.get("/assets/app.js")
     assert r.status_code == 200
     assert "console.log" in r.text
+
+
+def test_cache_control_headers(spa_client: TestClient) -> None:
+    """hashed 资源不可变长缓存；壳与 SW 强制协商——部署后不被启发式缓存拖住。"""
+    r_asset = spa_client.get("/assets/app.js")
+    assert r_asset.headers["cache-control"] == "public, max-age=31536000, immutable"
+    for path in ("/", "/transactions/new", "/sw.js"):
+        r = spa_client.get(path)
+        assert r.headers["cache-control"] == "no-cache", path
