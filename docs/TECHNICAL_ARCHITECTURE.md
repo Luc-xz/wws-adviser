@@ -1307,22 +1307,26 @@ ADR 格式至少包含状态、上下文、决策、备选方案、正负影响�
 
 ## 25. MVP 架构验收清单
 
-- [ ] 单个 Docker 应用容器和一个 `/data` 卷可以完成部署。
-- [ ] 生产启动明确拒绝或告警多 worker 配置。
-- [ ] SQLite 启用 WAL、外键和 busy timeout，迁移可从空库运行。
-- [ ] 交易重放可重建持仓，金额和数量全链路无浮点结算误差。
-- [ ] 行情、公告和新闻都带来源、市场/发布时间、抓取时间和质量状态。
-- [ ] 数据源、模型和通知均通过端口适配，不渗透到领域计算。
-- [ ] 分析先冻结快照，报告和建议可按 ID 完整复现。
-- [ ] 行情过期、账本未对账和模型冲突时可靠进入降级状态。
-- [ ] 凯利概率只能来自全市场同类信号回测、样本外校准通过且未过期的信号；模型 Gateway 无权写入 `p` 字段。
-- [ ] 凯利任何拒绝或折扣都保留可审计的原因链（样本不足/未校准/过期/校准失败/payoff 非正或极端/数据过期/降级），拒绝时不输出具体仓位区间。
-- [ ] 模型输出通过 schema、数值、引用和风险校验后才能发布。
-- [ ] APScheduler 只入队任务，任务具备唯一键、租约和安全重试。
-- [ ] PWA 可安装；实时接口不离线缓存，退出登录清理私有报告缓存。
-- [ ] API 密钥不进入 SQLite 明文字段、日志、前端和普通备份。
-- [ ] Online Backup、恢复校验和持仓重算完成演练。
-- [ ] 手机核心路径、模型故障、数据过期和任务恢复均有自动化测试。
+> **2026-09-10 核对回填**：十六项逐项核对全绿，证据 = 自动化测试（460 后端 + 41 前端，
+> 当日全绿）/ 部署实录（VPS 114.132.239.95，Phase 1/2 收官镜像 6e2b29d/8ef2a2a）/
+> 演练记录（备份恢复 2026-09-10）。核对记录同步至里程碑 §7。
+
+- [x] 单个 Docker 应用容器和一个 `/data` 卷可以完成部署。✅ `deploy/Dockerfile`（多阶段、非 root、标签=commit）+ `docker-compose.yml`（/data 卷 + 仅回环 8000）；VPS 实跑 Phase 1/2 验证窗口全程单容器。
+- [x] 生产启动明确拒绝或告警多 worker 配置。✅ `core/worker_guard.py`：prod 多 worker 抛 `MultiWorkerError` 拒绝启动，非 prod 告警放行——`test_worker_guard` 3 测试锁定。
+- [x] SQLite 启用 WAL、外键和 busy timeout，迁移可从空库运行。✅ `core/db.py` 连接事件执行 `PRAGMA journal_mode=WAL / foreign_keys=ON / busy_timeout=5000`；migrate-check 空库建至 0015（37 表，2026-09-10 复验）+ CI 门禁。
+- [x] 交易重放可重建持仓，金额和数量全链路无浮点结算误差。✅ 金额定标整数分存储、price/quantity 无损 decimal 串；`test_positions_domain` 8 种交易类型固定 fixture 断言；Phase 1 退出条件 2（1635 笔全量回放对账 100%）VPS 实测。
+- [x] 行情、公告和新闻都带来源、市场/发布时间、抓取时间和质量状态。✅ `market_records`（source/source_url/fetched_at/quality_status/source_delay_class）、`nav_records`、`documents`（来源/发布时间/内容哈希）字段齐备；DATA-01 按质量状态展示。
+- [x] 数据源、模型和通知均通过端口适配，不渗透到领域计算。✅ `ports/`（market_data/model/notifier/document_source/object_store）Protocol 定义；领域模块只 import ports（如 advice/service 经 `ports.market_data.InstrumentRef`），适配器 stub_*/akshare_*/openai_* 全在 infrastructure；契约测试 cassette。
+- [x] 分析先冻结快照，报告和建议可按 ID 完整复现。✅ `analysis_snapshots` 幂等不可变冻结（同 (account,date,purpose) 重入返回既有）；`test_reports`（10 测试）覆盖 refs 冻结/版本递进/幂等。
+- [x] 行情过期、账本未对账和模型冲突时可靠进入降级状态。✅ `test_advice_domain`（15）锁定 quote_fresh=False→suspend + data_stale 失效链；`ledger_unreconciled` 与 `data_conflict`（3.3 多源冲突）降级路径均有测试 + Phase 2 验收窗口真实实例（8/31 三重原因降级、窗口内 30 条零区间）。
+- [x] 凯利概率只能来自全市场同类信号回测、样本外校准通过且未过期的信号；模型 Gateway 无权写入 `p` 字段。✅ `test_phase2_exit_criteria` 结构性检查（p 写路径仅在回测/校准服务）；运行形态 `breakout-20 = calibrated_oos`（n_eff_oos=109/30，有效期至 2026-12-10）。
+- [x] 凯利任何拒绝或折扣都保留可审计的原因链（样本不足/未校准/过期/校准失败/payoff 非正或极端/数据过期/降级），拒绝时不输出具体仓位区间。✅ `test_kelly`（27）全枚举拒绝/折扣原因链 + 拒绝形态 f_min/f_max/lots 置空断言。
+- [x] 模型输出通过 schema、数值、引用和风险校验后才能发布。✅ model_gateway 后置校验（数值与确定性不一致→覆盖为确定性值；evidence 白名单违例→BLOCKED；结构缺字段→一次受控修复）；`test_model_gateway`（7，含"模型调用时无打开写事务"断言）。
+- [x] APScheduler 只入队任务，任务具备唯一键、租约和安全重试。✅ `test_jobs`：enqueue 幂等（UNIQUE）/claim CAS 无并发/租约到期可重领/非法状态转移拒绝 + `test_scheduler_enqueue_only_viapoints`（scheduler 仅入队，执行归 executor 常驻线程）。
+- [x] PWA 可安装；实时接口不离线缓存，退出登录清理私有报告缓存。✅ build 产出 manifest.webmanifest + SW（precache 51 entries）；`/api` 路由 NetworkOnly（vite.config SW 生成）；`reportCache.test` 6 测试（user/kind 隔离、版本化、LRU、登出清 `wws-report-*`）。
+- [x] API 密钥不进入 SQLite 明文字段、日志、前端和普通备份。✅ settings 只存 env 引用名（GET 掩码）；备份演练 3 个真实密钥值子串扫描未泄漏（2026-09-10）；密钥经 env 注入（env.example 只名不密）。
+- [x] Online Backup、恢复校验和持仓重算完成演练。✅ 2026-09-10 演练：Online Backup API 备份 → 隔离容器恢复 → 迁移头比对正确拒就绪 → upgrade 后就绪 → integrity ok + 表一致（users/transactions/positions 校验通过）+ 校准状态随库恢复；`core/backup.py` + `scripts/backup_drill.py`。
+- [x] 手机核心路径、模型故障、数据过期和任务恢复均有自动化测试。✅ 前端 vitest 41 例（HOME 空账户/离线契约、TC-DSB/RA/NUM、建议页契约、离线缓存与轮询兜底）；后端 AC-06 断 key 降级、data_stale 失效链、job 租约重领（见上各条对应测试）。
 
 ## 26. 后续详细设计文档
 

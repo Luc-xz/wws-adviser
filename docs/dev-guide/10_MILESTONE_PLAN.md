@@ -177,9 +177,9 @@ Phase 3 完成后逐项核：
 - [x] 备份恢复演练完成（Phase 0 骨架 → Phase 1 全量）。✅ 2026-09-10 演练通过：备份 `pre-phase3-20260909.db`（alembic 0011）→ 隔离容器恢复（8010 端口）→ `/health/ready` 正确拒就绪（迁移头比对生效，缺 0012–0015 六表）→ `alembic upgrade head` → 就绪；integrity ok；users 1 / accounts 1 / transactions 1722 / advice_records 123 / documents 48 / reports 45 / job_runs 64 / instruments 86 / market_records 6143；校准状态随库恢复（breakout-20 calibrated_oos 至 2026-12-10）；登录页与市场状态 API 可用；演练容器与临时文件已清理。
 - [ ] 公网部署 HTTPS/身份/会话/密钥检查（[8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §11）。⏸ 2026-09-10 方向记录：拟改 **Cloudflare Tunnel**（免开公网端口 + 自动 HTTPS）；落地时按 §11 清单核对并立 ADR。
 - [ ] 数据源使用符合授权与服务条款（供应商确定后复核）。
-- [ ] 技术架构 §25 MVP 架构验收清单 16 项全绿。
+- [x] 技术架构 §25 MVP 架构验收清单 16 项全绿。✅ 2026-09-10 核对回填（[TECHNICAL_ARCHITECTURE §25](../TECHNICAL_ARCHITECTURE.md)）：十六项逐项附证据——自动化测试 460 后端 + 41 前端当日全绿、VPS 部署实录（6e2b29d/8ef2a2a）、备份演练记录、migrate-check 空库 0015 复验。
 
-> **2026-09-10 核对记录**：上述自动化 5 项的证据子集（7 个测试文件共 76 测试）单独运行全过；备份恢复演练同日完成。剩余 4 项：真机验证（延后）、Cloudflare Tunnel（待落地）、数据源条款与 §25 清单（随公网部署一并核）。
+> **2026-09-10 核对记录**：上述自动化 5 项的证据子集（7 个测试文件共 76 测试）单独运行全过；备份恢复演练同日完成；§25 十六项清单同日核对全绿（证据注记在技术架构 §25）。剩余 3 项：真机验证（延后，与 V5 合流）、Cloudflare Tunnel（待落地）、数据源条款（随公网部署一并核）。
 
 ## 8. 运行配置与待确认项
 
