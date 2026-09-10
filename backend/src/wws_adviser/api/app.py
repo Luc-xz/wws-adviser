@@ -9,6 +9,9 @@ from contextlib import AbstractAsyncContextManager
 from uuid import uuid4
 
 from fastapi import FastAPI, Request, Response
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException
+from starlette.types import Scope
 
 from wws_adviser.api.errors import problem, register_exception_handlers
 from wws_adviser.api.routes import health
@@ -92,10 +95,34 @@ def create_app(
         return response
 
     # 同源静态（技术架构 §17.1）：配置了 WWSE_STATIC_DIR 且目录存在时挂载 PWA 产物
-    # （最后挂载 → API 路由优先匹配；html=True 提供 SPA 入口回退）。开发用 vite dev/proxy 不配。
+    # （最后挂载 → API 路由优先匹配；SPA history 回退见 SPAStaticFiles）。
+    # 开发用 vite dev/proxy 不配。
     if settings.static_dir is not None and settings.static_dir.is_dir():
-        from fastapi.staticfiles import StaticFiles
-
-        app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="pwa")
+        app.mount("/", SPAStaticFiles(directory=settings.static_dir, html=True), name="pwa")
 
     return app
+
+
+class SPAStaticFiles(StaticFiles):
+    """SPA history 模式回退：非文件型深链（如 /transactions/new）返回应用壳。
+
+    - `api/` 前缀不回退——未知 API 路径保持 404，不被 HTML 掩盖；
+    - 文件型路径（末段含扩展名分隔点，如 /assets/missing.js）不回退——缺资源就该 404。
+    """
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        try:
+            return await super().get_response(path, scope)
+        except HTTPException as exc:
+            if exc.status_code == 404 and self._should_fallback(path):
+                return await super().get_response("index.html", scope)
+            raise
+
+    @staticmethod
+    def _should_fallback(path: str) -> bool:
+        # StaticFiles 在 Windows 下以反斜杠连接路径，统一分隔符后判断
+        normalized = path.replace("\\", "/").lstrip("/")
+        if normalized.startswith("api/"):
+            return False
+        last_segment = normalized.rsplit("/", 1)[-1]
+        return "." not in last_segment
