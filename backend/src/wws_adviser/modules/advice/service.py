@@ -9,16 +9,17 @@ ledger_unreconciled / no_calibrated_signal / gate:*——不静默隐藏。
 
 import json
 import logging
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
 from fastapi import Request
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session as DBSession
 
 from wws_adviser.core.config import Settings
+from wws_adviser.core.errors import DomainError
 from wws_adviser.core.ids import new_id
 from wws_adviser.core.time import now_utc_iso
 from wws_adviser.modules.advice.domain import (
@@ -26,6 +27,8 @@ from wws_adviser.modules.advice.domain import (
     Advice,
     IntradayContext,
     build_intraday_advice,
+    decode_cursor,
+    encode_cursor,
     is_actionable,
 )
 from wws_adviser.modules.advice.models import AdviceRecord
@@ -350,4 +353,108 @@ def advice_to_payload(a: Advice) -> dict[str, Any]:
              "after": str(s.after) if s.after is not None else None}
             for s in a.trail
         ],
+    }
+
+
+# —— 历史建议记录查询（3_API §3.9：HOME-02 列表 / CHAT-02 详情 / 评价回读）——
+
+
+class NotFoundError(DomainError):
+    code = "NOT_FOUND"
+    status = 404
+
+
+@dataclass(slots=True)
+class AdviceRecordPage:
+    rows: list[AdviceRecord]
+    next_cursor: str | None
+    has_more: bool
+
+
+def list_records(
+    db: DBSession,
+    *,
+    user_id: str,
+    code: str | None = None,
+    action: str | None = None,
+    state: str | None = None,
+    cursor: str | None = None,
+    limit: int = 50,
+) -> AdviceRecordPage:
+    """当前用户的建议记录，按 created_at DESC, id DESC 游标分页。"""
+    cursor_tuple = decode_cursor(cursor) if cursor else None
+    cond = [AdviceRecord.user_id == user_id]
+    if code:
+        cond.append(AdviceRecord.code == code)
+    if action:
+        cond.append(AdviceRecord.action == action)
+    if state:
+        cond.append(AdviceRecord.state == state)
+    if cursor_tuple is not None:
+        c_created, c_id = cursor_tuple
+        cond.append(or_(
+            AdviceRecord.created_at < c_created,
+            and_(AdviceRecord.created_at == c_created, AdviceRecord.id < c_id),
+        ))
+    rows = list(db.scalars(
+        select(AdviceRecord).where(*cond)
+        .order_by(AdviceRecord.created_at.desc(), AdviceRecord.id.desc())
+        .limit(limit + 1)
+    ))
+    has_more = len(rows) > limit
+    page = rows[:limit]
+    next_cursor = (
+        encode_cursor(page[-1].created_at, page[-1].id) if has_more and page else None
+    )
+    return AdviceRecordPage(rows=page, next_cursor=next_cursor, has_more=has_more)
+
+
+def get_record(db: DBSession, *, user_id: str, record_id: str) -> AdviceRecord:
+    row = db.scalar(select(AdviceRecord).where(
+        AdviceRecord.id == record_id, AdviceRecord.user_id == user_id,
+    ))
+    if row is None:
+        raise NotFoundError("建议记录不存在")
+    return row
+
+
+def record_to_payload(row: AdviceRecord) -> dict[str, Any]:
+    """AdviceRecord → API JSON（与 advice_to_payload 字段同义 + 评价回填）。
+
+    历史记录未持久化 trigger_conditions/invalidation_reasons 文本，不伪造；
+    失效语义由 expires_at + invalidated 表达。
+    """
+    evaluation: dict[str, Any] | None = None
+    if row.evaluation_json:
+        evaluation = json.loads(row.evaluation_json)
+
+    def _names(raw: str | None) -> list[str]:
+        return list(json.loads(raw)) if raw else []
+
+    def _trail(raw: str | None) -> list[dict[str, Any]]:
+        return list(json.loads(raw)) if raw else []
+
+    return {
+        "advice_id": row.id,
+        "signal_id": row.signal_id,
+        "code": row.code,
+        "action": row.action,
+        "state": row.state,
+        "valid_from": row.valid_from,
+        "expires_at": row.expires_at,
+        "actionable": row.state == "published" and not row.invalidated,
+        "invalidated": row.invalidated,
+        "f_min": row.f_min,
+        "f_max": row.f_max,
+        "value_min": row.value_min,
+        "value_max": row.value_max,
+        "suggested_lots": row.suggested_lots,
+        "reasons": _names(row.reasons_json),
+        "evidence_ids": _names(row.evidence_json),
+        "trail": _trail(row.trail_json),
+        "model_explanation": row.model_explanation,
+        "verdict": row.verdict,
+        "evaluated_at": row.evaluated_at,
+        "evaluation": evaluation,
+        "created_at": row.created_at,
     }

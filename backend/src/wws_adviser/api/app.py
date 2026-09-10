@@ -17,6 +17,7 @@ from wws_adviser.api.errors import problem, register_exception_handlers
 from wws_adviser.api.routes import health
 from wws_adviser.core.config import Settings
 from wws_adviser.core.logging import request_id_var
+from wws_adviser.modules.advice.api import records_router as advice_records_router
 from wws_adviser.modules.advice.api import router as advice_router
 from wws_adviser.modules.analytics.api import analytics_router, positions_router
 from wws_adviser.modules.appsettings.api import router as settings_router
@@ -58,6 +59,7 @@ def create_app(
     app.include_router(reports_router)
     app.include_router(settings_router)
     app.include_router(advice_router)
+    app.include_router(advice_records_router)
     app.include_router(research_router)
     app.include_router(push_router)
 

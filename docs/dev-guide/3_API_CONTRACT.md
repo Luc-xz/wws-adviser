@@ -98,12 +98,15 @@
 
 ### 3.9 advice
 
+历史建议记录查询（2026-09-10 交付；数据源为 `advice_records`，FR-REV-003 建议时快照）。
+列表按 `created_at DESC` keyset 游标分页（`cursor` + `has_more`），仅当前用户可见。
+
 | 方法 路径 | 用途 | 关键字段 |
 | --- | --- | --- |
-| `GET /advice` | 今日建议列表 | 每条：`action, current_weight, target_weight_range, triggers, invalidations, valid_until, evidence_ids, degradation_reasons` |
-| `GET /advice/:id` | 建议详情 | 含 `reason_chain`（凯利拒绝/折扣） |
-| `GET /advice/:id/evaluation` | 建议评价 | 按动作类型口径（见 [4_ANALYTICS_AND_RISK.md](./4_ANALYTICS_AND_RISK.md)） |
-| `POST /advice/:id/acknowledge` | 用户确认已读/已记录行动 | 写审计 |
+| `GET /advice` | 建议记录列表（`?code=&action=&state=&cursor=&limit=`） | 每条：`action, state, actionable, invalidated, f_min/f_max, value_min/value_max, suggested_lots, reasons, trail, evidence_ids, verdict, created_at` |
+| `GET /advice/:id` | 建议详情 | 全字段 + `evaluation`（评价回填）；历史记录不携带 `trigger_conditions` 文本（未持久化，不伪造） |
+| `GET /advice/:id/evaluation` | 建议评价回读 | `verdict, evaluated_at, spec_version, reasons, direction_return, horizon`（按动作类型口径，见 [4_ANALYTICS_AND_RISK.md](./4_ANALYTICS_AND_RISK.md)；未评价 verdict=null） |
+| `POST /advice/:id/acknowledge` | 用户确认已读/已记录行动 | 写审计。**留白**（未交付；CHAT-02 偏差登记于基准卡） |
 
 ### 3.10 assistant（盘中/通用问询）
 

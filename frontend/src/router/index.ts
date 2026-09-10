@@ -41,6 +41,21 @@ const router = createRouter({
       component: () => import("@/features/assistant/pages/Assistant.vue"),
       meta: { requiresAuth: true, title: "助手" },
     },
+    // ===== advice_records 查询 API 补页（2026-09-10，原 V4 后端缺口收口）=====
+    // HOME-02 今日行动与风险（承接首页「查看全部」）
+    {
+      path: "/advice",
+      name: "advice-list",
+      component: () => import("@/features/advice/pages/AdviceList.vue"),
+      meta: { requiresAuth: true, title: "今日行动与风险" },
+    },
+    // CHAT-02 建议详情（完整建议卡 + 凯利过程 + 评价回读）
+    {
+      path: "/advice/:id",
+      name: "advice-detail",
+      component: () => import("@/features/advice/pages/AdviceDetail.vue"),
+      meta: { requiresAuth: true, title: "建议详情" },
+    },
     // LIB-01 研究与报告库
     {
       path: "/research",

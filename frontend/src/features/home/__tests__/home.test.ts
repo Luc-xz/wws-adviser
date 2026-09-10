@@ -24,6 +24,7 @@ function mkRouter() {
     routes: [
       { path: "/", component: HomeOverview },
       { path: "/portfolio", component: { template: "<div/>" } },
+      { path: "/advice", component: { template: "<div/>" } },
       { path: "/data-status", component: { template: "<div/>" } },
     ],
   });

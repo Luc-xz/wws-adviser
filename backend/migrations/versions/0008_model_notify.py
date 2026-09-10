@@ -1,4 +1,4 @@
-"""model_gateway + notifications + app_settings: model_profiles, model_calls, notifications, app_settings
+"""model_gateway + notifications + app_settings: model_profiles/model_calls 等 4 表
 
 建 4 表（波6 / 工作项 1.6）。model_profiles.key_ref 只存 env 变量名（密钥绝不落库，
 8_SECURITY §5）；notifications 以 (channel,event_type,payload_hash) 幂等；app_settings

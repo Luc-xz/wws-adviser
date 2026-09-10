@@ -10,6 +10,7 @@ FSM：DRAFT → DATA_CHECKED → RISK_CHECKED → MODEL_EXPLAINED → OUTPUT_VAL
 - 拒绝/暂停的建议不携带仓位区间，只携带原因类别。
 """
 
+import base64
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from decimal import Decimal
@@ -283,3 +284,17 @@ def build_intraday_advice(
         reasons=ctx.kelly_reasons, evidence_ids=tuple(evidence_ids),
         trail=ctx.kelly_trail,
     )
+
+
+# —— 游标分页（base64 of "created_at|id"，按 created_at DESC, id DESC）——
+
+
+def encode_cursor(created_at: str, row_id: str) -> str:
+    raw = f"{created_at}|{row_id}".encode()
+    return base64.urlsafe_b64encode(raw).decode("ascii")
+
+
+def decode_cursor(cursor: str) -> tuple[str, str]:
+    raw = base64.urlsafe_b64decode(cursor.encode("ascii")).decode("utf-8")
+    created_at, row_id = raw.split("|", 1)
+    return created_at, row_id

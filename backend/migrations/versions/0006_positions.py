@@ -43,7 +43,9 @@ def upgrade() -> None:
         sa.Column("created_at", sa.Text(), nullable=False),
         sa.Column("updated_at", sa.Text(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False, server_default="1"),
-        sa.ForeignKeyConstraint(["account_id"], ["accounts.id"], name="fk_position_snapshots_account_id"),
+        sa.ForeignKeyConstraint(
+            ["account_id"], ["accounts.id"], name="fk_position_snapshots_account_id"
+        ),
         sa.ForeignKeyConstraint(
             ["instrument_id"], ["instruments.id"], name="fk_position_snapshots_instrument_id"
         ),

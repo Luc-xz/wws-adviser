@@ -203,7 +203,7 @@ function reportTitle(t: string): string {
         class="space-y-2"
       >
         <router-link
-          to="/portfolio"
+          to="/advice"
           class="flex items-center justify-between rounded-lg px-4 py-3"
           :class="sortedBreaches.some((b) => b.level === 'hard')
             ? 'bg-risk-critical/10 text-risk-critical'
