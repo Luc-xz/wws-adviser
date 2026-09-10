@@ -168,16 +168,18 @@ PRD §17 阶段 4、技术架构 §21 扩展触发条件。**不预设规模提�
 
 Phase 3 完成后逐项核：
 
-- [ ] 持仓计算测试覆盖买/卖/费用/分红/拆分/申赎/调整（Phase 1）。
-- [ ] 风险规则、凯利、降级逻辑有自动测试（Phase 2）。
-- [ ] 报告关键数字可溯至数据记录或确定性计算（Phase 1/3）。
-- [ ] 交易时段行情过期可靠阻止具体交易数量（Phase 2）。
-- [ ] 模型不可用/异常不破坏业务数据（Phase 1）。
-- [ ] PWA 在 iOS+Android 等效环境验证（Phase 0/3）。
-- [ ] 备份恢复演练完成（Phase 0 骨架 → Phase 1 全量）。
-- [ ] 公网部署 HTTPS/身份/会话/密钥检查（[8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §11）。
+- [x] 持仓计算测试覆盖买/卖/费用/分红/拆分/申赎/调整（Phase 1）。✅ 2026-09-10 核：`test_positions_domain` 8 测试，8 种交易类型全枚举（BUY/SELL/SUBSCRIBE/REDEEM/DIVIDEND/SPLIT/FEE/ADJUST）。
+- [x] 风险规则、凯利、降级逻辑有自动测试（Phase 2）。✅ 2026-09-10 核：`test_kelly`（27）+ `test_advice_domain`（15）+ `test_phase2_exit_criteria`（5）。
+- [x] 报告关键数字可溯至数据记录或确定性计算（Phase 1/3）。✅ 2026-09-10 核：`test_reports`（10，幂等/降级/版本/refs 冻结）+ `test_research_exit`（4，引用→文档→哈希复盘链）。
+- [x] 交易时段行情过期可靠阻止具体交易数量（Phase 2）。✅ 2026-09-10 核：`test_advice_domain` quote_fresh=False→suspend + data_stale 失效链；Phase 2 收官期 AC-03 沪深全标实测佐证。
+- [x] 模型不可用/异常不破坏业务数据（Phase 1）。✅ 2026-09-10 核：`test_model_gateway`（7，含"模型调用时无打开写事务"断言 + model_unavailable 降级可重试）。
+- [ ] PWA 在 iOS+Android 等效环境验证（Phase 0/3）。⏸ 2026-09-10 决策：**延后**（重要性调降；缓存策略头已修复，装机体验就绪，与视觉批次 V5 真机项合并待做）。
+- [x] 备份恢复演练完成（Phase 0 骨架 → Phase 1 全量）。✅ 2026-09-10 演练通过：备份 `pre-phase3-20260909.db`（alembic 0011）→ 隔离容器恢复（8010 端口）→ `/health/ready` 正确拒就绪（迁移头比对生效，缺 0012–0015 六表）→ `alembic upgrade head` → 就绪；integrity ok；users 1 / accounts 1 / transactions 1722 / advice_records 123 / documents 48 / reports 45 / job_runs 64 / instruments 86 / market_records 6143；校准状态随库恢复（breakout-20 calibrated_oos 至 2026-12-10）；登录页与市场状态 API 可用；演练容器与临时文件已清理。
+- [ ] 公网部署 HTTPS/身份/会话/密钥检查（[8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §11）。⏸ 2026-09-10 方向记录：拟改 **Cloudflare Tunnel**（免开公网端口 + 自动 HTTPS）；落地时按 §11 清单核对并立 ADR。
 - [ ] 数据源使用符合授权与服务条款（供应商确定后复核）。
 - [ ] 技术架构 §25 MVP 架构验收清单 16 项全绿。
+
+> **2026-09-10 核对记录**：上述自动化 5 项的证据子集（7 个测试文件共 76 测试）单独运行全过；备份恢复演练同日完成。剩余 4 项：真机验证（延后）、Cloudflare Tunnel（待落地）、数据源条款与 §25 清单（随公网部署一并核）。
 
 ## 8. 运行配置与待确认项
 
