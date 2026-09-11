@@ -241,3 +241,7 @@ Phase 1 各波次注记中的「无期留白」一次性清账（每项原子提
 - 基准卡 8→**21 张**（11 张 V4 新页追溯卡于批次审计日补齐；HOME-02/CHAT-02 于 2026-09-10 补页时补齐）。
 - 批次审计（六条退出条件文档侧核验 + 5 页稿侧实拍比对）完成；审计发现的空账户 HOME 404 假数据卡 bug 当日修复（`useSummary` 404→null 空标记走导入引导，+TC-GS-02）。
 - **余项**：PWA 真机验证（`deploy/PWA_DEVICE_CHECKLIST.md` A–G，与 §7 上线门槛合流，需 VPS HTTPS 部署）；各基准卡「三截图并排贴 PR」走查项随合并 PR 补贴。
+
+### 8.4 上线质量优化批次（2026-09-11 立项，Tunnel 上线问题修复）
+
+> Cloudflare Tunnel 上线 + PWA 实测反馈四类问题（数字超长/记录交易无效/研究·建议缺数据/UI 观感糙），根因已全部查实（含 Portfolio.vue 空函数占位、data_maintenance 不采公告、信号覆盖范围三类结构性缺口）。**详细计划：[11_LAUNCH_QUALITY_PLAN.md](./11_LAUNCH_QUALITY_PLAN.md)**。四波：W1 P0 修复（0.5d）→ W2 数据常态化（1.5d）→ W3 视觉精修（2–3d）→ W4 Playwright E2E 防回归（1d，并行）；合计 4–5.5 个工作日。
