@@ -120,6 +120,20 @@ watch(
         >
           {{ incomplete ? "不完整" : "已完成" }}
         </span>
+        <!-- W2.5-4：导出 md（render 端点）+ 配置策略入口（REP-01 稿动作位） -->
+        <a
+          v-if="reportId"
+          :href="`/api/v1/reports/${reportId}/render?format=md`"
+          class="rounded-md border border-gray-200 px-2 py-1 text-caption text-gray-600 hover:border-primary hover:text-primary dark:border-gray-600 dark:text-gray-300"
+          download
+          data-testid="report-export"
+        >导出 md</a>
+        <button
+          type="button"
+          class="rounded-md border border-gray-200 px-2 py-1 text-caption text-gray-600 hover:border-primary hover:text-primary dark:border-gray-600 dark:text-gray-300"
+          data-testid="report-config"
+          @click="router.push('/settings/risk')"
+        >配置策略</button>
       </template>
     </PageHeader>
 

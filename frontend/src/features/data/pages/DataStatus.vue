@@ -3,6 +3,7 @@
 // 各标的行情/净值质量与新鲜度 + 多源冲突（Phase 3.3 data_conflicts）。
 // 消解操作在 SET-02（波 V4 落地），本页展示 + 引导。
 import { useQuery } from "@tanstack/vue-query";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import client from "@/api/client";
 import { useMarketQuality } from "@/features/home/composables/queries";
@@ -11,6 +12,20 @@ import { DataFooter, PageHeader } from "@/shared/ui";
 
 const router = useRouter();
 const { data: qualityData, isLoading: qualityLoading } = useMarketQuality();
+
+// W2.5-5：审计日志入口（DATA-01 稿"查看完整审计日志"）——默认折叠
+const auditOpen = ref(false);
+const { data: auditData } = useQuery({
+  queryKey: ["audit-events"],
+  queryFn: async () => {
+    const { data, error } = await client.GET("/api/v1/audit-events", {
+      params: { query: { limit: 50 } },
+    });
+    if (error || !data) throw new Error("审计获取失败");
+    return data;
+  },
+});
+const auditRows = computed(() => auditData.value?.items ?? []);
 
 const { data: conflictsData } = useQuery({
   queryKey: ["market", "conflicts"],
@@ -132,6 +147,43 @@ const STATUS_NAMES: Record<string, string> = {
         </div>
       </div>
     </div>
+
+    <!-- W2.5-5：审计日志（折叠面板） -->
+    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <button
+        type="button"
+        class="flex w-full items-center justify-between text-h3 font-semibold"
+        data-testid="audit-toggle"
+        @click="auditOpen = !auditOpen"
+      >
+        <span>审计日志（近 50 条）</span>
+        <span class="text-caption text-gray-400">{{ auditOpen ? "收起" : "展开" }}</span>
+      </button>
+      <ol
+        v-if="auditOpen"
+        class="mt-3 space-y-1 text-caption"
+        data-testid="audit-list"
+      >
+        <li
+          v-for="e in auditRows"
+          :key="e.id"
+          class="flex items-baseline gap-2 border-b border-gray-50 py-1 dark:border-gray-700"
+        >
+          <span class="num text-gray-400">{{ e.occurred_at.slice(5, 16).replace("T", " ") }}</span>
+          <span class="font-medium text-gray-600 dark:text-gray-300">{{ e.action }}</span>
+          <span
+            v-if="e.target_type"
+            class="text-gray-400"
+          >{{ e.target_type }}#{{ (e.target_id ?? "").slice(0, 8) }}</span>
+        </li>
+        <li
+          v-if="!auditRows.length"
+          class="text-gray-400"
+        >
+          暂无审计事件。
+        </li>
+      </ol>
+    </section>
 
     <DataFooter as-of="最近采集" />
   </div>

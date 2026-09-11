@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // PORT-02 标的/持仓详情（波 V4）：基本信息 + 日线 TrendChart + 持仓明细（若持有）
 // + 相关公告（documents）。后端 bars/documents/positions 全就绪。
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useQuery } from "@tanstack/vue-query";
+import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import client from "@/api/client";
 import { EMPTY, formatMoney, formatPercent } from "@/shared/format/number";
 import { DataFooter, PageHeader, TrendChart } from "@/shared/ui";
@@ -89,6 +89,35 @@ const { data: coverage } = useQuery({
     return data;
   },
 });
+
+// 加入/移出自选（W2.5-4；PUT 整体替换语义，CSRF 由 client 中间件注入）
+const qc = useQueryClient();
+const { data: watchlist } = useQuery({
+  queryKey: ["watchlist"],
+  queryFn: async () => {
+    const { data } = await client.GET("/api/v1/settings/watchlist");
+    return data?.codes ?? [];
+  },
+});
+const inWatchlist = computed(() => watchlist.value?.includes(instCode.value));
+const watchBusy = ref(false);
+async function toggleWatch() {
+  if (!instCode.value || watchBusy.value) return;
+  watchBusy.value = true;
+  try {
+    const cur = watchlist.value ?? [];
+    const next = inWatchlist.value
+      ? cur.filter((c) => c !== instCode.value)
+      : [...cur, instCode.value];
+    const { error } = await client.PUT("/api/v1/settings/watchlist", {
+      body: { codes: next },
+    });
+    if (error) throw new Error("自选更新失败");
+    await qc.invalidateQueries({ queryKey: ["watchlist"] });
+  } finally {
+    watchBusy.value = false;
+  }
+}
 </script>
 
 <template>
@@ -98,7 +127,23 @@ const { data: coverage } = useQuery({
       :subtitle="inst ? `${inst.market} · ${inst.kind} · 价格精度 ${inst.price_scale}` : ''"
       back
       @back="router.back()"
-    />
+    >
+      <template #actions>
+        <button
+          v-if="instCode"
+          type="button"
+          class="rounded-md border px-2.5 py-1 text-caption font-medium"
+          :class="inWatchlist
+            ? 'border-success text-success'
+            : 'border-primary text-primary hover:bg-primary/5'"
+          :disabled="watchBusy"
+          data-testid="watch-toggle"
+          @click="toggleWatch"
+        >
+          {{ watchBusy ? "…" : inWatchlist ? "✓ 已自选" : "+ 加入自选" }}
+        </button>
+      </template>
+    </PageHeader>
 
     <!-- 行情 -->
     <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
