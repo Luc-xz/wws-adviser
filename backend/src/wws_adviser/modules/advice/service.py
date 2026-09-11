@@ -104,6 +104,47 @@ def _evidence_refs(db: DBSession, code: str, calibration_row_id: str | None) -> 
     return tuple(refs)
 
 
+def signal_coverage(db: DBSession, code: str) -> dict[str, object]:
+    """信号覆盖透视（W2-5 / PORT-02）：解释该标的当前为何有/无正向建议。
+
+    no_calibrated_signal 多数时候不是"校准坏了"，而是信号（如 breakout-20）
+    当日未触发——正向建议只在触发日给出（避免天天喊单）。本函数把两层拆开。
+    """
+    inst = db.scalar(select(Instrument).where(Instrument.code == code))
+    bars_by_code = calibration_service.load_bars_by_code(db)
+    bars = bars_by_code.get(code) or []
+    active = _active_signal_for_code(db, code)
+    signal_id = active[0].signal_id if active is not None else None
+    calib_state: str | None = None
+    calib_expires: str | None = None
+    if signal_id is not None:
+        record, _row = calibration_service.latest_valid_calibration_with_row(
+            db, signal_id, as_of=datetime.now(UTC).date().isoformat()
+        )
+        calib_state = record.state if record is not None else "missing"
+        calib_expires = record.expires_on if record is not None else None
+    return {
+        "code": code,
+        "instrument_id": inst.id if inst is not None else None,
+        "bars_count": len(bars),
+        "latest_bar_date": bars[-1].business_date if bars else None,
+        "signal_id": signal_id,
+        "signal_triggered_today": active is not None,
+        "calibration_state": calib_state,
+        "calibration_expires_on": calib_expires,
+        "note": (
+            "正向建议仅在信号触发日给出（当前未触发 = 暂停建议属设计行为）"
+            if active is not None
+            else (
+                "该标的当日无已注册信号触发（如 20 日突破未出现）——暂停建议属设计行为，非故障"
+                if bars
+                else "该标的无历史日线数据，信号无法评估"
+            )
+        ),
+    }
+
+
+
 def _kelly_for_code(
     db: DBSession,
     settings: Settings,

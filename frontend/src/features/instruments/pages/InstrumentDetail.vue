@@ -74,6 +74,21 @@ const { data: docs } = useQuery({
 function docTitle(d: { title?: string }): string {
   return d.title ?? "（无标题）";
 }
+
+// 信号覆盖透视（W2-5 / Q1 决策）：当日是否触发 + 校准状态 + 人话注解
+const instCode = computed(() => inst.value?.code ?? "");
+const { data: coverage } = useQuery({
+  queryKey: ["signal-coverage", instCode.value],
+  enabled: computed(() => instCode.value.length > 0),
+  queryFn: async () => {
+    const { data, error } = await client.GET(
+      "/api/v1/assistant/coverage/{code}",
+      { params: { path: { code: instCode.value } } },
+    );
+    if (error || !data) throw new Error("信号覆盖获取失败");
+    return data;
+  },
+});
 </script>
 
 <template>
@@ -171,6 +186,46 @@ function docTitle(d: { title?: string }): string {
           </dd>
         </div>
       </dl>
+    </section>
+
+    <!-- 信号覆盖（W2-5）：解释为什么没有正向建议 -->
+    <section
+      v-if="coverage"
+      class="space-y-2 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      data-testid="signal-coverage"
+    >
+      <h2 class="text-h3 font-semibold">
+        盘中建议状态
+      </h2>
+      <dl class="grid grid-cols-2 gap-2 text-body">
+        <div>
+          <dt class="text-caption text-gray-400 dark:text-gray-500">
+            当日信号触发
+          </dt>
+          <dd class="mt-0.5 font-medium">
+            {{ coverage.signal_triggered_today ? "是" : "否" }}
+            <span
+              v-if="coverage.signal_id"
+              class="ml-1 text-caption text-gray-400"
+            >（{{ coverage.signal_id }}）</span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-caption text-gray-400 dark:text-gray-500">
+            校准状态
+          </dt>
+          <dd class="mt-0.5 font-medium">
+            {{ coverage.calibration_state ?? "无信号在校准中" }}
+            <span
+              v-if="coverage.calibration_expires_on"
+              class="ml-1 text-caption text-gray-400"
+            >（有效期至 {{ coverage.calibration_expires_on }}）</span>
+          </dd>
+        </div>
+      </dl>
+      <p class="text-caption text-gray-500 dark:text-gray-400">
+        {{ coverage.note }}
+      </p>
     </section>
 
     <!-- 相关公告 -->

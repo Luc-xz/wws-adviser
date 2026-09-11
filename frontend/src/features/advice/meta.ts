@@ -12,7 +12,7 @@ export const REASON_NAMES: Record<string, string> = {
   data_conflict: "多源数据冲突未消解",
   market_abnormal: "标的停牌或异常",
   ledger_unreconciled: "账本未对账",
-  no_calibrated_signal: "无已校准信号（样本外校准未通过或未跑）",
+  no_calibrated_signal: "该标的当日无已校准信号触发——按风控设计不给凯利建议（正向建议仅信号触发日给出，非故障）",
   calibration_uncalibrated: "信号未完成样本外校准",
   calibration_stale: "校准已过期/失效",
   calibration_expired: "校准已过有效期",

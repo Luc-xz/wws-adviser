@@ -5,8 +5,15 @@
 // 注意：vue-eslint-parser 的模板节点（V*）不经 ESLint 核心遍历，visitor 必须经
 // parserServices.defineTemplateBodyVisitor 注册——直接 return {VXxx(){}} 会被静默忽略
 //（2026-09-11 实测发现：既有 no-market-color-misuse 即因此自落地起从未生效）。
-const NUMERIC_FIELD_RE =
-  /(cost|price|quantity|pnl|amount|assets|market_value|avg_cost|value_a|value_b|weight|ratio)/i;
+// 数值字段按 snake_case 段匹配（子串匹配会误伤 calibration_state 的 "calib-ratio-n"）：
+// 段级 token（cost/price/quantity/…）须独立成段；复合字段按全名精确匹配。
+const NUMERIC_SEGMENT_RE = /(^|_)(cost|price|quantity|pnl|amount|assets|weight|ratio|cash)($|_)/;
+const NUMERIC_EXACT_RE = /^(market_value|avg_cost|value_a|value_b)$/i;
+
+function isNumericField(name) {
+  const snake = name.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+  return NUMERIC_EXACT_RE.test(snake) || NUMERIC_SEGMENT_RE.test(snake);
+}
 
 // 豁免已格式化中间变量（命名约定：*Text / *Fmt / *Formatted / *Display 结尾视为已格式化）
 const FORMATTED_SUFFIX_RE = /(Text|Fmt|Formatted|Display)$/i;
@@ -53,7 +60,7 @@ export default {
         const expr = node.expression;
         if (!expr) return;
         const name = leafName(expr);
-        if (name && !FORMATTED_SUFFIX_RE.test(name) && NUMERIC_FIELD_RE.test(name)) {
+        if (name && !FORMATTED_SUFFIX_RE.test(name) && isNumericField(name)) {
           context.report({
             node: expr,
             messageId: "raw",

@@ -36,6 +36,7 @@ const mockQueries = vi.hoisted(() => ({
   useResearchReport: vi.fn(),
   useCreateResearchTask: vi.fn(),
   useCancelResearchTask: vi.fn(),
+  useCorpusCount: vi.fn(),
   researchExportUrl: (id: string, f: string) => `/api/v1/research/reports/${id}/export?format=${f}`,
 }));
 
@@ -79,6 +80,10 @@ describe("Library（研究与报告库）", () => {
       create: vi.fn().mockResolvedValue({ id: "t1" }),
     });
     mockQueries.useCancelResearchTask.mockReturnValue({ cancel: vi.fn() });
+    mockQueries.useCorpusCount.mockReturnValue({
+      data: ref(null),
+      refetch: vi.fn().mockResolvedValue({}),
+    });
   });
 
   it("空态显示引导文案；表单元素齐全", () => {

@@ -2,9 +2,11 @@
 // LIB-01 研究与报告库（Phase 3 波7）：创建任务（公司/行业）→ 任务列表（SSE 实时进度）→
 // 报告阅读（认知层级标签 + 引用可追溯）→ 导出（md / 可打印 html）。
 import { computed, ref, watch } from "vue";
+import client from "@/api/client";
 import {
   researchExportUrl,
   useCancelResearchTask,
+  useCorpusCount,
   useCreateResearchTask,
   useResearchReport,
   useResearchTasks,
@@ -26,6 +28,48 @@ const formSubject = ref("");
 const formDepth = ref<ResearchDepth>("standard");
 const creating = ref(false);
 const createError = ref<string | null>(null);
+const collecting = ref(false);
+
+// —— W2-2：语料前置检查（公司研究 + 6 位代码时启用）——
+const isCompanyCode = computed(
+  () => formType.value === "company" && /^\d{6}$/.test(formSubject.value.trim()),
+);
+const corpusCode = computed(() =>
+  isCompanyCode.value ? formSubject.value.trim() : "",
+);
+const corpusEnabled = computed(() => corpusCode.value.length > 0);
+const { data: corpusData, refetch: refetchCorpus } = useCorpusCount(
+  corpusCode,
+  corpusEnabled,
+);
+const corpusHint = computed(() => {
+  if (!isCompanyCode.value) return null;
+  const c = corpusData.value;
+  if (!c) return null;
+  if (c.count === 0) {
+    return { low: true, text: "该标的暂无公告语料——先采集再研究，否则任务将因证据不足失败" };
+  }
+  const label = c.full ? "50+" : String(c.count);
+  return c.count < 5
+    ? { low: true, text: `语料仅 ${label} 条，证据可能不足——建议先补充采集` }
+    : { low: false, text: `语料 ${label} 条` };
+});
+
+async function collectCorpus() {
+  collecting.value = true;
+  try {
+    const { error } = await client.POST("/api/v1/documents/refresh", {
+      params: { query: { code: formSubject.value.trim() } },
+      headers: { "Idempotency-Key": crypto.randomUUID() },
+    });
+    if (error) throw new Error("采集失败");
+    await refetchCorpus();
+  } catch (e) {
+    createError.value = e instanceof Error ? e.message : "采集失败";
+  } finally {
+    collecting.value = false;
+  }
+}
 
 async function submit() {
   const subject = formSubject.value.trim();
@@ -132,6 +176,25 @@ function onCancel(id: string) { void cancel(id); }
           :placeholder="formType === 'company' ? '证券代码，如 600519' : '行业名称，如 白酒'"
           data-testid="research-subject-input"
         >
+        <!-- W2-2：公司研究语料前置检查（无语料 → 一键采集，不再提交后吃失败） -->
+        <div
+          v-if="corpusHint"
+          class="flex w-full items-center gap-2 text-xs"
+          :class="corpusHint.low ? 'text-risk-warning' : 'text-gray-400 dark:text-gray-500'"
+          data-testid="corpus-hint"
+        >
+          <span>{{ corpusHint.text }}</span>
+          <button
+            v-if="corpusHint.low && !collecting"
+            type="button"
+            class="rounded border border-primary px-2 py-0.5 text-primary"
+            data-testid="collect-corpus-btn"
+            @click="collectCorpus"
+          >
+            一键采集公告
+          </button>
+          <span v-if="collecting">采集中…</span>
+        </div>
         <select
           v-model="formDepth"
           class="rounded-lg border border-gray-200 px-2 py-2 text-sm"

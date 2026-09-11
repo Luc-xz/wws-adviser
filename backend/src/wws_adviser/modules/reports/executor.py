@@ -7,6 +7,7 @@
 import logging
 from pathlib import Path
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session as DBSession
 
 from wws_adviser.core.config import Settings
@@ -189,7 +190,77 @@ async def _run_data_maintenance(db: DBSession, settings: Settings) -> dict[str, 
         _logger.info("交易日历同步完成：%s 行（近一年 + 未来 400 天）", cal_rows)
     except Exception as exc:  # noqa: BLE001 — 日历失败不阻塞采集结果
         _logger.warning("交易日历同步失败（不影响日线采集）: %s", exc)
-    return {"ok": ok, "failed": len(results) - ok}
+
+    docs_stats = await _collect_announcements(db, settings)
+    return {"ok": ok, "failed": len(results) - ok, **docs_stats}
+
+
+async def _collect_announcements(db: DBSession, settings: Settings) -> dict[str, int]:
+    """公告增量采集（W2-1）：持仓 + 自选标的，14 天窗口。
+
+    幂等（sha 去重 + 同 URL 就地升级）；失败不影响日线/日历结果。
+    """
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+    from datetime import timedelta as _ttd
+
+    if settings.document_source != "akshare":
+        return {"docs_ingested": 0, "docs_updated": 0, "docs_skipped": 0}
+    try:
+        from wws_adviser.infrastructure.data_sources.akshare_document import (
+            AKShareDocumentProvider,
+        )
+        from wws_adviser.infrastructure.storage.local_object_store import LocalObjectStore
+        from wws_adviser.modules.appsettings import service as appsettings_service
+        from wws_adviser.modules.documents import service as doc_service
+        from wws_adviser.modules.instruments import service as instruments_svc
+        from wws_adviser.modules.instruments.models import Instrument
+        from wws_adviser.modules.portfolio import service as portfolio_service
+        from wws_adviser.modules.portfolio.models import Account
+        from wws_adviser.ports.document_source import DocumentScope
+        from wws_adviser.ports.market_data import InstrumentRef
+
+        # code -> market：持仓（qty>0）优先，自选补充（自选缺 instrument 行则跳过）
+        codes: dict[str, str] = {}
+        for account in db.scalars(select(Account)).all():
+            state = portfolio_service.get_position_state(db, account.id)
+            for inst_id, st in state.positions.items():
+                if st.qty <= 0:
+                    continue
+                inst = instruments_svc.get_instrument(db, inst_id)
+                if inst is not None:
+                    codes[inst.code] = inst.market
+        for wl_code in appsettings_service.get_watchlist(db):
+            if wl_code in codes:
+                continue
+            inst = db.scalar(select(Instrument).where(Instrument.code == wl_code))
+            if inst is not None:
+                codes[inst.code] = inst.market
+
+        provider = AKShareDocumentProvider(env=settings.env)
+        store = LocalObjectStore(settings.data_dir)
+        since = _dt.now(_UTC) - _ttd(days=14)
+        ing = upd = skp = 0
+        for code, market in codes.items():
+            scope = DocumentScope(
+                instrument=InstrumentRef(code=code, market=market, kind="stock"),
+                kinds=None,
+            )
+            r = await doc_service.ingest_documents(
+                db, object_store=store, provider=provider, scope=scope,
+                since=since, request_id=f"docs-maintenance-{code}",
+            )
+            ing += r.ingested
+            upd += r.updated
+            skp += r.skipped
+        _logger.info(
+            "公告增量采集完成：%s 标的（ingested=%s updated=%s skipped=%s）",
+            len(codes), ing, upd, skp,
+        )
+        return {"docs_ingested": ing, "docs_updated": upd, "docs_skipped": skp}
+    except Exception as exc:  # noqa: BLE001 — 公告失败不阻塞日线/日历
+        _logger.warning("公告增量采集失败（不影响日线/日历）: %s", exc)
+        return {"docs_ingested": 0, "docs_updated": 0, "docs_skipped": 0}
 
 
 def enqueue_report_job(

@@ -170,6 +170,15 @@ async function ask() {
             {{ reasonText(r) }}
           </p>
         </div>
+        <!-- W2-3：suspend + no_calibrated_signal 时补一段设计行为说明（Q1 决策落地） -->
+        <p
+          v-if="advice.action === 'suspend' && advice.reasons.includes('no_calibrated_signal')"
+          class="text-caption text-gray-400 dark:text-gray-500"
+          data-testid="intraday-suspend-note"
+        >
+          说明：A 股建议需先通过概率校准（AC-07 风控门槛），正向建议只在信号触发日给出；
+          未覆盖/未触发的标的一律暂停而不给数量——这是设计行为，不是系统故障。
+        </p>
       </section>
 
       <!-- 调整轨迹（计算输入 → 折扣 → 约束 → 最终区间） -->

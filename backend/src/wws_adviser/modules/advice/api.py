@@ -62,6 +62,16 @@ async def intraday(
     )
 
 
+@router.get("/coverage/{code}")
+async def signal_coverage(
+    code: str,
+    db: Annotated[DBSession, Depends(get_session)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> dict[str, object]:
+    """信号覆盖透视（W2-5 / PORT-02）：当日是否触发 + 校准状态 + 人话注解。"""
+    return service.signal_coverage(db, code)
+
+
 @records_router.get("", response_model=AdviceRecordListResponse)
 async def list_advice_records(
     db: Annotated[DBSession, Depends(get_session)],

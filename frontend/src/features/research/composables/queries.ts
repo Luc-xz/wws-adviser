@@ -1,4 +1,5 @@
 // 研究任务与报告查询（Phase 3 波7）
+import type { Ref } from "vue";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import client from "@/api/client";
 import { useOfflineFallback } from "@/shared/offline/useOfflineFallback";
@@ -118,4 +119,27 @@ export function useCancelResearchTask() {
 /** 导出下载地址（浏览器带 cookie 直接下载） */
 export function researchExportUrl(reportId: string, format: "md" | "html"): string {
   return `/api/v1/research/reports/${reportId}/export?format=${format}`;
+}
+
+/** W2-2：公司研究语料前置检查——按代码查公告语料数（满 50 按 50+ 展示）。 */
+export function useCorpusCount(
+  code: Ref<string>,
+  enabled: Ref<boolean>,
+) {
+  return useQuery({
+    queryKey: ["research-corpus", code],
+    enabled,
+    queryFn: async () => {
+      const { data: insts } = await client.GET("/api/v1/instruments", {
+        params: { query: { q: code.value } },
+      });
+      const hit = (insts?.items ?? []).find((i) => i.code === code.value);
+      if (!hit) return { count: 0, full: false };
+      const { data: docs } = await client.GET("/api/v1/documents", {
+        params: { query: { instrument_id: hit.id, limit: 50 } },
+      });
+      const n = docs?.items?.length ?? 0;
+      return { count: n >= 50 ? 50 : n, full: n >= 50 };
+    },
+  });
 }

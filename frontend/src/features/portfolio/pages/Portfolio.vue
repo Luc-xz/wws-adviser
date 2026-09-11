@@ -62,7 +62,7 @@ const summaryStrip = computed(() => {
     0
   );
   return {
-    marketValue: formatMoney(mv.toFixed(2)),
+    marketValueText: formatMoney(mv.toFixed(2)),
     cashRatioText: summaryData.value?.cash_ratio
       ? formatPercent(summaryData.value.cash_ratio)
       : null,
@@ -226,7 +226,7 @@ function removeWatch(code: string) {
               class="mt-1 text-body-lg font-semibold num"
               data-num
             >
-              {{ summaryStrip.marketValue }}
+              {{ summaryStrip.marketValueText }}
             </div>
           </div>
           <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
