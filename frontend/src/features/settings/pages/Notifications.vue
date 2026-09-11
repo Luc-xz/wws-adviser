@@ -62,7 +62,7 @@ async function savePrivacy() {
       @back="router.back()"
     />
 
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <h2 class="text-h3 font-semibold">
         通知渠道
       </h2>
@@ -78,7 +78,7 @@ async function savePrivacy() {
       </p>
     </section>
 
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <div class="flex items-center justify-between">
         <div class="min-w-0">
           <h2 class="text-h3 font-semibold">
@@ -122,7 +122,7 @@ async function savePrivacy() {
 
     <section
       v-if="push.supported.value"
-      class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
     >
       <div class="flex items-center justify-between gap-3">
         <div class="min-w-0">

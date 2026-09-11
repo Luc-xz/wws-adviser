@@ -10,11 +10,11 @@ const route = useRoute();
 const session = useSessionStore();
 
 const NAV_ITEMS = [
-  { to: "/", title: "首页", icon: "i-carbon-home" },
-  { to: "/portfolio", title: "持仓", icon: "i-carbon-portfolio" },
-  { to: "/assistant", title: "助手", icon: "i-carbon-chat-bot" },
-  { to: "/research", title: "研究", icon: "i-carbon-analytics" },
-  { to: "/settings", title: "设置", icon: "i-carbon-settings" },
+  { to: "/", title: "首页", icon: "i-material-symbols-home-rounded" },
+  { to: "/portfolio", title: "持仓", icon: "i-material-symbols-payments-rounded" },
+  { to: "/assistant", title: "助手", icon: "i-material-symbols-smart-toy-rounded" },
+  { to: "/research", title: "研究", icon: "i-material-symbols-monitoring-rounded" },
+  { to: "/settings", title: "设置", icon: "i-material-symbols-settings-rounded" },
 ] as const;
 
 const pageTitle = computed(() => (route.meta.title as string | undefined) ?? "");
@@ -62,7 +62,7 @@ const pageTitle = computed(() => (route.meta.title as string | undefined) ?? "")
         data-testid="topbar-session"
       >
         <span
-          class="i-carbon-user-avatar text-xl"
+          class="i-material-symbols-person-rounded text-xl"
           aria-hidden="true"
         />
         已登录

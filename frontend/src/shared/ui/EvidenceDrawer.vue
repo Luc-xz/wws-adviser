@@ -123,7 +123,7 @@ async function toggle(c: EvidenceCite, i: number) {
             data-testid="evidence-close"
             @click="emit('close')"
           >
-            <span class="i-carbon-close text-lg block" />
+            <span class="i-material-symbols-close-rounded text-lg block" />
           </button>
         </div>
 
@@ -162,7 +162,7 @@ async function toggle(c: EvidenceCite, i: number) {
                 v-if="c.section"
                 class="text-caption text-gray-300 dark:text-gray-600"
               >· {{ c.section }}</span>
-              <span class="ml-auto i-carbon-chevron-down text-gray-300" />
+              <span class="ml-auto i-material-symbols-expand-more-rounded text-gray-300" />
             </button>
             <div
               v-if="expandedId === keyFor(c, i)"

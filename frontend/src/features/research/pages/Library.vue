@@ -146,7 +146,7 @@ function onCancel(id: string) { void cancel(id); }
 
     <!-- 创建任务 -->
     <form
-      class="rounded-lg bg-white p-4 shadow-sm space-y-6 dark:bg-gray-800"
+      class="rounded-2xl bg-white p-4 shadow-sm space-y-6 dark:bg-gray-800"
       data-testid="research-create-form"
       @submit.prevent="submit"
     >
@@ -233,14 +233,14 @@ function onCancel(id: string) { void cancel(id); }
     <!-- 任务列表 -->
     <div
       v-if="!tasks.length"
-      class="rounded-lg bg-white p-6 text-center text-sm text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+      class="rounded-2xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
     >
       {{ tasksLoading ? "加载中…" : "暂无研究任务——创建一个试试" }}
     </div>
     <div
       v-for="t in tasks"
       :key="t.id"
-      class="rounded-lg bg-white p-3 shadow-sm flex items-center justify-between gap-3 cursor-pointer dark:bg-gray-800"
+      class="rounded-2xl bg-white p-3 shadow-sm flex items-center justify-between gap-3 cursor-pointer dark:bg-gray-800"
       :class="{ 'ring-2 ring-primary/40': t.id === selectedId }"
       data-testid="research-task-row"
       @click="selectedId = t.id"
@@ -292,7 +292,7 @@ function onCancel(id: string) { void cancel(id); }
     <!-- 报告阅读 -->
     <div
       v-if="selectedTask && (selectedTask.report_id || liveReportId)"
-      class="rounded-lg bg-white p-4 shadow-sm space-y-6 dark:bg-gray-800"
+      class="rounded-2xl bg-white p-4 shadow-sm space-y-6 dark:bg-gray-800"
       data-testid="research-report-panel"
     >
       <!-- 离线副本横幅（AC-08 / doc7 §5） -->
@@ -343,7 +343,7 @@ function onCancel(id: string) { void cancel(id); }
           @click="drawerOpen = true"
         >
           <span>引用清单（{{ citations.length }} 条 · 点击逐条回查证据切片与原文）</span>
-          <span class="i-carbon-chevron-right block" />
+          <span class="i-material-symbols-chevron-right-rounded block" />
         </button>
         <EvidenceDrawer
           :open="drawerOpen"

@@ -89,7 +89,7 @@ async function save() {
     />
     <form
       v-else
-      class="space-y-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="space-y-4 rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
       @submit.prevent="save"
     >
       <div class="rounded-md bg-gray-50 px-3 py-2 text-caption text-gray-500 dark:bg-gray-700 dark:text-gray-400">

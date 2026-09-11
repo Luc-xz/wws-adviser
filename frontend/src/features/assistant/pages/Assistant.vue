@@ -73,7 +73,7 @@ function hasInterval(m: ChatMessage) {
 
 <template>
   <div class="flex flex-col space-y-4">
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <h1 class="text-h1 font-bold lg:text-h1-d">
         盘中问询
       </h1>
@@ -194,7 +194,7 @@ function hasInterval(m: ChatMessage) {
               <p
                 v-for="r in m.advice.reasons"
                 :key="r"
-                class="rounded-lg bg-white p-2 text-xs shadow-sm dark:bg-gray-800"
+                class="rounded-2xl bg-white p-2 text-xs shadow-sm dark:bg-gray-800"
                 :class="m.advice.action === 'suspend' ? 'text-risk-warning' : 'text-gray-500'"
                 data-testid="intraday-reason"
               >
@@ -213,7 +213,7 @@ function hasInterval(m: ChatMessage) {
             <!-- 调整轨迹 -->
             <div
               v-if="m.advice.trail.length"
-              class="rounded-lg bg-white p-3 text-xs shadow-sm dark:bg-gray-800"
+              class="rounded-2xl bg-white p-3 text-xs shadow-sm dark:bg-gray-800"
             >
               <p
                 v-for="(s, i) in m.advice.trail"
@@ -231,7 +231,7 @@ function hasInterval(m: ChatMessage) {
             <!-- 模型解读（失败时后端自动省略） -->
             <div
               v-if="m.advice.model_explanation"
-              class="rounded-lg bg-white p-3 text-sm leading-relaxed shadow-sm dark:bg-gray-800"
+              class="rounded-2xl bg-white p-3 text-sm leading-relaxed shadow-sm dark:bg-gray-800"
             >
               {{ m.advice.model_explanation }}
             </div>

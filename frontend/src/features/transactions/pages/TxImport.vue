@@ -110,7 +110,7 @@ async function confirmImport() {
       >
         <span
           v-if="i > 0"
-          class="i-carbon-chevron-right text-gray-300"
+          class="i-material-symbols-chevron-right-rounded text-gray-300"
           aria-hidden="true"
         />
         <span
@@ -125,7 +125,7 @@ async function confirmImport() {
     <!-- 步骤 1：选文件 -->
     <div
       v-if="step === 1"
-      class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
     >
       <input
         type="file"
@@ -156,7 +156,7 @@ async function confirmImport() {
 
     <!-- 步骤 2：校验回显 -->
     <template v-else-if="step === 2">
-      <div class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <div class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
         <div class="flex items-center justify-between">
           <h2 class="text-h3 font-semibold">
             可导入 {{ preview.length }} 条
@@ -236,7 +236,7 @@ async function confirmImport() {
     <!-- 步骤 3：完成 -->
     <div
       v-else
-      class="rounded-lg bg-white p-6 text-center shadow-sm dark:bg-gray-800"
+      class="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
       data-testid="import-done"
     >
       <p class="text-h3 font-semibold text-success">

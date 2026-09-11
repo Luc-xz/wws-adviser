@@ -142,7 +142,7 @@ watch(
       :offline="offlineRef"
     />
 
-    <div class="rounded-lg bg-white dark:bg-gray-800 p-4 shadow-sm">
+    <div class="rounded-2xl bg-white dark:bg-gray-800 p-4 shadow-sm">
       <!-- 降级标记（AC-02：公告源失败→标记不完整） -->
       <div
         v-if="degradationFlags.length"
@@ -175,7 +175,7 @@ watch(
 
     <div
       v-if="!content"
-      class="rounded-lg bg-white dark:bg-gray-800 p-6 text-center text-body text-gray-400 dark:text-gray-500 shadow-sm"
+      class="rounded-2xl bg-white dark:bg-gray-800 p-6 text-center text-body text-gray-400 dark:text-gray-500 shadow-sm"
     >
       {{ reportLoading ? "加载中…" : "报告内容不可用" }}
     </div>
@@ -226,7 +226,7 @@ watch(
         />
         <p
           v-if="!riskItems.length"
-          class="rounded-lg bg-white dark:bg-gray-800 p-3 text-body text-gray-400 dark:text-gray-500 shadow-sm"
+          class="rounded-2xl bg-white dark:bg-gray-800 p-3 text-body text-gray-400 dark:text-gray-500 shadow-sm"
         >
           未触发风险限制
         </p>
@@ -261,7 +261,7 @@ watch(
         <h2 class="text-h3 font-semibold">
           解读
         </h2>
-        <div class="rounded-lg bg-white dark:bg-gray-800 p-3 text-body leading-relaxed shadow-sm">
+        <div class="rounded-2xl bg-white dark:bg-gray-800 p-3 text-body leading-relaxed shadow-sm">
           {{ modelSection.summary }}
         </div>
       </section>
@@ -288,7 +288,7 @@ watch(
         <p
           v-for="(b, i) in biasItems"
           :key="i"
-          class="rounded-lg bg-white p-3 text-body shadow-sm dark:bg-gray-800"
+          class="rounded-2xl bg-white p-3 text-body shadow-sm dark:bg-gray-800"
           data-testid="bias-finding"
         >
           <span class="font-medium">{{ BIAS_NAMES[String(b.kind)] ?? b.kind }}</span>
@@ -301,7 +301,7 @@ watch(
       </section>
 
       <!-- 来源与版本尾注 -->
-      <div class="rounded-lg bg-white dark:bg-gray-800 p-3 text-caption text-gray-400 dark:text-gray-500 shadow-sm">
+      <div class="rounded-2xl bg-white dark:bg-gray-800 p-3 text-caption text-gray-400 dark:text-gray-500 shadow-sm">
         <p>来源 {{ detail?.sources_count ?? 0 }} 项</p>
         <p class="mt-1">
           schema {{ header?.schema_version ?? detail?.schema_version }} ·

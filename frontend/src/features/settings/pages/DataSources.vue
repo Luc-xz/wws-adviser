@@ -75,7 +75,7 @@ async function resolve(conflictId: string, winner: string) {
       </p>
       <div
         v-else-if="!rows.length"
-        class="rounded-lg bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+        class="rounded-2xl bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
         data-testid="conflicts-empty"
       >
         暂无冲突——多源比对未发现超容差差异。
@@ -83,7 +83,7 @@ async function resolve(conflictId: string, winner: string) {
       <div
         v-for="c in rows"
         :key="c.id"
-        class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+        class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
         data-testid="conflict-admin-row"
       >
         <div class="flex items-center justify-between">
@@ -164,7 +164,7 @@ async function resolve(conflictId: string, winner: string) {
       <div
         v-for="(e, i) in qualityData?.items ?? []"
         :key="i"
-        class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800"
+        class="flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800"
       >
         <span
           class="text-body num"

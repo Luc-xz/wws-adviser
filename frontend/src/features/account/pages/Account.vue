@@ -67,7 +67,7 @@ const statsByAccount = computed(() => {
 
     <div
       v-else-if="isSuccess && !accounts?.length"
-      class="rounded-lg bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+      class="rounded-2xl bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
       data-testid="account-empty"
     >
       暂无账户——通过 CLI 或交易记录创建。
@@ -76,7 +76,7 @@ const statsByAccount = computed(() => {
     <div
       v-for="a in accounts ?? []"
       :key="a.id"
-      class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
       data-testid="account-row"
     >
       <div class="flex items-center justify-between">

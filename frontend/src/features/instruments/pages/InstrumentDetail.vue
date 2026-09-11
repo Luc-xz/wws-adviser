@@ -146,7 +146,7 @@ async function toggleWatch() {
     </PageHeader>
 
     <!-- 行情 -->
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <div class="flex items-baseline justify-between">
         <h2 class="text-h3 font-semibold">
           日线收盘
@@ -180,7 +180,7 @@ async function toggleWatch() {
     <!-- 持仓明细（若持有） -->
     <section
       v-if="holding"
-      class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
     >
       <h2 class="text-h3 font-semibold">
         我的持仓
@@ -236,7 +236,7 @@ async function toggleWatch() {
     <!-- 信号覆盖（W2-5）：解释为什么没有正向建议 -->
     <section
       v-if="coverage"
-      class="space-y-2 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="space-y-2 rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
       data-testid="signal-coverage"
     >
       <h2 class="text-h3 font-semibold">
@@ -280,7 +280,7 @@ async function toggleWatch() {
       </h2>
       <div
         v-if="!(docs?.items?.length)"
-        class="rounded-lg bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+        class="rounded-2xl bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
       >
         暂无相关文档。
       </div>
@@ -288,7 +288,7 @@ async function toggleWatch() {
         v-for="d in docs?.items ?? []"
         :key="d.id"
         to="#"
-        class="block rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+        class="block rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
         @click.prevent
       >
         <div class="flex items-center justify-between gap-2">

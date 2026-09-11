@@ -129,7 +129,7 @@ function rowAmount(q: string, p: string): string {
 
     <div
       v-if="loaded && !rows.length && !loading"
-      class="rounded-lg bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+      class="rounded-2xl bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
       data-testid="tx-empty"
     >
       暂无匹配的流水
@@ -137,7 +137,7 @@ function rowAmount(q: string, p: string): string {
 
     <div
       v-else
-      class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
+      class="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
       data-testid="tx-list"
     >
       <div

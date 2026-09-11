@@ -201,7 +201,7 @@ function removeWatch(code: string) {
       <!-- 空态引导 -->
       <div
         v-if="positionsOk && !positionsData?.items?.length"
-        class="rounded-lg bg-white p-6 text-center shadow-sm dark:bg-gray-800"
+        class="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
         data-testid="empty-guide"
       >
         <p class="font-medium">
@@ -218,7 +218,7 @@ function removeWatch(code: string) {
           v-if="summaryStrip"
           class="grid grid-cols-2 gap-2 text-center sm:grid-cols-4"
         >
-          <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+          <div class="rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800">
             <div class="text-label text-gray-500 dark:text-gray-400">
               持仓市值
             </div>
@@ -229,7 +229,7 @@ function removeWatch(code: string) {
               {{ summaryStrip.marketValueText }}
             </div>
           </div>
-          <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+          <div class="rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800">
             <div class="text-label text-gray-500 dark:text-gray-400">
               现金占比
             </div>
@@ -240,7 +240,7 @@ function removeWatch(code: string) {
               {{ summaryStrip.cashRatioText ?? "—" }}
             </div>
           </div>
-          <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+          <div class="rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800">
             <div class="text-label text-gray-500 dark:text-gray-400">
               集中度
             </div>
@@ -251,7 +251,7 @@ function removeWatch(code: string) {
               {{ summaryStrip.concentrationText ?? "—" }}
             </div>
           </div>
-          <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+          <div class="rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800">
             <div class="text-label text-gray-500 dark:text-gray-400">
               持仓数
             </div>
@@ -267,7 +267,7 @@ function removeWatch(code: string) {
         <!-- 累计已实现盈亏趋势 -->
         <div
           v-if="trend"
-          class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800"
+          class="rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800"
           data-testid="realized-trend"
         >
           <div class="mb-1 flex items-baseline justify-between">
@@ -318,7 +318,7 @@ function removeWatch(code: string) {
     <template v-else-if="activeTab === 'transactions'">
       <div
         v-if="txOk && !txRows.length"
-        class="rounded-lg bg-white p-6 text-center shadow-sm dark:bg-gray-800"
+        class="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
         data-testid="tx-empty"
       >
         <p class="font-medium">
@@ -330,7 +330,7 @@ function removeWatch(code: string) {
       </div>
       <div
         v-else
-        class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
+        class="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
         data-testid="tx-list"
       >
         <div
@@ -375,7 +375,7 @@ function removeWatch(code: string) {
     <!-- ===== 自选 Tab ===== -->
     <template v-else>
       <!-- 新增 -->
-      <div class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <div class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
         <form
           class="flex gap-2"
           @submit.prevent="addWatch"
@@ -407,7 +407,7 @@ function removeWatch(code: string) {
 
       <div
         v-if="watchOk && !watchCodesRef.length"
-        class="rounded-lg bg-white p-6 text-center shadow-sm dark:bg-gray-800"
+        class="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
         data-testid="watch-empty"
       >
         <p class="font-medium">
@@ -419,7 +419,7 @@ function removeWatch(code: string) {
       </div>
       <div
         v-else
-        class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
+        class="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
         data-testid="watch-list"
       >
         <div

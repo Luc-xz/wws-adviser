@@ -174,7 +174,7 @@ const lastChecked = computed(() =>
       <!-- 空态：不使用庆祝动画 -->
       <div
         v-if="loaded && !rows.length && !loading"
-        class="rounded-lg bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+        class="rounded-2xl bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
         data-testid="advice-empty"
       >
         当前没有需要处理的行动
@@ -199,7 +199,7 @@ const lastChecked = computed(() =>
         <!-- 当日建议（有效期内在前） -->
         <div
           v-if="liveRows.length"
-          class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
+          class="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
           data-testid="advice-list"
         >
           <router-link
@@ -250,20 +250,20 @@ const lastChecked = computed(() =>
         >
           <button
             type="button"
-            class="flex w-full items-center justify-between rounded-lg bg-white px-4 py-3 text-label text-gray-600 shadow-sm dark:bg-gray-800 dark:text-gray-300"
+            class="flex w-full items-center justify-between rounded-2xl bg-white px-4 py-3 text-label text-gray-600 shadow-sm dark:bg-gray-800 dark:text-gray-300"
             data-testid="advice-history-toggle"
             @click="showHistory = !showHistory"
           >
             <span>历史记录（{{ historyRows.length }}）</span>
             <span
-              class="i-carbon-chevron-down text-lg transition-transform"
+              class="i-material-symbols-expand-more-rounded text-lg transition-transform"
               :class="showHistory ? 'rotate-180' : ''"
               aria-hidden="true"
             />
           </button>
           <div
             v-if="showHistory"
-            class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
+            class="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm dark:divide-gray-700 dark:bg-gray-800"
             data-testid="advice-history-list"
           >
             <router-link
@@ -313,7 +313,7 @@ const lastChecked = computed(() =>
     <template v-else>
       <div
         v-if="!sortedBreaches.length"
-        class="rounded-lg bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+        class="rounded-2xl bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
         data-testid="advice-risk-empty"
       >
         当前没有触发的风险项

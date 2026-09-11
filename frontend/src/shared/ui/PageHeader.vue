@@ -23,7 +23,7 @@ const emit = defineEmits<{ back: [] }>();
         @click="emit('back')"
       >
         <span
-          class="i-carbon-arrow-left inline-block h-5 w-5 leading-none"
+          class="i-material-symbols-arrow-back-rounded inline-block h-5 w-5 leading-none"
           aria-hidden="true"
         />
       </button>

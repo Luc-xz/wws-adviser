@@ -21,7 +21,7 @@ const router = useRouter();
 
 <template>
   <div
-    class="flex items-center gap-3 rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800"
+    class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800"
     :class="to ? 'cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700' : ''"
     data-testid="position-row"
     @click="to && router.push(to)"
@@ -32,7 +32,7 @@ const router = useRouter();
         <span class="text-caption text-gray-400 dark:text-gray-500">{{ code }}</span>
         <span
           v-if="to"
-          class="i-carbon-chevron-right text-gray-300"
+          class="i-material-symbols-chevron-right-rounded text-gray-300"
           aria-hidden="true"
         />
       </div>

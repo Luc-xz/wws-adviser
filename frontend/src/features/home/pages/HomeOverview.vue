@@ -115,7 +115,7 @@ function reportTitle(t: string): string {
     <!-- 空账户：导入引导（绝不显示假 ¥0） -->
     <div
       v-else-if="summaryOk && !hasAccount"
-      class="rounded-lg bg-white p-6 text-center shadow-sm dark:bg-gray-800"
+      class="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
       data-testid="empty-guide"
     >
       <p class="text-h3 font-semibold">
@@ -133,24 +133,36 @@ function reportTitle(t: string): string {
         :offline="offline"
       />
 
-      <!-- 组合摘要大卡（基准卡 §2.3：Display 数字 + 盈亏 tone + 两列副指标） -->
-      <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <!-- 组合摘要大卡（基准卡 §2.3：Display 数字 + 盈亏 tone + 两列副指标；W3-A3 图标容器） -->
+      <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
         <div class="flex items-end justify-between gap-3">
-          <div class="min-w-0">
-            <div class="text-label text-gray-500 dark:text-gray-400">
-              总资产
-            </div>
-            <div
-              class="mt-1 truncate text-display font-bold num lg:text-display-d"
-              data-num
-              data-testid="total-assets"
-            >
-              {{ summaryData?.total_assets ?? EMPTY }}
+          <div class="flex min-w-0 items-start gap-2.5">
+            <span
+              class="shrink-0 rounded-lg bg-primary/10 p-2 text-primary"
+              aria-hidden="true"
+            ><span class="i-material-symbols-account-balance-wallet-rounded block text-xl" /></span>
+            <div class="min-w-0">
+              <div class="text-label text-gray-500 dark:text-gray-400">
+                总资产
+              </div>
+              <div
+                class="mt-1 truncate text-display font-bold num lg:text-display-d"
+                data-num
+                data-testid="total-assets"
+              >
+                {{ summaryData?.total_assets ?? EMPTY }}
+              </div>
             </div>
           </div>
           <div class="shrink-0 text-right">
-            <div class="text-label text-gray-500 dark:text-gray-400">
+            <div class="flex items-center justify-end gap-1 text-label text-gray-500 dark:text-gray-400">
               累计盈亏
+              <span
+                class="rounded p-1"
+                data-context="quote"
+                :class="pnlTone === 'up' ? 'bg-market-up/10 text-market-up' : 'bg-market-down/10 text-market-down'"
+                aria-hidden="true"
+              ><span class="i-material-symbols-trending-up-rounded block text-sm" /></span>
             </div>
             <div
               class="mt-1 text-h3 font-semibold num"
@@ -215,7 +227,7 @@ function reportTitle(t: string): string {
             {{ sortedBreaches.length }} 项风险需要处理
           </span>
           <span
-            class="i-carbon-chevron-right text-xl"
+            class="i-material-symbols-chevron-right-rounded text-xl"
             aria-hidden="true"
           />
         </router-link>
@@ -273,7 +285,7 @@ function reportTitle(t: string): string {
           v-for="r in reportsData.items.slice(0, 3)"
           :key="r.id"
           :to="`/reports/${r.id}`"
-          class="block rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+          class="block rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
         >
           <div class="flex items-center justify-between">
             <span class="text-body font-medium">{{ reportTitle(r.report_type) }}</span>

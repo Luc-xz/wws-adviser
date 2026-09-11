@@ -111,7 +111,7 @@ const STATUS_NAMES: Record<string, string> = {
 
     <div
       v-if="!qualityData?.items?.length"
-      class="rounded-lg bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+      class="rounded-2xl bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
     >
       {{ qualityLoading ? "加载中…" : "暂无数据源记录（采集后展示）" }}
     </div>
@@ -119,7 +119,7 @@ const STATUS_NAMES: Record<string, string> = {
     <div
       v-for="(e, i) in qualityData?.items ?? []"
       :key="i"
-      class="flex items-center justify-between rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
     >
       <div>
         <div
@@ -149,7 +149,7 @@ const STATUS_NAMES: Record<string, string> = {
     </div>
 
     <!-- W2.5-5：审计日志（折叠面板） -->
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <button
         type="button"
         class="flex w-full items-center justify-between text-h3 font-semibold"

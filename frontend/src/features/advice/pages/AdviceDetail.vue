@@ -78,7 +78,7 @@ const kellySummary = computed(() => {
 
     <template v-else-if="advice">
       <!-- 动作与状态（完整 Advice Card 头部） -->
-      <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
         <div class="flex items-center justify-between">
           <span
             class="rounded px-2 py-1 text-sm font-medium"
@@ -112,7 +112,7 @@ const kellySummary = computed(() => {
       <!-- 目标区间条（水平带，非仪表盘；当前仓位未持久化 → 只画目标带） -->
       <section
         v-if="hasInterval && band"
-        class="space-y-2 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+        class="space-y-2 rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
       >
         <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           目标风险预算区间
@@ -162,7 +162,7 @@ const kellySummary = computed(() => {
           <p
             v-for="r in advice.reasons"
             :key="r"
-            class="rounded-lg bg-white p-2 text-xs shadow-sm dark:bg-gray-800"
+            class="rounded-2xl bg-white p-2 text-xs shadow-sm dark:bg-gray-800"
             :class="advice.action === 'suspend' ? 'text-risk-warning' : 'text-gray-500 dark:text-gray-400'"
             data-testid="advice-detail-reason"
           >
@@ -178,7 +178,7 @@ const kellySummary = computed(() => {
       >
         <button
           type="button"
-          class="flex w-full items-center justify-between rounded-lg bg-white px-4 py-3 text-left shadow-sm dark:bg-gray-800"
+          class="flex w-full items-center justify-between rounded-2xl bg-white px-4 py-3 text-left shadow-sm dark:bg-gray-800"
           data-testid="advice-kelly-toggle"
           @click="kellyOpen = !kellyOpen"
         >
@@ -191,14 +191,14 @@ const kellySummary = computed(() => {
               : "计算轨迹"
           }}</span>
           <span
-            class="i-carbon-chevron-down text-lg text-gray-400 transition-transform"
+            class="i-material-symbols-expand-more-rounded text-lg text-gray-400 transition-transform"
             :class="kellyOpen ? 'rotate-180' : ''"
             aria-hidden="true"
           />
         </button>
         <div
           v-if="kellyOpen"
-          class="rounded-lg bg-white p-3 text-xs shadow-sm dark:bg-gray-800"
+          class="rounded-2xl bg-white p-3 text-xs shadow-sm dark:bg-gray-800"
         >
           <p
             v-for="(s, i) in advice.trail"
@@ -226,7 +226,7 @@ const kellySummary = computed(() => {
         <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           解读
         </h2>
-        <div class="rounded-lg bg-white p-3 text-sm leading-relaxed shadow-sm dark:bg-gray-800">
+        <div class="rounded-2xl bg-white p-3 text-sm leading-relaxed shadow-sm dark:bg-gray-800">
           {{ advice.model_explanation }}
         </div>
       </section>
@@ -236,7 +236,7 @@ const kellySummary = computed(() => {
         <h2 class="text-sm font-medium text-gray-600 dark:text-gray-300">
           事实和证据
         </h2>
-        <div class="rounded-lg bg-white p-3 text-xs shadow-sm dark:bg-gray-800">
+        <div class="rounded-2xl bg-white p-3 text-xs shadow-sm dark:bg-gray-800">
           <p
             v-if="!advice.evidence_ids.length"
             class="text-gray-400 dark:text-gray-500"
@@ -261,7 +261,7 @@ const kellySummary = computed(() => {
         </h2>
         <div
           v-if="advice.verdict"
-          class="rounded-lg bg-white p-3 text-xs shadow-sm dark:bg-gray-800"
+          class="rounded-2xl bg-white p-3 text-xs shadow-sm dark:bg-gray-800"
           data-testid="advice-verdict"
         >
           <p class="text-body font-medium">
@@ -290,14 +290,14 @@ const kellySummary = computed(() => {
         </div>
         <p
           v-else
-          class="rounded-lg bg-white p-3 text-xs text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+          class="rounded-2xl bg-white p-3 text-xs text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
           data-testid="advice-verdict-pending"
         >
           待评价（建议到期 {{ advice.evaluation ? "" : "且观察窗口（10 自然日）" }}结束后按动作口径评价）
         </p>
       </section>
 
-      <p class="rounded-lg bg-white p-3 text-xs text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500">
+      <p class="rounded-2xl bg-white p-3 text-xs text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500">
         区间来自全市场同类信号回测（Wilson 置信区间）与分数凯利折扣，为风险预算参考，
         不构成投资建议；模型语言不参与概率估计。
       </p>

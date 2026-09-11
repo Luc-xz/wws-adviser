@@ -1,6 +1,11 @@
 :root {
-  font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei",
-    "Noto Sans CJK SC", system-ui, sans-serif;
+  /* Q2 决策：弃 Inter，统一系统栈（消除平台差异与外网加载）；Latin 走 SF/Segoe，CJK 走苹方/雅黑 */
+  font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "MiSans", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  /* W3-B 精修：渲染调优 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   /* 语义 token（uno.config theme 同源；CSS 侧引用避免裸 hex） */
   --color-primary: #3157d5;
   /* 深色模式表面 token：.dark 挂 <html> 时同元素覆盖（shared/theme.ts） */

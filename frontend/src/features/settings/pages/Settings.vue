@@ -16,12 +16,12 @@ const push = usePushManager();
 
 // 子页入口（SET-01~08；SET-05/07 后端缺资源，波 V4 P2 裁剪线）
 const SUB_PAGES = [
-  { to: "/settings/risk", label: "风险与约束", icon: "i-carbon-warning-alt" },
-  { to: "/settings/data-sources", label: "数据源与质量", icon: "i-carbon-data-base" },
-  { to: "/settings/models", label: "模型设置", icon: "i-carbon-model-alt" },
-  { to: "/settings/notifications", label: "通知与隐私", icon: "i-carbon-notification" },
-  { to: "/settings/security", label: "安全与会话", icon: "i-carbon-security" },
-  { to: "/settings/system", label: "系统状态", icon: "i-carbon-information" },
+  { to: "/settings/risk", label: "风险与约束", icon: "i-material-symbols-warning-rounded" },
+  { to: "/settings/data-sources", label: "数据源与质量", icon: "i-material-symbols-storage-rounded" },
+  { to: "/settings/models", label: "模型设置", icon: "i-material-symbols-memory-rounded" },
+  { to: "/settings/notifications", label: "通知与隐私", icon: "i-material-symbols-notifications-rounded" },
+  { to: "/settings/security", label: "安全与会话", icon: "i-material-symbols-security-rounded" },
+  { to: "/settings/system", label: "系统状态", icon: "i-material-symbols-info-rounded" },
 ] as const;
 
 const { data: riskSettingsData, isSuccess: riskSettingsOk } = useQuery({
@@ -67,7 +67,7 @@ const riskRows = computed(() =>
       设置
     </h1>
 
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <h2 class="text-h3 font-semibold">
         外观
       </h2>
@@ -95,7 +95,7 @@ const riskRows = computed(() =>
 
     <section
       v-if="push.supported.value"
-      class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
     >
       <h2 class="text-h3 font-semibold">
         通知
@@ -123,7 +123,7 @@ const riskRows = computed(() =>
       </p>
     </section>
 
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <h2 class="text-h3 font-semibold">
         风险阈值
       </h2>
@@ -156,7 +156,7 @@ const riskRows = computed(() =>
     </section>
 
     <!-- 子页入口（波 V4：SET-01~08 落点） -->
-    <section class="rounded-lg bg-white p-2 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-2 shadow-sm dark:bg-gray-800">
       <div
         v-for="item in SUB_PAGES"
         :key="item.to"
@@ -174,7 +174,7 @@ const riskRows = computed(() =>
             {{ item.label }}
           </span>
           <span
-            class="i-carbon-chevron-right text-xl text-gray-300"
+            class="i-material-symbols-chevron-right-rounded text-xl text-gray-300"
             aria-hidden="true"
           />
         </router-link>

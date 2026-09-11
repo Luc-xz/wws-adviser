@@ -62,7 +62,7 @@ function badge(s: "…" | "ok" | "fail"): string {
     />
 
     <div class="grid grid-cols-2 gap-2">
-      <div class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <div class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
         <div class="text-label text-gray-500 dark:text-gray-400">
           存活（live）
         </div>
@@ -71,7 +71,7 @@ function badge(s: "…" | "ok" | "fail"): string {
           :class="badge(live)"
         >{{ live === "ok" ? "正常" : live === "fail" ? "异常" : "检测中" }}</span>
       </div>
-      <div class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <div class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
         <div class="text-label text-gray-500 dark:text-gray-400">
           就绪（ready）
         </div>
@@ -94,14 +94,14 @@ function badge(s: "…" | "ok" | "fail"): string {
       </p>
       <div
         v-else-if="!deps.length"
-        class="rounded-lg bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+        class="rounded-2xl bg-white p-6 text-center text-body text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
       >
         依赖详情不可用（仅登录用户可见）。
       </div>
       <div
         v-for="d in deps"
         :key="d.name"
-        class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800"
+        class="flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800"
       >
         <span class="text-body font-medium">{{ d.name }}</span>
         <span class="text-caption text-gray-500 dark:text-gray-400">{{ d.status ?? "—" }}</span>

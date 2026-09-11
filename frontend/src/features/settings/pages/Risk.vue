@@ -74,7 +74,7 @@ async function save() {
     />
     <form
       v-else
-      class="space-y-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="space-y-4 rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
       @submit.prevent="save"
     >
       <label

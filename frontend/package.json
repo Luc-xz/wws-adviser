@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.26",
+    "@iconify-json/material-symbols": "^1.2.91",
     "@types/node": "^22.10.0",
     "@typescript-eslint/parser": "^8.18.0",
     "@vitejs/plugin-vue": "^5.2.0",

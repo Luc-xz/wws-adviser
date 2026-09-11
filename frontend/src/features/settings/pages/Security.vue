@@ -134,7 +134,7 @@ async function logoutAll() {
     />
 
     <!-- Passkey 管理 -->
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <div class="flex items-center justify-between">
         <h2 class="text-h3 font-semibold">
           Passkey
@@ -195,7 +195,7 @@ async function logoutAll() {
     </section>
 
     <!-- 改密码 -->
-    <section class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <section class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800">
       <h2 class="text-h3 font-semibold">
         修改密码
       </h2>
