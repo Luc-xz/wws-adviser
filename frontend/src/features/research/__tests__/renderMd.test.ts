@@ -127,11 +127,15 @@ describe("Library（研究与报告库）", () => {
     expect(w.text()).toContain("已完成");
     expect(w.text()).toContain("未检索到证据");
 
-    // 点选完成任务 → 显示报告面板 + 引用清单 + 导出链接
+    // 点选完成任务 → 显示报告面板 + 引用入口（明细在 EvidenceDrawer）+ 导出链接
     await w.findAll('[data-testid="research-task-row"]')[0]!.trigger("click");
     await flushPromises();
     expect(w.find('[data-testid="research-report-panel"]').exists()).toBe(true);
-    expect(w.find('[data-testid="research-citations"]').text()).toContain("半年报#para:1");
+    const cite = w.find('[data-testid="research-citations"]');
+    expect(cite.exists()).toBe(true);
+    expect(cite.text()).toContain("1 条");
+    expect(cite.text()).toContain("点击逐条回查证据切片与原文");
+    expect(w.find('[data-testid="open-evidence-drawer"]').exists()).toBe(true);
     expect(w.html()).toContain("/api/v1/research/reports/r1/export?format=md");
     // 认知层级标签在渲染后的报告里
     expect(w.html()).toContain("概览【事实】");

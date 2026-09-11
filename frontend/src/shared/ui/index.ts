@@ -6,3 +6,4 @@ export { default as RiskAlert } from "./RiskAlert.vue";
 export { default as TrendChart } from "./TrendChart.vue";
 export { default as AppShellDesktop } from "./AppShellDesktop.vue";
 export { default as PageHeader } from "./PageHeader.vue";
+export { default as EvidenceDrawer } from "./EvidenceDrawer.vue";

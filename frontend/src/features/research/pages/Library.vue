@@ -15,6 +15,7 @@ import {
 } from "@/features/research/composables/queries";
 import { useResearchTaskStatus } from "@/features/research/composables/useResearchTaskStatus";
 import { renderReportMd } from "@/features/research/composables/renderMd";
+import { EvidenceDrawer } from "@/shared/ui";
 
 const { data: taskData, isLoading: tasksLoading } = useResearchTasks();
 const { create } = useCreateResearchTask();
@@ -132,6 +133,7 @@ const reportHtml = computed(() =>
   reportData.value?.content_md ? renderReportMd(reportData.value.content_md) : "",
 );
 const citations = computed(() => reportData.value?.citations ?? []);
+const drawerOpen = ref(false);
 
 function onCancel(id: string) { void cancel(id); }
 </script>
@@ -334,17 +336,21 @@ function onCancel(id: string) { void cancel(id); }
         class="border-t border-gray-100 pt-2"
         data-testid="research-citations"
       >
-        <div class="text-xs font-medium text-gray-500 mb-1">
-          引用清单（{{ citations.length }} 条 · 内容哈希可复盘）
-        </div>
-        <ol class="text-xs text-gray-400 space-y-0.5 list-decimal list-inside">
-          <li
-            v-for="(c, i) in citations"
-            :key="i"
-          >
-            {{ c.locator }} · {{ c.verified ? '已双源验证' : (c.unverified_note ?? '未验证') }}
-          </li>
-        </ol>
+        <button
+          type="button"
+          class="flex w-full items-center justify-between text-xs font-medium text-primary"
+          data-testid="open-evidence-drawer"
+          @click="drawerOpen = true"
+        >
+          <span>引用清单（{{ citations.length }} 条 · 点击逐条回查证据切片与原文）</span>
+          <span class="i-carbon-chevron-right block" />
+        </button>
+        <EvidenceDrawer
+          :open="drawerOpen"
+          :title="selectedTask ? `${selectedTask.subject} 研究报告` : '研究报告'"
+          :citations="citations"
+          @close="drawerOpen = false"
+        />
       </div>
     </div>
   </div>
