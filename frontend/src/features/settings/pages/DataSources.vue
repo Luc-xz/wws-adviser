@@ -5,6 +5,7 @@ import { computed, ref } from "vue";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useRouter } from "vue-router";
 import client from "@/api/client";
+import { formatMoney } from "@/shared/format/number";
 import { PageHeader } from "@/shared/ui";
 
 const router = useRouter();
@@ -101,8 +102,8 @@ async function resolve(conflictId: string, winner: string) {
           class="mt-1 text-caption text-gray-500 num dark:text-gray-400"
           data-num
         >
-          {{ c.business_date }} · {{ c.field }} · {{ c.source_a }}={{ c.value_a }} vs
-          {{ c.source_b }}={{ c.value_b }}
+          {{ c.business_date }} · {{ c.field }} · {{ c.source_a }}={{ formatMoney(c.value_a, 4) }} vs
+          {{ c.source_b }}={{ formatMoney(c.value_b, 4) }}
         </div>
         <div
           v-if="c.status === 'RESOLVED' && c.resolved_by"
@@ -136,7 +137,7 @@ async function resolve(conflictId: string, winner: string) {
             :data-testid="`resolve-${src}`"
             @click="resolve(c.id, src)"
           >
-            采用 {{ src }}（{{ src === c.source_a ? c.value_a : c.value_b }}）
+            采用 {{ src }}（{{ formatMoney(src === c.source_a ? c.value_a : c.value_b, 4) }})
           </button>
           <button
             type="button"

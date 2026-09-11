@@ -20,6 +20,7 @@ defineProps<{
     <div
       class="mt-1 text-lg font-semibold num"
       data-num
+      data-context="quote"
       :class="{
         'text-market-up': tone === 'up',
         'text-market-down': tone === 'down',

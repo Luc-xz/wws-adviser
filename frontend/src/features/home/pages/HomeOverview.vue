@@ -155,6 +155,7 @@ function reportTitle(t: string): string {
             <div
               class="mt-1 text-h3 font-semibold num"
               data-num
+              data-context="quote"
               :class="{
                 'text-market-up': pnlTone === 'up',
                 'text-market-down': pnlTone === 'down',

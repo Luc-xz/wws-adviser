@@ -134,7 +134,7 @@ function docTitle(d: { title?: string }): string {
             class="mt-0.5 font-medium num"
             data-num
           >
-            {{ holding.quantity }}
+            {{ formatMoney(holding.quantity, 2) }}
           </dd>
         </div>
         <div>

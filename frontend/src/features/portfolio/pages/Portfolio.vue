@@ -3,6 +3,7 @@
 // 持仓=摘要条+风险前置持仓卡+累计已实现盈亏趋势（/positions/history 按日聚合）；
 // 流水=交易列表（keyset 首页）；自选=watchlist 增删+快照价（技术债清理：波7 留白）。
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 import { formatMoney, formatPercent } from "@/shared/format/number";
 import { DataFooter, PageHeader, PositionRow, TrendChart } from "@/shared/ui";
 import {
@@ -10,6 +11,8 @@ import {
   useRisk,
   useSummary,
 } from "@/features/home/composables/queries";
+
+const router = useRouter();
 import {
   useInstrumentMap,
   usePositionsHistory,
@@ -60,16 +63,19 @@ const summaryStrip = computed(() => {
   );
   return {
     marketValue: formatMoney(mv.toFixed(2)),
-    cashRatio: summaryData.value?.cash_ratio
+    cashRatioText: summaryData.value?.cash_ratio
       ? formatPercent(summaryData.value.cash_ratio)
       : null,
-    concentration: summaryData.value?.concentration ?? null,
+    concentrationText: summaryData.value?.concentration
+      ? formatPercent(summaryData.value.concentration)
+      : null,
     count: d.items?.length ?? 0,
   };
 });
 
 function recordTrade() {
-  // TODO(后续波次): 手工录入表单/CSV 导入 UI（后端 /transactions 已就绪）
+  // TX-02 手工录入表单（W1-1：入口接通，表单页 V4 已交付）
+  router.push("/transactions/new");
 }
 
 // 趋势：各标的 realized_pnl 快照按日求和（组合累计已实现盈亏，近 30 个快照日）
@@ -105,9 +111,10 @@ const txRows = computed(() =>
     isBuy: t.direction === "BUY",
     kind: t.kind,
     inst: instLabel(t.instrument_id),
-    quantity: formatMoney(t.quantity, 2),
-    price: formatMoney(t.price, 2),
-    fee: formatMoney((Number(t.fee) + Number(t.tax)).toFixed(2)),
+    // 已格式化字符串（*Text 命名 = no-raw-number-interpolation 豁免约定）
+    quantityText: formatMoney(t.quantity, 2),
+    priceText: formatMoney(t.price, 2),
+    feeText: formatMoney((Number(t.fee) + Number(t.tax)).toFixed(2)),
   }))
 );
 
@@ -230,7 +237,7 @@ function removeWatch(code: string) {
               class="mt-1 text-body-lg font-semibold num"
               data-num
             >
-              {{ summaryStrip.cashRatio ?? "—" }}
+              {{ summaryStrip.cashRatioText ?? "—" }}
             </div>
           </div>
           <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
@@ -241,7 +248,7 @@ function removeWatch(code: string) {
               class="mt-1 text-body-lg font-semibold num"
               data-num
             >
-              {{ summaryStrip.concentration ?? "—" }}
+              {{ summaryStrip.concentrationText ?? "—" }}
             </div>
           </div>
           <div class="rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
@@ -349,7 +356,7 @@ function removeWatch(code: string) {
               class="mt-1 text-xs text-gray-500 dark:text-gray-400 num"
               data-num
             >
-              {{ t.tradeAt }} · 数量 {{ t.quantity }} @ {{ t.price }} · 费税 {{ t.fee }}
+              {{ t.tradeAt }} · 数量 {{ t.quantityText }} @ {{ t.priceText }} · 费税 {{ t.feeText }}
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // 持仓行/卡（UI §9 PositionRow）：代码/名称/数量/市值/权重/新鲜度；空值 = —
 // 可选 to：传入路由则整行可点（PORT-02 标的详情，波 V4）。
-import { EMPTY, formatPercent } from "@/shared/format/number";
+import { EMPTY, formatMoney, formatPercent } from "@/shared/format/number";
 import { useRouter } from "vue-router";
 
 defineProps<{
@@ -40,7 +40,7 @@ const router = useRouter();
         class="mt-0.5 text-caption text-gray-500 num dark:text-gray-400"
         data-num
       >
-        数量 {{ quantity }} · 成本 {{ avgCost }}
+        数量 {{ formatMoney(quantity, 2) }} · 成本 {{ formatMoney(avgCost, 3) }}
       </div>
     </div>
     <div class="text-right">
@@ -48,7 +48,7 @@ const router = useRouter();
         class="text-body font-medium num"
         data-num
       >
-        {{ marketValue ?? EMPTY }}
+        {{ marketValue ? formatMoney(marketValue, 2) : EMPTY }}
       </div>
       <div
         class="text-caption text-gray-500 num dark:text-gray-400"

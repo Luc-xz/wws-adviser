@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/vue-query";
 import { useRouter } from "vue-router";
 import client from "@/api/client";
 import { useMarketQuality } from "@/features/home/composables/queries";
+import { formatMoney } from "@/shared/format/number";
 import { DataFooter, PageHeader } from "@/shared/ui";
 
 const router = useRouter();
@@ -84,8 +85,8 @@ const STATUS_NAMES: Record<string, string> = {
           class="mt-1 text-caption text-gray-500 num dark:text-gray-400"
           data-num
         >
-          {{ c.business_date }} · {{ c.field }}：{{ c.source_a }}={{ c.value_a }} vs
-          {{ c.source_b }}={{ c.value_b }}
+          {{ c.business_date }} · {{ c.field }}：{{ c.source_a }}={{ formatMoney(c.value_a, 4) }} vs
+          {{ c.source_b }}={{ formatMoney(c.value_b, 4) }}
         </div>
       </div>
       <p class="text-caption text-gray-400 dark:text-gray-500">

@@ -161,7 +161,7 @@ function rowAmount(q: string, p: string): string {
             class="mt-1 text-caption text-gray-500 num dark:text-gray-400"
             data-num
           >
-            {{ t.trade_at.slice(0, 10) }} · 数量 {{ t.quantity }} @ {{ t.price }}
+            {{ t.trade_at.slice(0, 10) }} · 数量 {{ formatMoney(t.quantity, 2) }} @ {{ formatMoney(t.price, 2) }}
             <template v-if="Number(t.fee) + Number(t.tax) > 0">
               · 费税 {{ formatMoney((Number(t.fee) + Number(t.tax)).toFixed(2)) }}
             </template>
