@@ -11,7 +11,8 @@
     "lint": "eslint . && vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gen:api": "openapi-typescript ./openapi.json -o ./src/api/generated/types.ts"
+    "gen:api": "openapi-typescript ./openapi.json -o ./src/api/generated/types.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.101.4",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.26",
     "@iconify-json/material-symbols": "^1.2.91",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.10.0",
     "@typescript-eslint/parser": "^8.18.0",
     "@vitejs/plugin-vue": "^5.2.0",

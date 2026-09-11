@@ -4,6 +4,7 @@
 // direction 仅买卖两类需要；提交走幂等 POST /transactions，成功回 TX-01。
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import client from "@/api/client";
 import { PageHeader } from "@/shared/ui";
 import {
   KIND_NAMES,
@@ -45,8 +46,21 @@ async function submit() {
     return;
   }
   try {
+    // W4 可用性修复：标的输入支持 6 位代码（自动解析 ID），也接受完整 ID
+    let instId = instrumentId.value.trim();
+    if (/^\d{6}$/.test(instId)) {
+      const { data: insts, error: qErr } = await client.GET("/api/v1/instruments", {
+        params: { query: { q: instId } },
+      });
+      const hit = (insts?.items ?? []).find((i) => i.code === instId);
+      if (qErr || !hit) {
+        error.value = `标的代码 ${instId} 不存在，请先在数据源导入或检查代码`;
+        return;
+      }
+      instId = hit.id;
+    }
     await create.mutateAsync({
-      instrument_id: instrumentId.value.trim(),
+      instrument_id: instId,
       kind: kind.value,
       direction: needsDirection.value ? direction.value : null,
       quantity: quantity.value,

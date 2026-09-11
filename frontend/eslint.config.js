@@ -7,7 +7,7 @@ import noRawNumberInterpolation from "./src/eslint-rules/no-raw-number-interpola
 // ESLint（vue 模板规则 + TS script 解析）；TS 类型由 vue-tsc 负责。
 // 自定义规则见 src/eslint-rules/（ENFORCEMENT_CONTRACT §3）。
 export default [
-  { ignores: ["dist/**", "dev-dist/**", "node_modules/**", "src/api/generated/**"] },
+  { ignores: ["e2eReports/**", "test-results/**", "playwright-report/**", "dist/**", "dev-dist/**", "node_modules/**", "src/api/generated/**"] },
   ...vue.configs["flat/recommended"],
   {
     files: ["**/*.vue"],
