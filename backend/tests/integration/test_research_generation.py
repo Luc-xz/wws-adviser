@@ -285,7 +285,11 @@ def test_executor_completes_company_task(migrated_client: TestClient) -> None:
 
 
 def test_executor_fails_on_fabricated_evidence(migrated_client: TestClient) -> None:
-    """编造证据编号 → 网关 BLOCKED → 任务失败（不产出报告）。"""
+    """编造证据编号 → 网关 BLOCKED → AC-06 降级：任务完成但模型段标注不可用。
+
+    W2-4 复盘改契约：模型失败/引用违例不再整体失败——确定性内容 + 降级标记
+    （对齐日报 model_unavailable 行为），重试生成可恢复完整报告。
+    """
     app = migrated_client.app
     with app.state.session_factory() as db:
         _seed_doc(db, title="600519贵州茅台2026年半年报", text="600519 贵州茅台营业收入增长15%。")
@@ -310,9 +314,16 @@ def test_executor_fails_on_fabricated_evidence(migrated_client: TestClient) -> N
     with app.state.session_factory() as db:
         task = research_service.get_task(db, task_id)
         assert task is not None
-        assert task.status == "FAILED"
-        assert "output_invalid" in (task.error_code or "")
-        assert task.report_id is None
+        assert task.status == "COMPLETED"  # 降级不失败
+        assert task.report_id is not None
+        # 降级报告可读：含模型段不可用标注 + fact 段证据引用
+        r2 = migrated_client.get(
+            f"/api/v1/research/reports/{task.report_id}", headers=headers
+        )
+        assert r2.status_code == 200
+        body = r2.json()
+        assert "模型叙述段不可用" in body["content_md"]
+        assert body["citations"]
 
 
 def test_executor_fails_without_evidence(migrated_client: TestClient) -> None:

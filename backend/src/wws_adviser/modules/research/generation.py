@@ -172,6 +172,57 @@ def _locator_of(e: EvidenceSlice) -> str:
     return loc
 
 
+def _degraded_sections(
+    plan: tuple[SectionSpec, ...],
+    evidence: list[EvidenceSlice],
+    *,
+    note: str | None = None,
+) -> tuple[ResearchSection, ...]:
+    """模型失败/引用违例时的确定性降级段落（AC-06 哲学：模型不可用不废报告）。
+
+    fact 段：证据切片原文拼接（带定位引用）；模型叙述段：显式标注不可用。
+    """
+    from wws_adviser.modules.research.domain import Citation
+
+    unverified = note or "模型段降级（单源引用，未经双源验证）"
+    parts: list[ResearchSection] = []
+    for spec in plan:
+        if spec.epistemic_type == "fact":
+            texts = "；".join(
+                f"{e.title} {e.slice_ref}：{e.text[:120]}" for e in evidence[:5]
+            )
+            citations = tuple(
+                Citation(
+                    evidence_id=e.evidence_id,
+                    section=spec.section_type,
+                    locator=e.slice_ref,
+                    content_hash=e.content_hash,
+                    verified=False,
+                    unverified_note=unverified,
+                )
+                for e in evidence[:3]
+            )
+            parts.append(ResearchSection(
+                section_type=spec.section_type,
+                title=spec.title,
+                content=texts or "（无可用证据切片）",
+                epistemic_type="fact",
+                citations=citations,
+            ))
+        else:
+            reason = note or "模型调用失败"
+            parts.append(ResearchSection(
+                section_type=spec.section_type,
+                title=spec.title,
+                content=(
+                    "【模型叙述段不可用】本段由模型生成，当前模型不可用或输出未通过引用校验"
+                    f"（{reason}），确定性数据见指标表；重试生成可恢复完整报告。"
+                ),
+                epistemic_type="model_judgment",
+            ))
+    return tuple(parts)
+
+
 def sections_from_model(
     content: dict[str, Any],
     *,
@@ -391,14 +442,20 @@ async def _run_research(
         evidence_whitelist=evidence_ids,
     )
     research_service.update_progress(db, task, 80)
+    model_degraded = False
     if not call.ok or call.content is None:
-        raise ValueError(f"model_failed:{call.error_code}")
-
-    # 4) 引用校验（波1 domain：fact 段必引用 + 未验证须有说明）
-    sections = sections_from_model(call.content, plan=plan, evidence=evidence)
-    violations = validate_citations(list(sections))
-    if violations:
-        raise ValueError(f"citation_violation:{violations}")
+        # AC-06 哲学对齐（W2-4 复盘）：模型失败降级为确定性报告，不整体失败——
+        # 段落按计划生成，fact 段引用证据标题定位，模型叙述段显式标注不可用
+        model_degraded = True
+        sections = _degraded_sections(plan, evidence)
+    else:
+        # 4) 引用校验（波1 domain：fact 段必引用 + 未验证须有说明）
+        sections = sections_from_model(call.content, plan=plan, evidence=evidence)
+        violations = validate_citations(list(sections))
+        if violations:
+            # 引用违例同样降级不失败（模型段不可信 ≠ 确定性内容不可用）
+            model_degraded = True
+            sections = _degraded_sections(plan, evidence, note=f"citation_violation:{violations}")
     research_service.update_progress(db, task, 90)
 
     # 5) 渲染 + 保存（波1 service：原子写 + 落库）
@@ -412,6 +469,8 @@ async def _run_research(
         "depth": task.depth,
         "time_span": task.time_span,
         "sections": [s.section_type.value for s in sections],
+        "model_degraded": model_degraded,
+        "degraded_reason": (call.error_code if model_degraded else None),
     }
     content_md = assemble_report_md(
         report_kind=report_kind, subject=subject_name, sections=sections,

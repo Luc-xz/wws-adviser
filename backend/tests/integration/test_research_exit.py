@@ -169,9 +169,9 @@ def test_exit_failure_not_stuck_and_retryable(migrated_client: TestClient) -> No
 
     r = migrated_client.get(f"/api/v1/research/tasks/{task_id}", headers=headers)
     t = r.json()
-    assert t["status"] == "FAILED"
-    assert t["error_code"] and "model_failed" in t["error_code"]
-    assert t["report_id"] is None
+    # W2-4 契约变更：模型失败降级不失败（AC-06 对齐）——完成态 + 降级报告可重建
+    assert t["status"] == "COMPLETED"
+    assert t["report_id"] is not None
 
     # 终态不阻塞重建（幂等仅覆盖 PENDING/RUNNING）→ 换好模型重跑成功
     r2 = migrated_client.post(
