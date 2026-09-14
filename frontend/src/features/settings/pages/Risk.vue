@@ -3,7 +3,7 @@
 // 语义与 PORT 摘要一致：single_cap/industry_cap/cash_floor/top_n/top_n_concentration。
 import { onMounted, ref } from "vue";
 import client from "@/api/client";
-import { PageHeader } from "@/shared/ui";
+import { PageHeader, Skeleton } from "@/shared/ui";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -70,8 +70,10 @@ async function save() {
 
     <div
       v-if="loading"
-      class="h-48 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-700"
-    />
+      class="rounded-2xl bg-white p-4 dark:bg-gray-800"
+    >
+      <Skeleton variant="text" :lines="5" />
+    </div>
     <form
       v-else
       class="space-y-4 rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"

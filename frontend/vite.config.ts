@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import vue from "@vitejs/plugin-vue";
 import UnoCSS from "unocss/vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -54,5 +54,6 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    exclude: [...configDefaults.exclude, "e2e/**"],
   },
 });

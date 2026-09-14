@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { RouterView, useRoute } from "vue-router";
 
 import { AppShellDesktop } from "@/shared/ui";
 import { useSessionStore } from "@/stores/session";
@@ -32,9 +32,14 @@ const NAV_ITEMS = [
     <!-- 桌面外壳：侧栏 224px + 顶栏 64px（组件内部 hidden lg:flex） -->
     <AppShellDesktop />
 
-    <!-- 主内容：桌面让位侧栏/顶栏，最大 1200px 居中（UI §5.2，左右 padding 32px） -->
+    <!-- 主内容：桌面让位侧栏/顶栏，最大 1200px 居中（UI §5.2，左右 padding 32px）；
+         路由切换淡入（W3-B1 动效，150ms 不炫技） -->
     <main class="p-4 lg:mt-16 lg:ml-56 lg:w-[calc(100%-14rem)] lg:max-w-[75rem] lg:mx-auto lg:p-8">
-      <router-view />
+      <RouterView v-slot="{ Component }">
+        <Transition name="page" mode="out-in">
+          <component :is="Component" />
+        </Transition>
+      </RouterView>
     </main>
 
     <!-- 移动底导航（UI §5.1：视觉高 64px + 安全区；图标 22px + 12px 标签） -->

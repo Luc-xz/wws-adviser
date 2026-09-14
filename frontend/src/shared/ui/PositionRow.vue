@@ -21,7 +21,7 @@ const router = useRouter();
 
 <template>
   <div
-    class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800"
+    class="stagger-item flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800"
     :class="to ? 'cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700' : ''"
     data-testid="position-row"
     @click="to && router.push(to)"

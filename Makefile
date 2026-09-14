@@ -15,6 +15,10 @@ lint:                      ## ruff + mypy
 
 test: test-unit test-integration  ## 全部测试
 
+test-e2e:                   ## Playwright E2E 六链路（W4；Q3 决策：本地门禁必跑）
+	cd frontend && pnpm e2e
+
+
 test-unit:                 ## 单元测试
 	$(BACKEND) pytest tests/unit -q
 

@@ -4,7 +4,7 @@
 import { computed, ref } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import client from "@/api/client";
-import { PageHeader } from "@/shared/ui";
+import { PageHeader, Skeleton } from "@/shared/ui";
 import { useAccounts, useReconcile, type AccountRow } from "@/features/transactions/composables/queries";
 // 复用交易域 composable（同客户端同查询域）
 
@@ -62,8 +62,10 @@ const statsByAccount = computed(() => {
 
     <div
       v-if="isLoading"
-      class="h-20 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-700"
-    />
+      class="rounded-2xl bg-white p-3 dark:bg-gray-800"
+    >
+      <Skeleton variant="row" :lines="2" />
+    </div>
 
     <div
       v-else-if="isSuccess && !accounts?.length"
@@ -76,7 +78,7 @@ const statsByAccount = computed(() => {
     <div
       v-for="a in accounts ?? []"
       :key="a.id"
-      class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
+      class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800 stagger-item"
       data-testid="account-row"
     >
       <div class="flex items-center justify-between">

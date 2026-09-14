@@ -15,7 +15,7 @@ import {
 } from "@/features/research/composables/queries";
 import { useResearchTaskStatus } from "@/features/research/composables/useResearchTaskStatus";
 import { renderReportMd } from "@/features/research/composables/renderMd";
-import { EvidenceDrawer } from "@/shared/ui";
+import { EmptyIllustration, EvidenceDrawer, Skeleton } from "@/shared/ui";
 
 const { data: taskData, isLoading: tasksLoading } = useResearchTasks();
 const { create } = useCreateResearchTask();
@@ -232,10 +232,23 @@ function onCancel(id: string) { void cancel(id); }
 
     <!-- 任务列表 -->
     <div
-      v-if="!tasks.length"
-      class="rounded-2xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+      v-if="tasksLoading"
+      class="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
     >
-      {{ tasksLoading ? "加载中…" : "暂无研究任务——创建一个试试" }}
+      <Skeleton variant="row" :lines="2" />
+    </div>
+    <div
+      v-else-if="!tasks.length"
+      class="rounded-2xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm dark:bg-gray-800 dark:text-gray-500"
+      data-testid="research-empty"
+    >
+      <EmptyIllustration
+        variant="docs"
+        class="mx-auto"
+      />
+      <p class="mt-2">
+        暂无研究任务——创建一个试试
+      </p>
     </div>
     <div
       v-for="t in tasks"

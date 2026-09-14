@@ -43,3 +43,58 @@ table,
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
+
+/* W3-B1 动效：路由切换淡入（150ms，out-in 不叠层）；列表渐入工具类 */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.15s ease;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+/* 列表 stagger 渐入（卡片列表加 .stagger-item，父级加 .stagger；100ms 级） */
+.stagger-item {
+  animation: fade-up 0.24s ease both;
+}
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 40ms; }
+.stagger-item:nth-child(3) { animation-delay: 80ms; }
+.stagger-item:nth-child(n+4) { animation-delay: 120ms; }
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-leave-active,
+  .stagger-item {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* W3-B6 表单聚焦环统一：primary 2px outline offset；错误态红边 */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+input[aria-invalid="true"],
+input:user-invalid {
+  border-color: var(--color-risk-critical, #c11574);
+}
+input[aria-invalid="true"]:focus,
+input:user-invalid:focus {
+  outline-color: var(--color-risk-critical, #c11574);
+}

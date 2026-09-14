@@ -5,7 +5,7 @@
 // 离线禁用刷新（AC-08）。建议区已拆至 /advice（HOME-02，计划 §10-Q1 同类决策）。
 import { computed, ref } from "vue";
 import { useQueryClient } from "@tanstack/vue-query";
-import { DataStatusBar, DataFooter, PositionRow, RiskAlert } from "@/shared/ui";
+import { DataStatusBar, DataFooter, EmptyIllustration, PositionRow, RiskAlert, Skeleton } from "@/shared/ui";
 import { EMPTY, formatMoney, formatPercent } from "@/shared/format/number";
 import {
   useMarketQuality,
@@ -112,13 +112,17 @@ function reportTitle(t: string): string {
       <div class="h-16 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-700" />
     </div>
 
-    <!-- 空账户：导入引导（绝不显示假 ¥0） -->
+    <!-- 空账户：导入引导（绝不显示假 ¥0；W3-B5 插画） -->
     <div
       v-else-if="summaryOk && !hasAccount"
       class="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-gray-800"
       data-testid="empty-guide"
     >
-      <p class="text-h3 font-semibold">
+      <EmptyIllustration
+        variant="empty"
+        class="mx-auto"
+      />
+      <p class="mt-2 text-h3 font-semibold">
         还没有持仓数据
       </p>
       <p class="mt-1 text-body text-gray-500 dark:text-gray-400">
