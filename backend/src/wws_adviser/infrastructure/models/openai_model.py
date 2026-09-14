@@ -109,8 +109,8 @@ class OpenAICompatibleModelPort:
 
     async def _stream_completion(
         self, client: "httpx.AsyncClient", body: dict[str, Any]
-    ) -> tuple[str, dict[str, Any]]:
-        """消费一次流式补全：SSE 增量拼接 → (全文, usage)。"""
+    ) -> tuple[str, dict[str, Any], str]:
+        """消费一次流式补全：SSE 增量拼接 → (全文, usage, finish_reason)。"""
         async with client.stream(
             "POST", f"{self._base_url}/chat/completions",
             json=body, headers=self._headers(),
@@ -118,6 +118,7 @@ class OpenAICompatibleModelPort:
             resp.raise_for_status()
             chunks: list[str] = []
             usage: dict[str, Any] = {}
+            finish = ""
             async for line in resp.aiter_lines():
                 if not line.startswith("data: "):
                     continue
@@ -129,7 +130,10 @@ class OpenAICompatibleModelPort:
                     chunks.append(delta)
                 if chunk_usage:
                     usage = chunk_usage
-            return "".join(chunks), usage
+                meta = parse_sse_finish(payload)
+                if meta:
+                    finish = meta
+            return "".join(chunks), usage, finish
 
     async def call(self, request: ModelRequest) -> ModelResponse:
         import httpx
@@ -144,17 +148,25 @@ class OpenAICompatibleModelPort:
         # 持续到达（含 reasoning 增量），连接保持活跃直至完成。
         # 流式下 httpx 的 read timeout 是"相邻两次读之间"的超时，而非整体。
         body["stream"] = True
+        finish = ""
         async with httpx.AsyncClient(timeout=self._timeout, transport=self._transport) as client:
             try:
-                choice, usage = await self._stream_completion(client, body)
+                choice, usage, finish = await self._stream_completion(client, body)
             except httpx.HTTPStatusError as exc:
                 # 4xx + 原生模式 → 多为供应商不支持 json_schema：剥离后重试一次
                 if exc.response.status_code < 500 and "response_format" in body:
-                    choice, usage = await self._stream_completion(
+                    choice, usage, finish = await self._stream_completion(
                         client, strip_response_format(body)
                     )
                 else:
                     raise
+        # 推理前置模型（step-3.7/DeepSeek-R 系）思考即耗 token：预算被推理烧光时
+        # 正文为空且 finish=length——给出可定位的错误而非"输出非 JSON"误导
+        if not choice.strip() and finish == "length":
+            raise ValueError(
+                f"模型推理耗尽 max_tokens={request.max_tokens}（finish=length，正文为空）——"
+                "请调大该任务路由的 max_tokens"
+            )
         content = parse_content(choice)
         return ModelResponse(
             content=content,
@@ -189,3 +201,13 @@ def parse_sse_chunk(payload: str) -> tuple[str, dict[str, Any]]:
     content = delta.get("content") or ""
     usage = obj.get("usage") or {}
     return str(content), dict(usage) if usage else {}
+
+
+def parse_sse_finish(payload: str) -> str:
+    """SSE 载荷 → finish_reason（无则空串；与 parse_sse_chunk 同容错口径）。"""
+    try:
+        obj = json.loads(payload)
+    except json.JSONDecodeError:
+        return ""
+    choices = obj.get("choices") or [{}]
+    return str(choices[0].get("finish_reason") or "")
