@@ -137,13 +137,46 @@ _RESPONSE_SCHEMA_V1: dict[str, Any] = {
 
 
 def response_schema_for(prompt_name: str) -> dict[str, Any]:
-    """prompt 名 → 原生 structured-output JSON Schema（当前两模板输出同构）。
+    """prompt 名 → 原生 structured-output JSON Schema。
 
+    日报/盘中：summary+evidence_ids 同构；研究（research_*）：sections 结构。
+    2026-09-14 修复：此前研究任务也拿到 summary schema——原生 structured-output
+    把模型合同级锁死在错误形状上，被迫硬凑/编造 evidence_ids → 白名单违例
+    → MODEL_UNAVAILABLE（研究模型段自 9/11 起持续失败的根因之二）。
     返回副本：调用方修改不得污染注册表。
     """
     import copy
 
+    if is_research_task(prompt_name):
+        return copy.deepcopy(_RESEARCH_SCHEMA_V1)
     return copy.deepcopy(_RESPONSE_SCHEMA_V1)
+
+
+_RESEARCH_SCHEMA_V1: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "sections": {
+            "type": "array",
+            "description": "按输入 plan 逐段输出，section_type 必须与计划一致且不缺段",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "section_type": {"type": "string"},
+                    "content": {"type": "string", "description": "该段中文正文，100-400 字"},
+                    "evidence_ids": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "必须逐字来自输入证据白名单；无引用给空数组",
+                    },
+                },
+                "required": ["section_type", "content", "evidence_ids"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["sections"],
+    "additionalProperties": False,
+}
 
 
 # —— 脱敏上下文（8_SECURITY §5：现金金额不进模型明文；最小字段默认）——
