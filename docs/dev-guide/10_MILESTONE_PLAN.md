@@ -175,8 +175,8 @@ Phase 3 完成后逐项核：
 - [x] 模型不可用/异常不破坏业务数据（Phase 1）。✅ 2026-09-10 核：`test_model_gateway`（7，含"模型调用时无打开写事务"断言 + model_unavailable 降级可重试）。
 - [ ] PWA 在 iOS+Android 等效环境验证（Phase 0/3）。⏸ 2026-09-10 决策：**延后**（重要性调降；缓存策略头已修复，装机体验就绪，与视觉批次 V5 真机项合并待做）。
 - [x] 备份恢复演练完成（Phase 0 骨架 → Phase 1 全量）。✅ 2026-09-10 演练通过：备份 `pre-phase3-20260909.db`（alembic 0011）→ 隔离容器恢复（8010 端口）→ `/health/ready` 正确拒就绪（迁移头比对生效，缺 0012–0015 六表）→ `alembic upgrade head` → 就绪；integrity ok；users 1 / accounts 1 / transactions 1722 / advice_records 123 / documents 48 / reports 45 / job_runs 64 / instruments 86 / market_records 6143；校准状态随库恢复（breakout-20 calibrated_oos 至 2026-12-10）；登录页与市场状态 API 可用；演练容器与临时文件已清理。
-- [ ] 公网部署 HTTPS/身份/会话/密钥检查（[8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §11）。⏸ 2026-09-10 方向记录：拟改 **Cloudflare Tunnel**（免开公网端口 + 自动 HTTPS）；落地时按 §11 清单核对并立 ADR。
-- [ ] 数据源使用符合授权与服务条款（供应商确定后复核）。
+- [x] 公网部署 HTTPS/身份/会话/密钥检查（[8_SECURITY_AND_DEPLOYMENT.md](./8_SECURITY_AND_DEPLOYMENT.md) §11）。✅ 2026-09-15 核对通过：Cloudflare Tunnel 上线（ADR-0013，openclow.cc.cd 实测）——十项清单逐项附证据（HTTPS/401/Cookie 属性/密钥 DB 零命中/安全头中间件新增/注入测试/readiness/单 worker/备份演练/镜像非 root+只读根 FS+pip-audit 零漏洞/health）。
+- [x] 数据源使用符合授权与服务条款（供应商确定后复核）。✅ 2026-09-15 §8.5 复核记录：AKShare MIT；东财/腾讯接口只读低频个人使用；不分发上游数据，引用附来源+哈希。
 - [x] 技术架构 §25 MVP 架构验收清单 16 项全绿。✅ 2026-09-10 核对回填（[TECHNICAL_ARCHITECTURE §25](../TECHNICAL_ARCHITECTURE.md)）：十六项逐项附证据——自动化测试 460 后端 + 41 前端当日全绿、VPS 部署实录（6e2b29d/8ef2a2a）、备份演练记录、migrate-check 空库 0015 复验。
 
 > **2026-09-10 核对记录**：上述自动化 5 项的证据子集（7 个测试文件共 76 测试）单独运行全过；备份恢复演练同日完成；§25 十六项清单同日核对全绿（证据注记在技术架构 §25）。剩余 3 项：真机验证（延后，与 V5 合流）、Cloudflare Tunnel（待落地）、数据源条款（随公网部署一并核）。
