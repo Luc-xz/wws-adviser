@@ -68,6 +68,31 @@ def create_app(
     write_methods = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
     @app.middleware("http")
+    async def security_headers_middleware(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        """安全头（8_SECURITY §11）：CSP/HSTS/嗅探防护/引用策略。
+
+        CSP：script/media 仅 self（Vite 构建产物无内联脚本；manifest/sw 同源）；
+        style 允许 unsafe-inline——UnoCSS 原子类 + ECharts/组件内联样式依赖；
+        img 允许 data:（图标内联）与 https:（公告来源图，如有）。
+        connect-src self：SSE 与 fetch 全同源。
+        """
+        response = await call_next(request)
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: https:; connect-src 'self'; font-src 'self' data:; "
+            "object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
+        )
+        # HTTPS 由 Cloudflare Tunnel 终结（ADR-0013）；HSTS 仅 https 响应生效
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        return response
+
+    @app.middleware("http")
     async def csrf_middleware(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:

@@ -258,3 +258,18 @@ async def test_ingest_upgrades_existing_by_source_url(db_session, tmp_path) -> N
     # FTS 重建后正文关键词可命中（占位期索引只含标题）
     hits = docs_service.search_documents(db_session, "营业收入")
     assert len(hits) == 1 and hits[0].id == d.id
+
+
+def test_object_store_rejects_path_traversal(tmp_path) -> None:
+    """路径穿越拒绝（8_SECURITY §11 注入面）：../ 相对路径不得逃出 data_dir。"""
+    from wws_adviser.infrastructure.storage.local_object_store import LocalObjectStore
+
+    store = LocalObjectStore(tmp_path)
+    ok_rel = store.put(b"x", kind="text", ext="txt")
+    assert store.get(ok_rel) == b"x"
+    for evil in ("../../etc/passwd", "text/../../secret.txt", "../leak"):
+        try:
+            store.get(evil)
+            raise AssertionError(f"穿越路径未被拒绝: {evil}")
+        except ValueError:
+            pass  # 防穿越拒绝 ✓

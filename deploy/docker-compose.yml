@@ -1,4 +1,4 @@
-# 单容器部署（8_SECURITY §9.2：云端 VPS 单容器；宿主 Nginx 终结 HTTPS，仅开 443）
+# 单容器部署（8_SECURITY §9.2：云端 VPS 单容器；Cloudflare Tunnel 对外，容器仅绑回环）
 # 用法：deploy/env.sh（由 env.example 复制填写）→ docker compose up -d
 services:
   wws:
@@ -16,8 +16,12 @@ services:
     env_file: ./env.sh
     volumes:
       - wws-data:/data
+    # 8_SECURITY §11：只读根 FS（运行时写仅 /data 卷与 /tmp；ADR-0013）
+    read_only: true
+    tmpfs:
+      - /tmp
     ports:
-      - "127.0.0.1:8000:8000" # 仅本机回环，由宿主 Nginx 反代；不直接公网暴露
+      - "127.0.0.1:8000:8000" # 仅本机回环，由 cloudflared 反代；不直接公网暴露
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=5)"]

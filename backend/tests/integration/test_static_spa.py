@@ -75,3 +75,14 @@ def test_cache_control_headers(spa_client: TestClient) -> None:
     for path in ("/", "/transactions/new", "/sw.js"):
         r = spa_client.get(path)
         assert r.headers["cache-control"] == "no-cache", path
+
+
+def test_security_headers(client: TestClient) -> None:
+    """8_SECURITY §11：CSP/HSTS/嗅探防护/引用策略头全覆盖。"""
+    r = client.get("/health/live")
+    assert "Content-Security-Policy" in r.headers
+    assert "default-src 'self'" in r.headers["Content-Security-Policy"]
+    assert r.headers["Strict-Transport-Security"] == "max-age=31536000"
+    assert r.headers["X-Content-Type-Options"] == "nosniff"
+    assert r.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+    assert r.headers["X-Frame-Options"] == "DENY"
