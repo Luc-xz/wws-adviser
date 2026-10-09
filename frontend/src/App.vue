@@ -8,7 +8,17 @@ import { useSessionStore } from "@/stores/session";
 const session = useSessionStore();
 const route = useRoute();
 // 启动时探一次会话（cookie 有效则直接进入，否则跳登录）
-onMounted(() => session.fetchSession());
+onMounted(() => {
+  session.fetchSession();
+  // Chromium 窄视口（360px 级）布局视口自锁环兜底：首开 ~1s 后固定底导航的
+  // 布局盒可能停在扩张宽度（434px）不再重算——CSS 钳制（global.css）挡住横向
+  // 滚动但不会触发该盒重排。字体就绪后重设一次行内 overflow-x 强制样式重算，
+  // 布局盒随即恢复正常宽度（生产验收 2026-10-09 定位，5/5 复现、注入即愈）。
+  document.fonts.ready.then(() => {
+    const root = document.documentElement;
+    root.style.overflowX = "hidden";
+  });
+});
 
 // 登录页独立成屏（品牌表达），不套应用外壳
 const bareLayout = computed(() => route.path === "/login");
