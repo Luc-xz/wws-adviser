@@ -28,3 +28,5 @@ backend/data/
 # 本地环境
 .env
 .env.local
+# 生产验收产物（含个人资产数据，仅本地留存）
+frontend/acceptance/artifacts/
