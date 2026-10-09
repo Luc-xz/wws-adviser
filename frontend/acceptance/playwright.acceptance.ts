@@ -8,7 +8,7 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: ".",
   timeout: 90_000,
-  expect: { timeout: 15_000 },
+  expect: { timeout: 25_000 }, // 公网隧道延迟抖动，放宽默认断言等待
   fullyParallel: false,
   workers: 1,
   retries: 0,
