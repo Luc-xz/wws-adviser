@@ -42,9 +42,9 @@ const NAV_ITEMS = [
       </RouterView>
     </main>
 
-    <!-- 移动底导航（UI §5.1：视觉高 64px + 安全区；图标 22px + 12px 标签）
-         w-full：left-0+right-0+width:auto 的 shrink-to-fit 在 360px 视口被间歇排为 434px
-         （生产验收 2026-10-09 发现，路由切换才恢复）；显式 100% 钉死于包含块 -->
+    <!-- 移动底导航（UI §5.1：视觉高 64px + 安全区；图标 22px + 12px 标签）。
+         w-full + global.css 的 html overflow-x 钳制：窄视口布局视口被瞬时撑宽时
+         底导航曾间歇排为 434px 且不自愈（生产验收 2026-10-09 发现），双保险钉回 100% -->
     <nav
       class="fixed bottom-0 left-0 right-0 z-10 w-full flex border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-gray-700 dark:bg-gray-800 lg:hidden"
       aria-label="主导航"

@@ -31,6 +31,14 @@ body {
   margin: 0;
 }
 
+/* 移动 PWA 红线（清单 G）：任何页面不得横向滚动。全局钳制 html 横向溢出，
+   同时阻断固定底导航在窄视口的「内容瞬间过宽 → 布局视口扩张 → 导航跟随且不自愈」
+   自锁环（生产验收 2026-10-09 发现：360px 视口导航间歇排为 434px，路由切换才恢复；
+   overflow-x 钳制注入即恢复 360，预钳制 3/3 首开稳定） */
+html {
+  overflow-x: hidden;
+}
+
 /* ENFORCEMENT_CONTRACT §2.2 + VISUAL_ALIGNMENT_PLAN 波V2：tabular-nums 全局默认开启
    （:root 生效面覆盖全部文本数字；下方选择器保留为审计标记与旧组件兜底） */
 :root {
