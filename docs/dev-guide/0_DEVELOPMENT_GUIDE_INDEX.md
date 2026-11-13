@@ -1,8 +1,9 @@
 # WWS Adviser 开发指南（索引与协作约定）
 
-> 文档版本：v1.0  
+> 文档版本：v1.1  
 > 文档状态：开发基线  
-> 更新日期：2026-07-18  
+> 更新日期：2026-11-13  
+> 变更说明：v1.1——§5 挂接根目录 AGENTS.md（agent 会话入口/路由）与 LESSONS.md（批次复盘教训库，含晋升机制）。
 > 上游文档：[产品需求](../PRODUCT_REQUIREMENTS.md) · [技术架构](../TECHNICAL_ARCHITECTURE.md) · [UI 设计规范](../UI_DESIGN_SPECIFICATION.md)  
 > 适用范围：指导 WWS Adviser 整体开发，从骨架到 MVP 上线
 
@@ -59,6 +60,11 @@
 
 ## 5. 协作工作流
 
+> **Agent 会话入口在仓库根目录**：[AGENTS.md](../../AGENTS.md)（路由 / 决策保护 / 验证与披露纪律）
+> 与 [LESSONS.md](../../LESSONS.md)（批次复盘教训库，`Seen 3×` 的教训晋升入本节或 9 号文档）。
+> 人类协作者从本索引进入即可；两条路径指向同一套文档。
+
+- **任何改动前**：读 [LESSONS.md](../../LESSONS.md)——历史批次返工教训（交互接线 / 契约强制 / 验收核账 / 降级一致性等）。
 - **建模块前**：读 1_REPO_STRUCTURE 确认分层与文件清单，读对应子文档确认契约。
 - **改 schema 前**：读 2_DATA_MODEL_AND_STORAGE，先写 Alembic 迁移并补备份兼容性检查。
 - **加端点前**：读 3_API_CONTRACT，OpenAPI 是接口事实源，前端类型由其生成，手工 DTO 视为临时物。
