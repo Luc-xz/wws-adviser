@@ -139,9 +139,15 @@
 
 | 方法 路径 | 用途 |
 | --- | --- |
-| `GET /jobs/:id` | 状态/进度/错误 |
-| `POST /jobs/:id/retry` | 手动重试（受 max_attempts 约束） |
-| `POST /jobs/:id/cancel` | 取消 |
+| `GET /jobs` | 任务列表（需登录）。过滤 `job_type/status/business_date/date_from/date_to`；游标分页；排序 `created_at DESC, id DESC`（覆盖 §4 默认）。响应含 `result_ref` 解析摘要与条目计数（5_DATA §12） |
+| `GET /jobs/stats` | 窗口聚合（`window_days` 默认 7，需登录）：按状态计数、成功率、平均耗时、按类型连续失败 |
+| `GET /jobs/:id` | 状态/进度/错误（既有实现挂在 `/reports/jobs/:id`，本路径为契约对齐别名） |
+| `GET /jobs/:id/items` | 批次采集条目明细（`ingest_items`，过滤 `category/status`；游标分页，需登录） |
+| `POST /jobs/:id/retry` | 手动重试（受 max_attempts 约束；未实现） |
+| `POST /jobs/:id/cancel` | 取消（未实现） |
+
+任务状态 9 态枚举（UI 规范 §8.4）；`ingest_manual` 为手动补采批次
+（`/market/*/refresh`、`/documents/refresh` 同步执行产生，5_DATA §12.2）。
 
 ### 3.14 settings
 
@@ -161,6 +167,13 @@
 | 方法 路径 | 用途 |
 | --- | --- |
 | `GET /events` | 认证 SSE 流；事件仅 `job_id,status,progress`，不发完整持仓 |
+
+### 3.17 collections（采集运行与健康，v1.1 2026-11-13 增补，需登录）
+
+| 方法 路径 | 用途 |
+| --- | --- |
+| `GET /collections/health` | 六类别源健康（`ok/degraded/unavailable/no_data` + 最近成功/连续失败/最近错误，5_DATA §12.1）+ 各数据集最新业务日期与近 7 天行数；DATA-01「采集运行」与 SET-02 共用 |
+| `GET /collections/items` | 跨批次采集条目检索：`category/status/date_from/date_to/q`（display_name 模糊）；游标分页，`created_at DESC, id DESC` |
 
 ## 4. 分页与游标规范
 

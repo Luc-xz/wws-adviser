@@ -13,8 +13,11 @@ from wws_adviser.api.dependencies import (
     get_document_provider,
     get_object_store,
     get_session,
+    get_settings,
 )
+from wws_adviser.core.config import Settings
 from wws_adviser.core.errors import DomainError, MissingIdempotencyKeyError
+from wws_adviser.core.time import business_date
 from wws_adviser.modules.documents import service
 from wws_adviser.modules.documents.domain import decode_cursor
 from wws_adviser.modules.documents.models import Document, Evidence
@@ -25,6 +28,8 @@ from wws_adviser.modules.documents.schemas import (
     EvidenceOut,
     IngestResponse,
 )
+from wws_adviser.modules.jobs import service as jobs_service
+from wws_adviser.modules.jobs.domain import JobType
 from wws_adviser.ports.document_source import DocumentProvider, DocumentScope
 from wws_adviser.ports.market_data import InstrumentRef
 from wws_adviser.ports.object_store import ObjectStore
@@ -119,6 +124,7 @@ async def search_documents(
 async def refresh_documents(
     request: Request,
     db: DBDep,
+    settings: Annotated[Settings, Depends(get_settings)],
     object_store: StoreDep,
     provider: ProviderDep,
     _key: Annotated[str, Depends(_require_idempotency_key)],
@@ -126,22 +132,42 @@ async def refresh_documents(
     market: Annotated[str, Query()] = "SSE",
     kind_filter: Annotated[str | None, Query(alias="kind")] = None,
 ) -> IngestResponse:
+    # 手动补采 job 化（5_DATA §12.2）：同步执行但留批次痕迹，供 DATA-01「采集运行」下钻
+    job = jobs_service.start_manual_run(
+        db,
+        settings,
+        job_type=JobType.INGEST_MANUAL.value,
+        business_date=business_date().isoformat(),
+        scope_key=f"docs:{code or 'all'}",
+        idempotency_key=_key,
+        request_id=request.headers.get("x-request-id"),
+    )
     instrument = (
         InstrumentRef(code=code, market=market, kind="stock") if code else None
     )
     scope = DocumentScope(instrument=instrument, kinds=[kind_filter] if kind_filter else None)
     since = datetime.min.replace(tzinfo=UTC)
-    result = await service.ingest_documents(
+    try:
+        result = await service.ingest_documents(
+            db,
+            object_store=object_store,
+            provider=provider,
+            scope=scope,
+            since=since,
+            request_id=request.headers.get("x-request-id"),
+            run_id=job.id,
+        )
+    except Exception as exc:  # noqa: BLE001 — 批次失败留痕后原样上抛 Problem Details
+        jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+        raise
+    jobs_service.complete(
         db,
-        object_store=object_store,
-        provider=provider,
-        scope=scope,
-        since=since,
-        request_id=request.headers.get("x-request-id"),
+        job.id,
+        result_ref=f"docs://{result.ingested}/{result.updated}/{result.skipped}",
     )
     return IngestResponse(
         discovered=result.discovered, ingested=result.ingested, skipped=result.skipped,
-        updated=result.updated
+        updated=result.updated, job_run_id=job.id,
     )
 
 

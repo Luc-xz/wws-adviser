@@ -211,3 +211,147 @@ def cancel(db: DBSession, job_id: str) -> JobRun:
     _set_transition(job, JobStatus.CANCELLED)
     db.commit()
     return job
+
+
+# —— 手动批次 + 列表/聚合（采集监控面板，5_DATA §12.2/§12.3） ——
+
+
+def start_manual_run(
+    db: DBSession,
+    settings: Settings,
+    *,
+    job_type: str,
+    business_date: str,
+    scope_key: str,
+    idempotency_key: str | None = None,
+    request_id: str | None = None,
+) -> JobRun:
+    """非幂等手动批次：直接 RUNNING（lease_until=None 不入执行器领取范围）、逐次留痕。
+
+    与 enqueue（幂等 UNIQUE 元组）互补：手动补采每次调用都应产生一行批次记录。
+    同步执行方（refresh 端点）负责随后 complete/fail。
+    """
+    now = now_utc_iso()
+    job = JobRun(
+        id=new_id(),
+        job_type=job_type,
+        business_date=business_date,
+        scope_key=scope_key,
+        idempotency_key=idempotency_key,
+        config_version=1,
+        status=JobStatus.RUNNING.value,
+        attempt=1,
+        max_attempts=1,
+        lease_until=None,
+        started_at=now,
+        created_at=now,
+        updated_at=now,
+    )
+    db.add(job)
+    audit_service.append_event(
+        db,
+        action="job_enqueued",
+        target_type="job",
+        target_id=job.id,
+        after={"job_type": job_type, "business_date": business_date, "manual": True},
+        request_id=request_id,
+    )
+    db.commit()
+    return job
+
+
+def list_runs(
+    db: DBSession,
+    *,
+    job_type: str | None = None,
+    status: str | None = None,
+    business_date: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    cursor_created_at: str | None = None,
+    cursor_id: str | None = None,
+    limit: int = 50,
+) -> tuple[list[JobRun], bool]:
+    """任务列表（created_at DESC, id DESC 键集分页，3_API §3.13 覆盖 §4 默认排序）。"""
+    stmt = select(JobRun)
+    filters: list[ColumnElement[bool]] = []
+    if job_type is not None:
+        filters.append(JobRun.job_type == job_type)
+    if status is not None:
+        filters.append(JobRun.status == status)
+    if business_date is not None:
+        filters.append(JobRun.business_date == business_date)
+    if date_from is not None:
+        filters.append(JobRun.business_date >= date_from)
+    if date_to is not None:
+        filters.append(JobRun.business_date <= date_to)
+    if cursor_created_at is not None and cursor_id is not None:
+        filters.append(
+            (JobRun.created_at < cursor_created_at)
+            | ((JobRun.created_at == cursor_created_at) & (JobRun.id < cursor_id))
+        )
+    if filters:
+        stmt = stmt.where(*filters)
+    rows = list(
+        db.scalars(
+            stmt.order_by(JobRun.created_at.desc(), JobRun.id.desc()).limit(limit + 1)
+        ).all()
+    )
+    has_more = len(rows) > limit
+    return rows[:limit], has_more
+
+
+def run_stats(db: DBSession, *, window_days: int = 7) -> dict[str, object]:
+    """窗口聚合：按状态计数、成功率、平均耗时、按类型连续失败（SET-08/DATA-01 共用）。
+
+    成功率口径：(COMPLETED+PARTIAL) / (COMPLETED+PARTIAL+FAILED)；CANCELLED 与未终态不计。
+    连续失败：窗口内按 created_at 倒序取各 job_type 的最新序列，遇非 FAILED 即止。
+    """
+    cutoff = (datetime.now(UTC) - timedelta(days=window_days)).isoformat()
+    runs = list(
+        db.scalars(
+            select(JobRun).where(JobRun.created_at >= cutoff).order_by(JobRun.created_at.desc())
+        ).all()
+    )
+    by_status: dict[str, int] = {}
+    durations_ms: list[int] = []
+    streak: dict[str, int] = {}
+    streak_done: set[str] = set()  # 已遇非 FAILED 的类型，停止累计
+    for run in runs:
+        by_status[run.status] = by_status.get(run.status, 0) + 1
+        if run.job_type not in streak_done:
+            if run.status == JobStatus.FAILED.value:
+                streak[run.job_type] = streak.get(run.job_type, 0) + 1
+            else:
+                streak_done.add(run.job_type)
+        duration = _duration_ms(run)
+        if duration is not None:
+            durations_ms.append(duration)
+    finished = (
+        by_status.get(JobStatus.COMPLETED.value, 0)
+        + by_status.get(JobStatus.PARTIAL.value, 0)
+        + by_status.get(JobStatus.FAILED.value, 0)
+    )
+    succeeded = (
+        by_status.get(JobStatus.COMPLETED.value, 0) + by_status.get(JobStatus.PARTIAL.value, 0)
+    )
+    consecutive_failures = {k: v for k, v in streak.items() if v > 0}
+    return {
+        "window_days": window_days,
+        "total": len(runs),
+        "by_status": by_status,
+        "success_rate": round(succeeded / finished, 4) if finished else None,
+        "avg_duration_ms": round(sum(durations_ms) / len(durations_ms)) if durations_ms else None,
+        "consecutive_failures": consecutive_failures,
+    }
+
+
+def _duration_ms(run: JobRun) -> int | None:
+    if not run.started_at or not run.completed_at:
+        return None
+    try:
+        started = datetime.fromisoformat(run.started_at)
+        completed = datetime.fromisoformat(run.completed_at)
+    except ValueError:
+        return None
+    return max(0, int((completed - started).total_seconds() * 1000))

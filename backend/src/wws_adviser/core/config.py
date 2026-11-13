@@ -62,6 +62,10 @@ class Settings(BaseModel):
     # 波8 部署：同源静态（PWA dist；空=不挂载，开发用 vite dev/proxy）；执行器轮询间隔
     static_dir: Path | None = None
     executor_poll_seconds: int = 30
+    # 采集可观测性（5_DATA §12）：源健康派生阈值（连续失败计数）+ 条目保留期
+    source_health_degraded_after: int = 1
+    source_health_unavailable_after: int = 5
+    ingest_item_retention_days: int = 90
     # TODO(Phase2): 盘中新鲜度门禁实际生效；日线口径波2 已用 DAILY 规则
     intraday_freshness_threshold_seconds: int = 180
     clock_skew_threshold_seconds: int = 5  # 偏移超阈值 → warning + health 标 skew

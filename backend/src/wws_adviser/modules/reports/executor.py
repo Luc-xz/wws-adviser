@@ -99,7 +99,7 @@ async def run_due_jobs(
                 continue
             if job.job_type == JobType.DATA_MAINTENANCE.value:
                 try:
-                    maint = await _run_data_maintenance(db, settings)
+                    maint = await _run_data_maintenance(db, settings, run_id=job.id)
                     ok_n, fail_n = maint.get("ok", 0), maint.get("failed", 0)
                     jobs_service.complete(
                         db, job.id, result_ref=f"bars://{ok_n}/{fail_n}"
@@ -158,17 +158,21 @@ def _run_calibration_scan(db: DBSession, settings: Settings) -> dict[str, object
 
     return calibration_service.run_calibration_scan(db, settings)
 
-async def _run_data_maintenance(db: DBSession, settings: Settings) -> dict[str, int]:
-    """数据维护任务体：持仓日线批量采集 + 交易日历同步（均幂等，重采安全）。
+async def _run_data_maintenance(
+    db: DBSession, settings: Settings, *, run_id: str | None = None
+) -> dict[str, int]:
+    """数据维护任务体：持仓日线批量采集 + 交易日历同步 + 公告增量（均幂等，重采安全）。
 
     15:20 调度赶在 16:00 收市后报告前拿到当日收盘价；单标的失败不中断批次。
     日历同步失败不影响日线采集（报告侧尚有 weekday 兜底，但节假日识别依赖本同步）。
+    run_id 贯穿各 ingest（5_DATA §12.2）：条目挂到本批次，供采集面板下钻。
     """
     from datetime import timedelta as _td
 
     from wws_adviser.core.time import business_date as _bd
     from wws_adviser.infrastructure.data_sources.akshare_bar import AKShareBarProvider
     from wws_adviser.infrastructure.data_sources.akshare_calendar import AKShareCalendarProvider
+    from wws_adviser.modules.collections import service as collections_service
     from wws_adviser.modules.market_data import service as market_service
 
     if settings.market_data_source != "akshare":
@@ -177,6 +181,7 @@ async def _run_data_maintenance(db: DBSession, settings: Settings) -> dict[str, 
         db, data_dir=settings.data_dir,
         provider=AKShareBarProvider(env=settings.env),
         request_id=f"data-maintenance-{_bd().isoformat()}",
+        run_id=run_id,
     )
     ok = sum(1 for v in results.values() if v == "OK")
     try:
@@ -186,16 +191,25 @@ async def _run_data_maintenance(db: DBSession, settings: Settings) -> dict[str, 
             provider=AKShareCalendarProvider(env=settings.env),
             start=today - _td(days=365),
             end=today + _td(days=400),
+            run_id=run_id,
         )
         _logger.info("交易日历同步完成：%s 行（近一年 + 未来 400 天）", cal_rows)
     except Exception as exc:  # noqa: BLE001 — 日历失败不阻塞采集结果
         _logger.warning("交易日历同步失败（不影响日线采集）: %s", exc)
 
-    docs_stats = await _collect_announcements(db, settings)
+    docs_stats = await _collect_announcements(db, settings, run_id=run_id)
+    try:
+        pruned = collections_service.prune_ingest_items(db, settings)
+        if pruned:
+            _logger.info("采集条目保留清理：%s 行", pruned)
+    except Exception as exc:  # noqa: BLE001 — 清理失败不影响采集结果
+        _logger.warning("采集条目保留清理失败: %s", exc)
     return {"ok": ok, "failed": len(results) - ok, **docs_stats}
 
 
-async def _collect_announcements(db: DBSession, settings: Settings) -> dict[str, int]:
+async def _collect_announcements(
+    db: DBSession, settings: Settings, *, run_id: str | None = None
+) -> dict[str, int]:
     """公告增量采集（W2-1）：持仓 + 自选标的，14 天窗口。
 
     幂等（sha 去重 + 同 URL 就地升级）；失败不影响日线/日历结果。
@@ -248,7 +262,7 @@ async def _collect_announcements(db: DBSession, settings: Settings) -> dict[str,
             )
             r = await doc_service.ingest_documents(
                 db, object_store=store, provider=provider, scope=scope,
-                since=since, request_id=f"docs-maintenance-{code}",
+                since=since, request_id=f"docs-maintenance-{code}", run_id=run_id,
             )
             ing += r.ingested
             upd += r.updated

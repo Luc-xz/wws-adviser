@@ -34,6 +34,7 @@ def db_session(tmp_path):
     from wws_adviser.modules.analytics import models as _analytics_models  # noqa: F401
     from wws_adviser.modules.appsettings import models as _appsettings_models  # noqa: F401
     from wws_adviser.modules.audit import models as _audit_models  # noqa: F401
+    from wws_adviser.modules.collections import models as _collections_models  # noqa: F401
     from wws_adviser.modules.documents import models as _documents_models  # noqa: F401
     from wws_adviser.modules.identity import models as _identity_models  # noqa: F401
     from wws_adviser.modules.instruments import models as _instruments_models  # noqa: F401
@@ -74,6 +75,7 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.modules.analytics import models as _an  # noqa: F401
     from wws_adviser.modules.appsettings import models as _as  # noqa: F401
     from wws_adviser.modules.audit import models as _a  # noqa: F401
+    from wws_adviser.modules.collections import models as _col  # noqa: F401
     from wws_adviser.modules.documents import models as _docs  # noqa: F401
     from wws_adviser.modules.identity import domain  # noqa: F401
     from wws_adviser.modules.identity import models as identity_models

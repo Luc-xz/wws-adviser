@@ -22,10 +22,12 @@ from wws_adviser.modules.advice.api import router as advice_router
 from wws_adviser.modules.analytics.api import analytics_router, positions_router
 from wws_adviser.modules.appsettings.api import router as settings_router
 from wws_adviser.modules.audit.api import router as audit_router
+from wws_adviser.modules.collections.api import router as collections_router
 from wws_adviser.modules.documents.api import router as documents_router
 from wws_adviser.modules.events.api import router as events_router
 from wws_adviser.modules.identity.api import router as identity_router
 from wws_adviser.modules.instruments.api import router as instruments_router
+from wws_adviser.modules.jobs.api import router as jobs_router
 from wws_adviser.modules.market_data.api import market_router
 from wws_adviser.modules.market_data.api import router as market_data_router
 from wws_adviser.modules.notifications.push_api import router as push_router
@@ -57,9 +59,13 @@ def create_app(
     app.include_router(portfolio_router)
     app.include_router(positions_router)
     app.include_router(analytics_router)
+    # jobs_router 须在 reports_router 之前：后者已有 GET /api/v1/jobs/{job_id}（波5），
+    # 先注册本模块的 ""/stats/{id}/items 才不被 {job_id} 通配吞掉（3_API §3.13）
+    app.include_router(jobs_router)
     app.include_router(reports_router)
     app.include_router(settings_router)
     app.include_router(audit_router)
+    app.include_router(collections_router)
     app.include_router(advice_router)
     app.include_router(advice_records_router)
     app.include_router(research_router)

@@ -21,7 +21,10 @@ from wws_adviser.api.dependencies import (
 )
 from wws_adviser.core.config import Settings
 from wws_adviser.core.errors import MissingIdempotencyKeyError
+from wws_adviser.core.time import business_date
 from wws_adviser.modules.identity.models import User
+from wws_adviser.modules.jobs import service as jobs_service
+from wws_adviser.modules.jobs.domain import JobType
 from wws_adviser.modules.market_data import schemas, service
 from wws_adviser.modules.market_data.models import DataConflict, TradingCalendar
 from wws_adviser.modules.market_data.schemas import (
@@ -43,10 +46,12 @@ router = APIRouter(prefix="/api/v1/market-data", tags=["market-data"])
 
 @router.get("/quotes/{code}", response_model=QuoteOut)
 async def get_quote(
-    code: str, provider: Annotated[QuoteProvider, Depends(get_quote_provider)]
+    code: str,
+    db: Annotated[DBSession, Depends(get_session)],  # DBDep 定义在本端点之后，内联注解
+    provider: Annotated[QuoteProvider, Depends(get_quote_provider)],
 ) -> QuoteOut:
     instrument = InstrumentRef(code=code, market="SSE", kind="stock")
-    q = await service.get_quote(instrument, provider)
+    q = await service.get_quote(instrument, provider, db)
     return QuoteOut(
         code=q.code,
         source=q.source,
@@ -118,18 +123,41 @@ async def refresh_bars(
     end_date: Annotated[str, Query()],
     adjustment: Annotated[str, Query()] = "none",
 ) -> IngestResponse:
-    result = await service.ingest_daily_bars(
+    # 手动补采 job 化（5_DATA §12.2）：同步执行但留批次痕迹，供 DATA-01「采集运行」下钻
+    job = jobs_service.start_manual_run(
         db,
-        data_dir=settings.data_dir,
-        instrument_id=instrument_id,
-        provider=provider,
-        start=_parse_date(start_date).date(),
-        end=_parse_date(end_date).date(),
-        adjustment_type=adjustment,
+        settings,
+        job_type=JobType.INGEST_MANUAL.value,
+        business_date=business_date().isoformat(),
+        scope_key=f"bars:{instrument_id}",
+        idempotency_key=_key,
         request_id=request.headers.get("x-request-id"),
     )
+    try:
+        result = await service.ingest_daily_bars(
+            db,
+            data_dir=settings.data_dir,
+            instrument_id=instrument_id,
+            provider=provider,
+            start=_parse_date(start_date).date(),
+            end=_parse_date(end_date).date(),
+            adjustment_type=adjustment,
+            request_id=request.headers.get("x-request-id"),
+            run_id=job.id,
+        )
+    except Exception as exc:  # noqa: BLE001 — 批次失败留痕后原样上抛 Problem Details
+        jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+        raise
+    jobs_service.complete(
+        db,
+        job.id,
+        result_ref=f"bars://{result.ingested}/{0 if result.quality == 'OK' else 1}",
+    )
     return IngestResponse(
-        ingested=result.ingested, quality=result.quality, content_hash=result.content_hash
+        ingested=result.ingested,
+        quality=result.quality,
+        content_hash=result.content_hash,
+        job_run_id=job.id,
     )
 
 
@@ -164,16 +192,38 @@ async def refresh_nav(
     _key: Annotated[str, Depends(_require_idempotency_key)],
     as_of: Annotated[str, Query()],
 ) -> IngestResponse:
-    result = await service.ingest_nav(
+    job = jobs_service.start_manual_run(
         db,
-        data_dir=settings.data_dir,
-        instrument_id=instrument_id,
-        provider=provider,
-        as_of=_parse_date(as_of).date(),
+        settings,
+        job_type=JobType.INGEST_MANUAL.value,
+        business_date=business_date().isoformat(),
+        scope_key=f"nav:{instrument_id}",
+        idempotency_key=_key,
         request_id=request.headers.get("x-request-id"),
     )
+    try:
+        result = await service.ingest_nav(
+            db,
+            data_dir=settings.data_dir,
+            instrument_id=instrument_id,
+            provider=provider,
+            as_of=_parse_date(as_of).date(),
+            request_id=request.headers.get("x-request-id"),
+            run_id=job.id,
+        )
+    except Exception as exc:  # noqa: BLE001 — 批次失败留痕后原样上抛 Problem Details
+        jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+        raise
+    jobs_service.complete(
+        db,
+        job.id,
+        result_ref=f"nav://{result.ingested}/{0 if result.quality == 'OK' else 1}",
+    )
     return IngestResponse(
-        ingested=result.ingested, quality=result.quality, content_hash=result.content_hash
+        ingested=result.ingested,
+        quality=result.quality,
+        content_hash=result.content_hash,
+        job_run_id=job.id,
     )
 
 
