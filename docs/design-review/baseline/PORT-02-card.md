@@ -1,12 +1,12 @@
 # 基准卡：PORT-02 标的/持仓详情
 
 > 补卡（审计回填 2026-09-09）：V4 已实现页的追溯基准卡。入口：PORT-01 持仓行、
-> HOME 持仓概览整行导航（PositionRow `to` prop）。稿有多个变体（-cn / -maotai），
-> 结构取通用版。
+> HOME 持仓概览整行导航（PositionRow `to` prop）。稿原有真实数据变体（-cn / -maotai，
+> 结构同通用版），已于 2026-11-13 随迭代残留清理删除。
 
 ## 1. 参考稿
 
-- 移动：`stitch/mobile/PORT-02-mobile.html`（通用版；-cn/-maotai 为数据变体）
+- 移动：`stitch/mobile/PORT-02-mobile.html`（通用版）
 - 桌面：`stitch/PORT-02-desktop.html`（响应式：区块两列化）
 
 ## 2. 布局结构
