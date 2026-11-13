@@ -1,8 +1,10 @@
 <script setup lang="ts">
 // SET-08 系统状态（波 V4）：/health/live+ready+dependencies 概览。
-// job_runs 近况：无列表 API（仅单查 /jobs/{id}），本页先交付依赖健康主线。
+// W4 采集监控面板：任务近况改由 GET /jobs/stats 真数据（原"runtime_stats 后续补全"注释兑现）。
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useJobStats } from "@/features/data/composables/queries";
+import { formatCount, formatDuration, formatRate, EMPTY } from "@/shared/format/number";
 import { PageHeader } from "@/shared/ui";
 
 const router = useRouter();
@@ -50,6 +52,19 @@ onMounted(async () => {
 function badge(s: "…" | "ok" | "fail"): string {
   return s === "ok" ? "bg-success/10 text-success" : s === "fail" ? "bg-error/10 text-error" : "bg-gray-100 text-gray-400 dark:bg-gray-700";
 }
+
+// 任务近况（近 7 日聚合；DATA-01「采集运行」同一数据源）
+const { data: jobStats, isLoading: jobStatsLoading } = useJobStats(7);
+
+const JOB_TYPE_NAMES: Record<string, string> = {
+  pre_market: "开市前报告",
+  post_market: "收市后报告",
+  data_maintenance: "数据维护",
+  calibration_scan: "校准扫描",
+  advice_review: "建议评价",
+  ingest_manual: "手动补采",
+  backup: "备份",
+};
 </script>
 
 <template>
@@ -108,8 +123,72 @@ function badge(s: "…" | "ok" | "fail"): string {
       </div>
     </section>
 
-    <p class="text-center text-caption text-gray-400 dark:text-gray-500">
-      任务近况（job_runs 成功率/耗时）由 runtime_stats 提供，随 SET-08 后续补全。
-    </p>
+    <!-- 任务近况（近 7 日；W4 采集监控面板，技术架构 §16.3 轻量统计落地） -->
+    <section class="space-y-2">
+      <h2 class="text-h3 font-semibold lg:text-h3-d">
+        任务近况（近 7 日）
+      </h2>
+      <p
+        v-if="jobStatsLoading"
+        class="text-caption text-gray-400"
+      >
+        统计中…
+      </p>
+      <template v-else-if="jobStats">
+        <div
+          class="grid grid-cols-3 gap-2"
+          data-testid="system-job-stats"
+        >
+          <div class="rounded-2xl bg-white p-3 text-center shadow-sm dark:bg-gray-800">
+            <div class="text-label text-gray-500 dark:text-gray-400">
+              任务数
+            </div>
+            <div class="mt-1 text-h2 font-semibold num dark:text-gray-100">
+              {{ formatCount(jobStats.total) }}
+            </div>
+          </div>
+          <div class="rounded-2xl bg-white p-3 text-center shadow-sm dark:bg-gray-800">
+            <div class="text-label text-gray-500 dark:text-gray-400">
+              成功率
+            </div>
+            <div class="mt-1 text-h2 font-semibold num dark:text-gray-100">
+              {{ jobStats.success_rate === null ? EMPTY : formatRate(jobStats.success_rate) }}
+            </div>
+          </div>
+          <div class="rounded-2xl bg-white p-3 text-center shadow-sm dark:bg-gray-800">
+            <div class="text-label text-gray-500 dark:text-gray-400">
+              平均耗时
+            </div>
+            <div class="mt-1 text-h2 font-semibold num dark:text-gray-100">
+              {{ formatDuration(jobStats.avg_duration_ms) }}
+            </div>
+          </div>
+        </div>
+        <p
+          v-if="Object.keys(jobStats.consecutive_failures).length"
+          class="text-caption text-risk-warning"
+        >
+          <template
+            v-for="(n, jt, idx) in jobStats.consecutive_failures"
+            :key="jt"
+          >
+            {{ idx > 0 ? "；" : "" }}{{ JOB_TYPE_NAMES[jt] ?? jt }} 连续失败
+            {{ formatCount(n) }} 次
+          </template>
+        </p>
+        <p
+          v-else-if="!jobStats.total"
+          class="text-caption text-gray-400 dark:text-gray-500"
+        >
+          暂无任务记录。
+        </p>
+      </template>
+      <p
+        v-else
+        class="text-caption text-gray-400 dark:text-gray-500"
+      >
+        任务统计不可用（需登录）。明细与批次下钻见 数据状态 → 采集运行（DATA-01）。
+      </p>
+    </section>
   </div>
 </template>
