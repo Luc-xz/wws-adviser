@@ -4,6 +4,7 @@
 事务边界在此；采集 = fetch→parse→validate→dedup→assign quality→原子发布（Parquet + SQLite 索引）。
 """
 
+import time
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
@@ -16,6 +17,7 @@ from wws_adviser.core.ids import new_id
 from wws_adviser.core.time import now_utc_iso
 from wws_adviser.infrastructure.storage import parquet_store
 from wws_adviser.modules.audit import service as audit_service
+from wws_adviser.modules.collections import service as collections_service
 from wws_adviser.modules.instruments import service as instruments_service
 from wws_adviser.modules.market_data import repository
 from wws_adviser.modules.market_data.domain import (
@@ -44,11 +46,41 @@ from wws_adviser.ports.market_data import (
 )
 
 
-async def get_quote(instrument: InstrumentRef, provider: QuoteProvider) -> NormalizedQuote:
-    quotes = await provider.fetch_quotes([instrument])
+async def get_quote(
+    instrument: InstrumentRef, provider: QuoteProvider, db: DBSession | None = None
+) -> NormalizedQuote:
+    """单标的快照。传 db 时顺带记录 quote 源健康（5_DATA §12 采集可观测性）。"""
+    display = f"{instrument.code} 行情快照"
+    target = f"instrument:{instrument.code}"
+    try:
+        quotes = await provider.fetch_quotes([instrument])
+    except Exception as exc:  # noqa: BLE001 — 源失败先落观测再上抛
+        if db is not None:
+            collections_service.record_failure(
+                db,
+                category="quote",
+                target_ref=target,
+                display_name=display,
+                error_code=type(exc).__name__,
+                error_message=str(exc),
+            )
+        raise
     if not quotes:
+        if db is not None:
+            collections_service.record_failure(
+                db,
+                category="quote",
+                target_ref=target,
+                display_name=display,
+                error_code="NO_DATA",
+                error_message="源未返回行情",
+            )
         raise QuoteUnavailableError(f"无行情：{instrument.code}")
-    return parse_quote(quotes[0], instrument.code)
+    quote = parse_quote(quotes[0], instrument.code)
+    if db is not None:
+        collections_service.record_source_success(db, "quote")
+        db.commit()
+    return quote
 
 
 @dataclass(frozen=True)
@@ -84,76 +116,104 @@ async def ingest_daily_bars(
     end: date,
     adjustment_type: str = "none",
     request_id: str | None = None,
+    run_id: str | None = None,
 ) -> IngestResult:
-    """日线采集流水线：fetch→parse→Parquet 写 + SQLite 索引 upsert（UNIQUE 去重）。"""
+    """日线采集流水线：fetch→parse→Parquet 写 + SQLite 索引 upsert（UNIQUE 去重）。
+
+    run_id 为采集批次上下文（5_DATA §12.2）：传则 ingest_items 挂到该 job_runs 批次；
+    全程记 source_health / ingest_items 观测。
+    """
     instrument = instruments_service.get_instrument(db, instrument_id)
     if instrument is None:
         raise instruments_service.InstrumentNotFoundError(instrument_id)
     ref = _ref_of(instrument.code, instrument.market, instrument.kind)
-    raw = await provider.fetch_daily_bars(ref, start, end)
-    bars = parse_bars(raw, price_scale=instrument.price_scale, qty_scale=instrument.qty_scale)
-    if not bars:
-        return IngestResult(ingested=0, quality=QualityStatus.MISSING.value)
+    display = f"{instrument.name}({instrument.code}) 日线 {start.isoformat()}~{end.isoformat()}"
+    target = f"instrument:{instrument.id}"
+    data_ref = f"market:{instrument.id}:{start.isoformat()}-{end.isoformat()}"
+    t0 = time.perf_counter()
+    try:
+        raw = await provider.fetch_daily_bars(ref, start, end)
+        bars = parse_bars(raw, price_scale=instrument.price_scale, qty_scale=instrument.qty_scale)
+        if not bars:
+            collections_service.record_failure(
+                db, category="bar", run_id=run_id, target_ref=target, display_name=display,
+                error_code="NO_DATA", error_message="源返回空数据集（主备源均未命中）",
+                duration_ms=int((time.perf_counter() - t0) * 1000),
+            )
+            return IngestResult(ingested=0, quality=QualityStatus.MISSING.value)
 
-    by_year: dict[int, list[NormalizedBar]] = {}
-    for b in bars:
-        by_year.setdefault(b.business_date.year, []).append(b)
-    content_hash = ""
-    for year, ys in by_year.items():
-        content_hash = parquet_store.write_bars(
-            data_dir,
-            market=instrument.market,
-            instrument_id=instrument.id,
-            year=year,
-            rows=[_bar_row(b) for b in ys],
-            adjustment_type=adjustment_type,
-        )
+        by_year: dict[int, list[NormalizedBar]] = {}
+        for b in bars:
+            by_year.setdefault(b.business_date.year, []).append(b)
+        content_hash = ""
+        for year, ys in by_year.items():
+            content_hash = parquet_store.write_bars(
+                data_dir,
+                market=instrument.market,
+                instrument_id=instrument.id,
+                year=year,
+                rows=[_bar_row(b) for b in ys],
+                adjustment_type=adjustment_type,
+            )
 
-    now = now_utc_iso()
-    conflicts_written = 0
-    for b in bars:
-        record = MarketRecord(
-            id=new_id(),
-            instrument_id=instrument.id,
-            business_date=b.business_date.isoformat(),
-            open=format(b.open, "f"),
-            high=format(b.high, "f"),
-            low=format(b.low, "f"),
-            close=format(b.close, "f"),
-            volume=format(b.volume, "f"),
-            amount=None,
-            source=raw.source,
-            source_url=raw.source_url,
-            market_time=raw.market_time,
-            fetched_at=raw.fetched_at,
-            received_at=raw.received_at,
-            source_delay_class=raw.source_delay_class.value,
-            quality_status=QualityStatus.OK.value,
-            content_hash=content_hash,
-            adjustment_type=adjustment_type,
-            created_at=now,
-            updated_at=now,
-            version=1,
+        now = now_utc_iso()
+        conflicts_written = 0
+        for b in bars:
+            record = MarketRecord(
+                id=new_id(),
+                instrument_id=instrument.id,
+                business_date=b.business_date.isoformat(),
+                open=format(b.open, "f"),
+                high=format(b.high, "f"),
+                low=format(b.low, "f"),
+                close=format(b.close, "f"),
+                volume=format(b.volume, "f"),
+                amount=None,
+                source=raw.source,
+                source_url=raw.source_url,
+                market_time=raw.market_time,
+                fetched_at=raw.fetched_at,
+                received_at=raw.received_at,
+                source_delay_class=raw.source_delay_class.value,
+                quality_status=QualityStatus.OK.value,
+                content_hash=content_hash,
+                adjustment_type=adjustment_type,
+                created_at=now,
+                updated_at=now,
+                version=1,
+            )
+            repository.upsert_market_record(db, record)
+            conflicts_written += cross_validate_record(db, record)
+        collections_service.record_source_success(db, "bar")
+        collections_service.record_item(
+            db, category="bar", run_id=run_id, target_ref=target, display_name=display,
+            action="ingested", status="OK", rows_written=len(bars), source=raw.source,
+            duration_ms=int((time.perf_counter() - t0) * 1000), data_ref=data_ref,
         )
-        repository.upsert_market_record(db, record)
-        conflicts_written += cross_validate_record(db, record)
-    audit_service.append_event(
-        db,
-        action="market_bars_ingested",
-        target_type="instrument",
-        target_id=instrument.id,
-        after={
-            "n": len(bars),
-            "source": raw.source,
-            "adjustment_type": adjustment_type,
-            "conflicts": conflicts_written,
-        },
-        request_id=request_id,
-    )
-    db.commit()
-    return IngestResult(
-        ingested=len(bars), quality=QualityStatus.OK.value, content_hash=content_hash
-    )
+        audit_service.append_event(
+            db,
+            action="market_bars_ingested",
+            target_type="instrument",
+            target_id=instrument.id,
+            after={
+                "n": len(bars),
+                "source": raw.source,
+                "adjustment_type": adjustment_type,
+                "conflicts": conflicts_written,
+            },
+            request_id=request_id,
+        )
+        db.commit()
+        return IngestResult(
+            ingested=len(bars), quality=QualityStatus.OK.value, content_hash=content_hash
+        )
+    except Exception as exc:  # noqa: BLE001 — 源失败先落观测再上抛
+        collections_service.record_failure(
+            db, category="bar", run_id=run_id, target_ref=target, display_name=display,
+            error_code=type(exc).__name__, error_message=str(exc),
+            duration_ms=int((time.perf_counter() - t0) * 1000),
+        )
+        raise
 
 
 async def ingest_nav(
@@ -164,53 +224,74 @@ async def ingest_nav(
     provider: NAVProvider,
     as_of: date,
     request_id: str | None = None,
+    run_id: str | None = None,
 ) -> IngestResult:
-    """净值采集：fetch→parse→Parquet 写 + SQLite 索引 upsert。"""
+    """净值采集：fetch→parse→Parquet 写 + SQLite 索引 upsert（含观测写入，5_DATA §12）。"""
     instrument = instruments_service.get_instrument(db, instrument_id)
     if instrument is None:
         raise instruments_service.InstrumentNotFoundError(instrument_id)
     ref = _ref_of(instrument.code, instrument.market, instrument.kind)
-    raw = await provider.fetch_nav(ref, as_of)
-    nav = parse_nav(raw)
-    nav_str = format(nav.nav, "f")
-    content_hash = parquet_store.write_nav(
-        data_dir,
-        instrument_id=instrument.id,
-        year=as_of.year,
-        rows=[{"nav_date": as_of.isoformat(), "nav": nav_str, "published_at": nav.published_at}],
-    )
-    now = now_utc_iso()
-    repository.upsert_nav_record(
-        db,
-        NavRecord(
-            id=new_id(),
+    display = f"{instrument.name}({instrument.code}) 净值 {as_of.isoformat()}"
+    target = f"instrument:{instrument.id}"
+    data_ref = f"nav:{instrument.id}:{as_of.isoformat()}"
+    t0 = time.perf_counter()
+    try:
+        raw = await provider.fetch_nav(ref, as_of)
+        nav = parse_nav(raw)
+        nav_str = format(nav.nav, "f")
+        content_hash = parquet_store.write_nav(
+            data_dir,
             instrument_id=instrument.id,
-            nav_date=as_of.isoformat(),
-            nav=nav_str,
-            published_at=nav.published_at,
-            source=raw.source,
-            source_url=raw.source_url,
-            market_time=raw.market_time,
-            fetched_at=raw.fetched_at,
-            received_at=raw.received_at,
-            source_delay_class=raw.source_delay_class.value,
-            quality_status=QualityStatus.OK.value,
-            content_hash=content_hash,
-            created_at=now,
-            updated_at=now,
-            version=1,
-        ),
-    )
-    audit_service.append_event(
-        db,
-        action="market_nav_ingested",
-        target_type="instrument",
-        target_id=instrument.id,
-        after={"nav_date": as_of.isoformat(), "source": raw.source},
-        request_id=request_id,
-    )
-    db.commit()
-    return IngestResult(ingested=1, quality=QualityStatus.OK.value, content_hash=content_hash)
+            year=as_of.year,
+            rows=[
+                {"nav_date": as_of.isoformat(), "nav": nav_str, "published_at": nav.published_at}
+            ],
+        )
+        now = now_utc_iso()
+        repository.upsert_nav_record(
+            db,
+            NavRecord(
+                id=new_id(),
+                instrument_id=instrument.id,
+                nav_date=as_of.isoformat(),
+                nav=nav_str,
+                published_at=nav.published_at,
+                source=raw.source,
+                source_url=raw.source_url,
+                market_time=raw.market_time,
+                fetched_at=raw.fetched_at,
+                received_at=raw.received_at,
+                source_delay_class=raw.source_delay_class.value,
+                quality_status=QualityStatus.OK.value,
+                content_hash=content_hash,
+                created_at=now,
+                updated_at=now,
+                version=1,
+            ),
+        )
+        collections_service.record_source_success(db, "nav")
+        collections_service.record_item(
+            db, category="nav", run_id=run_id, target_ref=target, display_name=display,
+            action="ingested", status="OK", rows_written=1, source=raw.source,
+            duration_ms=int((time.perf_counter() - t0) * 1000), data_ref=data_ref,
+        )
+        audit_service.append_event(
+            db,
+            action="market_nav_ingested",
+            target_type="instrument",
+            target_id=instrument.id,
+            after={"nav_date": as_of.isoformat(), "source": raw.source},
+            request_id=request_id,
+        )
+        db.commit()
+        return IngestResult(ingested=1, quality=QualityStatus.OK.value, content_hash=content_hash)
+    except Exception as exc:  # noqa: BLE001 — 源失败先落观测再上抛
+        collections_service.record_failure(
+            db, category="nav", run_id=run_id, target_ref=target, display_name=display,
+            error_code=type(exc).__name__, error_message=str(exc),
+            duration_ms=int((time.perf_counter() - t0) * 1000),
+        )
+        raise
 
 
 def query_bars(
@@ -307,6 +388,7 @@ async def ingest_bars_for_holdings(
     provider: BarProvider,
     lookback_days: int = 30,
     request_id: str | None = None,
+    run_id: str | None = None,
 ) -> dict[str, str]:
     """为全部持仓标的批量采集日线（幂等：内容哈希去重，重采安全）。
 
@@ -336,10 +418,10 @@ async def ingest_bars_for_holdings(
             try:
                 r = await ingest_daily_bars(
                     db, data_dir=data_dir, instrument_id=inst_id, provider=provider,
-                    start=start, end=end, request_id=request_id,
+                    start=start, end=end, request_id=request_id, run_id=run_id,
                 )
                 results[inst.code] = r.quality
-            except Exception as exc:  # noqa: BLE001 — 单标的失败不中断批次
+            except Exception as exc:  # noqa: BLE001 — 单标的失败不中断批次（观测已在 ingest 内落库）
                 logger.warning("日线采集失败 %s: %s", inst.code, exc)
                 results[inst.code] = type(exc).__name__
     db.commit()
@@ -350,7 +432,12 @@ async def ingest_bars_for_holdings(
 
 
 def sync_trading_calendar(
-    db: DBSession, *, trading_days: list[date], start: date, end: date
+    db: DBSession,
+    *,
+    trading_days: list[date],
+    start: date,
+    end: date,
+    run_id: str | None = None,
 ) -> int:
     """交易日列表 → 全区间日历行显式落库（交易日 True / 非交易日 False）。幂等 upsert。
 
@@ -375,6 +462,12 @@ def sync_trading_calendar(
         )
         n += 1
         cur += timedelta(days=1)
+    collections_service.record_source_success(db, "calendar")
+    collections_service.record_item(
+        db, category="calendar", run_id=run_id, target_ref="calendar:CN",
+        display_name=f"交易日历 {start.isoformat()}~{end.isoformat()}",
+        action="synced", status="OK", rows_written=n, source="akshare",
+    )
     audit_service.append_event(
         db,
         action="calendar_synced",
@@ -391,12 +484,28 @@ async def sync_trading_calendar_from_provider(
     provider: TradingCalendarProvider,
     start: date,
     end: date,
+    run_id: str | None = None,
 ) -> int:
     """经端口拉取交易日并落库。源返回空列表 → 0（不写日历，报告侧维持 weekday 兜底）。"""
-    days = await provider.fetch_trading_dates(start, end)
-    if not days:
-        return 0
-    return sync_trading_calendar(db, trading_days=days, start=start, end=end)
+    display = f"交易日历 {start.isoformat()}~{end.isoformat()}"
+    t0 = time.perf_counter()
+    try:
+        days = await provider.fetch_trading_dates(start, end)
+        if not days:
+            collections_service.record_failure(
+                db, category="calendar", run_id=run_id, target_ref="calendar:CN",
+                display_name=display, error_code="NO_DATA", error_message="源返回空日历",
+                duration_ms=int((time.perf_counter() - t0) * 1000),
+            )
+            return 0
+        return sync_trading_calendar(db, trading_days=days, start=start, end=end, run_id=run_id)
+    except Exception as exc:  # noqa: BLE001 — 源失败先落观测再上抛
+        collections_service.record_failure(
+            db, category="calendar", run_id=run_id, target_ref="calendar:CN",
+            display_name=display, error_code=type(exc).__name__, error_message=str(exc),
+            duration_ms=int((time.perf_counter() - t0) * 1000),
+        )
+        raise
 
 
 # —— 多源交叉验证（Phase 3.3，5_DATA §6） ——

@@ -41,3 +41,4 @@ class IngestResponse(BaseModel):
     ingested: int
     skipped: int
     updated: int = 0
+    job_run_id: str | None = None  # 手动补采批次（ingest_manual，5_DATA §12.2；面板深链用）

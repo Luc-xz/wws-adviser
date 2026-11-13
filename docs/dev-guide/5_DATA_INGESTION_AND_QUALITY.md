@@ -1,8 +1,8 @@
 # 5. 数据采集与质量（端口、流水线、新鲜度、多源冲突、契约测试）
 
-> 文档版本：v1.0  
+> 文档版本：v1.1  
 > 文档状态：开发基线  
-> 更新日期：2026-07-18  
+> 更新日期：2026-11-13（v1.1 增补 §12 采集可观测性；v1.0 2026-07-18）  
 > 关联：技术架构 §8 §16 · PRD §8.2 §9.4 §9.5 · 索引：[0_DEVELOPMENT_GUIDE_INDEX.md](./0_DEVELOPMENT_GUIDE_INDEX.md)
 
 ## 1. 目的
@@ -48,7 +48,7 @@ plan/request            # 来自调度或盘中请求
   → dedup & multi-source comparison
   → assign quality_status
   → atomic publish（DB 行 + Parquet/文件）
-  → update data health（runtime_stats / market data quality 状态）
+  → update data health（source_health + ingest_items，§12）
 ```
 
 阶段契约：
@@ -59,7 +59,7 @@ plan/request            # 来自调度或盘中请求
 | validate | 统一对象 | 校验结果 + 违规字段 | 违规写 `quality_status=PARSE_FAILED` 或 `MISSING` |
 | dedup/compare | 校验通过对象 | 去重/比对记录 | 写 `market_records`/`nav_records` 原子行；冲突写 `data_conflicts` |
 | publish | 比对结果 | 已发布对象 | Parquet 原子写（`part.parquet.tmp`→`rename`，见 [2_DATA_MODEL_AND_STORAGE.md](./2_DATA_MODEL_AND_STORAGE.md) §8） |
-| health | 发布状态 | 质量摘要 | 写 `runtime_stats` |
+| health | 发布状态 | 质量摘要 | 写 `source_health`（类别级 upsert）+ `ingest_items`（条目明细），见 §12 |
 
 ## 4. 网络与重试策略（技术架构 §8.3）
 
@@ -180,6 +180,9 @@ fresh = age <= INTRADAY_FRESHNESS_THRESHOLD        # 默认 90s（命名常量�
 | 时钟偏差阈值 | `CLOCK_SKEW_THRESHOLD`，运行配置 | `TODO(clock-skew)`，初值待运行观测 |
 | 字段级冲突容差表 | `FIELD_TOLERANCE[field]`，按字段分类运行配置 | `TODO(field-tolerance)`，选型后按字段（价格/状态/公司行动/财务）分别定 |
 | 熔断窗口/连续失败阈值 | 按 `<source>` 运行配置 | 选型后填充 |
+| 源健康降级阈值 | `source_health_degraded_after`（连续失败 ≥ 此值 → degraded），默认 2 | 运行配置（§12） |
+| 源健康不可用阈值 | `source_health_unavailable_after`（连续失败 ≥ 此值 → unavailable），默认 5 | 运行配置（§12） |
+| 采集条目保留 | `ingest_item_retention_days`，默认 90 天（data_maintenance 收尾清理） | 运行配置（§12） |
 | 日线/净值 SQLite vs Parquet 分布 | SQLite 索引+元数据，Parquet 全量 | 运行配置，实现时按查询性能定，留 ADR（[2](./2_DATA_MODEL_AND_STORAGE.md) §13） |
 
 > 标的范围已确认仅 A 股 + 场内 ETF（PRD §20），无需覆盖场外公募基金净值 T+1 披露源；Instruments 端口与占位适配器对应简化。
@@ -200,3 +203,71 @@ fresh = age <= INTRADAY_FRESHNESS_THRESHOLD        # 默认 90s（命名常量�
 - **限频**：底层源（新浪/东财）会反爬，高频调用存在 IP 封锁风险；建议控制调用间隔 + 国内 VPS 部署（数据源服务器在国内）。
 - **升级触发条件**：稳定性不满足 SLA（开市前报告 09:00 前完成）/ 对外服务 / 需要分钟线或更全公告数据时，升级到 Tushare Pro（200–500 元/年起，日线免费）。
 - **端口设计不变**：升级仅替换适配器实现，端口契约与内部流水线不变（§2）。
+
+## 12. 采集可观测性（采集监控面板，v1.1 2026-11-13 增补）
+
+> 背景：技术架构 §16.3 规划的「SQLite 轻量运行统计」一直未落地；DATA-01 只有结果态
+> （质量/冲突/审计），无过程态。本节定义采集运行的数据面：
+> **批次（job_runs）→ 条目（ingest_items）→ 落库数据（market_records/documents）** 三级下钻。
+> UI 落点：DATA-01「采集运行」分区（UI 规范 §10.5 增补）+ SET-08 汇总卡。
+
+### 12.1 数据模型
+
+**`source_health`（源健康，按数据类别 upsert）**——§3 流水线 health 阶段的落库实现：
+
+| 字段 | 说明 |
+| --- | --- |
+| `category` PK | `quote / bar / nav / calendar / document / news`（类别级，非物理源级） |
+| `last_success_at / last_failure_at` | 最近成功/失败时间 |
+| `consecutive_failures` | 连续失败计数（成功清零） |
+| `last_error_code / last_error_message` | 最近错误（异常类型名 + 截断消息） |
+| `updated_at` | — |
+
+派生状态（读取侧计算，不落库）：`ok`（连败=0）/ `degraded`（1 ≤ 连败 < 阈值）/
+`unavailable`（连败 ≥ 阈值）/ `no_data`（无行）。阈值见 §11.1。
+物理源级「最近成功」从落库记录推导（`market_records`/`documents` 的 `source + MAX(fetched_at)`）；
+适配器内主备切换过程不上浮（留结构化日志）；v1 不做真实熔断器。
+
+**`ingest_items`（采集条目明细，append-only）**——回答「这一批对每个对象采了什么、成没成、为什么」：
+
+| 字段 | 说明 |
+| --- | --- |
+| `run_id` | 关联 `job_runs.id`（FK，ondelete CASCADE）；无运行上下文的服务调用可空 |
+| `category` | 同 `source_health` |
+| `action` | `ingested / updated / skipped / synced / no_data / failed` |
+| `status` | `OK / PARTIAL / SKIPPED / FAILED`（面板徽标用） |
+| `target_ref` | `instrument:{id}` / `document:{id}` / `calendar:CN` |
+| `display_name` | 写入时去规范化（标的+日期区间 / 公告标题），列表零 join 直出 |
+| `rows_written / source / duration_ms` | 采到多少行、最终源、单条目耗时 |
+| `error_code / error_message` | 失败原因 |
+| `data_ref` | 指向落库数据的引用（`market:{instrument_id}:{from}-{to}` / `doc:{id}`），前端凭它调既有读端点 |
+| `created_at` | — |
+
+不复制 payload：K 线/公告正文永远单源在 `market_records`/`documents`，无双写一致性问题。
+保留策略见 §11.1（`ingest_item_retention_days`，data_maintenance 收尾清理）。
+
+### 12.2 RunContext 与手动补采 job 化
+
+- `ingest_*` 服务函数增加可选 `run_id` 参数（RunContext）：调度路径由执行器传 `job.id`，
+  条目随批次落库；失败记录先 `db.rollback()` 再写 `source_health`（避免把半程未审计数据连带提交）。
+- 健康写入点在 service 层（modules），不进 infrastructure 适配器（四层依赖方向，
+  [1_REPO_STRUCTURE.md](./1_REPO_STRUCTURE.md) §4）。
+- 手动 `POST /market/{bars,nav}/{id}/refresh`、`POST /documents/refresh` 先建
+  `job_type=ingest_manual` 的 job_runs 行（直接 RUNNING、`lease_until=NULL` 不入执行器
+  领取范围、`attempt=1/max_attempts=1`），同步执行后 complete/fail——手动补采与定时采集
+  共用同一套批次视角。执行中途崩溃留下的 RUNNING 行视为「卡住」如实展示，不自动改写。
+
+### 12.3 查询面（API 见 [3_API_CONTRACT.md](./3_API_CONTRACT.md) §3.13/§3.17）
+
+- 批次列表 + 聚合：`GET /jobs`、`GET /jobs/stats`（成功率/耗时/按类型连续失败，SET-08 共用）。
+- 批次下钻：`GET /jobs/{id}/items`；跨批次检索：`GET /collections/items`。
+- 源健康 + 数据覆盖：`GET /collections/health`（六类别健康 + 各数据集最新业务日期/近 7 天行数；
+  `news` 恒为 `no_data` + `configured=false`——FR-DATA-005 仅 stub 实现，面板如实暴露缺口）。
+- `job_runs.result_ref`（`bars://3/1` 等）保留为兼容摘要；明细以 `ingest_items` 为准。
+
+### 12.4 边界（v1 不做）
+
+- 历史批次（`ingest_items` 上线前）只有聚合计数，明细区空态「早于明细记录功能上线」，不回填。
+- 不做 per-fetch 网络日志表、Prometheus（技术架构 §16.3 明言不部署）、真实熔断状态机。
+- 任务级自动重试（`RETRY_WAIT`/`max_attempts` 实际生效）与采集失败通知（技术架构 §16.4）
+  为独立工作项，不随本节交付。

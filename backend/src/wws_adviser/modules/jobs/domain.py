@@ -20,6 +20,7 @@ class JobType(StrEnum):
     DATA_MAINTENANCE = "data_maintenance"
     CALIBRATION_SCAN = "calibration_scan"
     ADVICE_REVIEW = "advice_review"
+    INGEST_MANUAL = "ingest_manual"  # 手动补采批次（refresh 端点同步执行，5_DATA §12.2）
     STUB = "stub"
 
 
