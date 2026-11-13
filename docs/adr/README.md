@@ -25,19 +25,23 @@
 
 ## 3. 决策清单
 
-技术架构 §23 列出的 8 条既有决策散落在基线文档中，已生效（状态 Accepted）。本目录先把它们登记入索引，待某条决策发生演进或被引用时再补独立文件展开。本次（2026-08-12）新增 ADR-0009。
+技术架构 §23 列出的 8 条既有决策散落在基线文档中，已生效（状态 Accepted）。本目录先把它们登记入索引（**独立文件待补，暂不建链**），待某条决策发生演进或被引用时再补文件展开。0009–0013 已有独立文件。
 
 | ADR | 标题 | 状态 | 决策来源 | 独立文件 |
 | --- | --- | --- | --- | --- |
-| [0001](./0001-modular-monolith.md) | 模块化单体而非微服务 | Accepted | 技术架构 §3.3 / §6 | 待补 |
-| [0002](./0002-pwa-not-native.md) | PWA 而非原生 App | Accepted | 技术架构 §14 / PRD §20 | 待补 |
-| [0003](./0003-sqlite-wal-single-worker.md) | SQLite WAL 单 worker 运行约束 | Accepted | 技术架构 §7.2 / §15 · [REPO §7](../dev-guide/1_REPO_STRUCTURE.md) | 待补 |
-| [0004](./0004-biz-data-vs-parquet-split.md) | 业务数据与 Parquet/内容寻址文件的存储分工 | Accepted | 技术架构 §7.1 / §7.4 | 待补 |
-| [0005](./0005-persistent-jobs-apscheduler.md) | 持久任务表 + APScheduler 的任务架构 | Accepted | 技术架构 §12 / §6.12 | 待补 |
-| [0006](./0006-model-explains-deterministic.md) | 模型仅解释确定性结果，结构化输出 + 后置校验 | Accepted | 技术架构 §10.1 / §9.4 | 待补 |
-| [0007](./0007-fts5-no-vector-mvp.md) | MVP 使用 FTS5，不引入向量数据库 | Accepted | 技术架构 §10.5 / §21.3 | 待补 |
-| [0008](./0008-same-origin-cookie-private-cache.md) | 同源部署、会话 Cookie 与 PWA 私有缓存策略 | Accepted | 技术架构 §15.3 / §14.3 | 待补 |
+| 0001 | 模块化单体而非微服务 | Accepted | 技术架构 §3.3 / §6 | 待补 |
+| 0002 | PWA 而非原生 App | Accepted | 技术架构 §14 / PRD §20 | 待补 |
+| 0003 | SQLite WAL 单 worker 运行约束 | Accepted | 技术架构 §7.2 / §15 · [REPO §7](../dev-guide/1_REPO_STRUCTURE.md) | 待补 |
+| 0004 | 业务数据与 Parquet/内容寻址文件的存储分工 | Accepted | 技术架构 §7.1 / §7.4 | 待补 |
+| 0005 | 持久任务表 + APScheduler 的任务架构 | Accepted | 技术架构 §12 / §6.12 | 待补 |
+| 0006 | 模型仅解释确定性结果，结构化输出 + 后置校验 | Accepted | 技术架构 §10.1 / §9.4 | 待补 |
+| 0007 | MVP 使用 FTS5，不引入向量数据库 | Accepted | 技术架构 §10.5 / §21.3 | 待补 |
+| 0008 | 同源部署、会话 Cookie 与 PWA 私有缓存策略 | Accepted | 技术架构 §15.3 / §14.3 | 待补 |
 | [0009](./0009-action-and-online-color-tokens.md) | 新增 `action.*` 色彩 token 族与 `status.online` 语义 token | Accepted | [UI §7.1/§7.3](../UI_DESIGN_SPECIFICATION.md) · [REVIEW_REPORT §2.2](../design-review/REVIEW_REPORT.md) | 本文 |
+| [0010](./0010-identity-audit-jobs-defaults.md) | Identity/Audit/Jobs 实现默认决策 | Accepted | [8_SECURITY §3](../dev-guide/8_SECURITY_AND_DEPLOYMENT.md) · [3_API §3.1/§6](../dev-guide/3_API_CONTRACT.md) · [6_MODEL §8](../dev-guide/6_MODEL_AND_REPORT_PIPELINE.md) · [2_DATA §6](../dev-guide/2_DATA_MODEL_AND_STORAGE.md) | 本文 |
+| [0011](./0011-ports-and-stubs-defaults.md) | Ports / Stub 适配器实现默认决策 | Accepted | [5_DATA §2/§9](../dev-guide/5_DATA_INGESTION_AND_QUALITY.md) · [6_MODEL §3](../dev-guide/6_MODEL_AND_REPORT_PIPELINE.md) · 技术架构 §7.5/§8.1 · [1_REPO §6](../dev-guide/1_REPO_STRUCTURE.md) | 本文 |
+| [0012](./0012-frontend-pwa-defaults.md) | Frontend / PWA 工程默认决策 | Accepted | [7_FRONTEND](../dev-guide/7_FRONTEND_AND_PWA.md) · [ENFORCEMENT_CONTRACT](../design-review/ENFORCEMENT_CONTRACT.md) · UI §5/§7/§10.1 · 技术架构 §14 | 本文 |
+| [0013](./0013-cloudflare-tunnel-exposure.md) | 公网暴露采用 Cloudflare Tunnel（替代原定 Nginx + 443） | Accepted | [8_SECURITY §11](../dev-guide/8_SECURITY_AND_DEPLOYMENT.md) · [10_MILESTONE §7](../dev-guide/10_MILESTONE_PLAN.md) | 本文 |
 
 ## 4. 维护约定
 
