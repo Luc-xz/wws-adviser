@@ -23,11 +23,13 @@ onMounted(() => {
 // 登录页独立成屏（品牌表达），不套应用外壳
 const bareLayout = computed(() => route.path === "/login");
 
+// 「数据」= DATA-01 数据状态中心一级入口（采集监控面板 W4：原仅首页状态条可达，过深）
 const NAV_ITEMS = [
   { to: "/", title: "首页", icon: "i-material-symbols-home-rounded" },
   { to: "/portfolio", title: "持仓", icon: "i-material-symbols-payments-rounded" },
   { to: "/assistant", title: "助手", icon: "i-material-symbols-smart-toy-rounded" },
   { to: "/research", title: "研究", icon: "i-material-symbols-monitoring-rounded" },
+  { to: "/data-status", title: "数据", icon: "i-material-symbols-database-rounded" },
   { to: "/settings", title: "设置", icon: "i-material-symbols-settings-rounded" },
 ] as const;
 </script>
