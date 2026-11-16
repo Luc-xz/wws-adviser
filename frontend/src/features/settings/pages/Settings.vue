@@ -15,9 +15,12 @@ const qc = useQueryClient();
 const push = usePushManager();
 
 // 子页入口（SET-01~08；SET-05/07 后端缺资源，波 V4 P2 裁剪线）
+// 「数据状态中心」非 settings 子页，但随 SET-02 同域挂入口（采集监控面板 W4：
+// DATA-01 无一级导航位，仅靠首页状态条进得过深）
 const SUB_PAGES = [
   { to: "/settings/risk", label: "风险与约束", icon: "i-material-symbols-warning-rounded" },
   { to: "/settings/data-sources", label: "数据源与质量", icon: "i-material-symbols-storage-rounded" },
+  { to: "/data-status", label: "数据状态与采集", icon: "i-material-symbols-monitor-heart-rounded" },
   { to: "/settings/models", label: "模型设置", icon: "i-material-symbols-memory-rounded" },
   { to: "/settings/notifications", label: "通知与隐私", icon: "i-material-symbols-notifications-rounded" },
   { to: "/settings/security", label: "安全与会话", icon: "i-material-symbols-security-rounded" },

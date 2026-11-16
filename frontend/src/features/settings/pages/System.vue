@@ -187,8 +187,17 @@ const JOB_TYPE_NAMES: Record<string, string> = {
         v-else
         class="text-caption text-gray-400 dark:text-gray-500"
       >
-        任务统计不可用（需登录）。明细与批次下钻见 数据状态 → 采集运行（DATA-01）。
+        任务统计不可用（需登录）。
       </p>
+      <!-- 入口（W4 增补）：SET-08 只有汇总，批次/条目下钻在 DATA-01「采集运行」 -->
+      <router-link
+        to="/data-status?tab=runs"
+        class="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-800"
+        data-testid="system-collections-link"
+      >
+        <span class="text-body font-medium">任务批次与采集条目明细</span>
+        <span class="text-caption text-gray-400">数据状态 · 采集运行 ›</span>
+      </router-link>
     </section>
   </div>
 </template>
