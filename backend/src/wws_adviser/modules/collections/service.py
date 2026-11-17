@@ -14,8 +14,16 @@ from wws_adviser.modules.collections import repository
 from wws_adviser.modules.collections.domain import Category, HealthStatus, encode_cursor
 from wws_adviser.modules.collections.models import IngestItem
 
-# FR-DATA-005 新闻仅 stub 实现（无真实 provider）——面板如实暴露缺口（5_DATA §12.3）
-_UNCONFIGURED_CATEGORIES = frozenset({Category.NEWS.value})
+
+# FR-DATA-005 新闻仅 stub 实现（无真实 provider）——面板如实暴露缺口（5_DATA §12.3）；
+# 市场环境三类别在选源为 stub 时同样如实标注未配置（ADR-0014 / 5_DATA §13.1）
+def _unconfigured_categories(settings: Settings) -> frozenset[str]:
+    cats = {Category.NEWS.value}
+    if settings.market_env_index_source == "stub":
+        cats |= {Category.INDEX_QUOTE.value, Category.INDEX_BAR.value}
+    if settings.market_env_sector_source == "stub":
+        cats.add(Category.SECTOR_FLOW.value)
+    return frozenset(cats)
 
 
 # —— 写入（service 层调用） ——
@@ -117,12 +125,13 @@ def health_overview(db: DBSession, settings: Settings) -> dict[str, object]:
     """
     rows = repository.get_all_health(db)
     coverage = repository.dataset_coverage(db)
+    unconfigured = _unconfigured_categories(settings)
     sources: list[dict[str, object]] = []
     for cat in Category:
         row = rows.get(cat.value)
         entry: dict[str, object] = {
             "category": cat.value,
-            "configured": cat.value not in _UNCONFIGURED_CATEGORIES,
+            "configured": cat.value not in unconfigured,
             "last_success_at": None,
             "last_failure_at": None,
             "consecutive_failures": 0,

@@ -52,7 +52,8 @@ export type IngestItem = {
   created_at: string;
 };
 
-/** 源健康 + 数据集覆盖（六类别；news 恒 no_data + configured=false——FR-DATA-005 仅 stub）。 */
+/** 源健康 + 数据集覆盖（九类别：六基础 + 市场环境三类别；news 恒 no_data + configured=false，
+ * 市场环境类别在选源为 stub 时同样 configured=false——ADR-0014 / 5_DATA §13.3）。 */
 export function useCollectionsHealth() {
   const q = useQuery({
     queryKey: ["collections", "health"],

@@ -5,6 +5,7 @@
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQueryClient } from "@tanstack/vue-query";
+import { Decimal } from "decimal.js";
 import { DataFooter, DataStatusBar, MetricCard, PageHeader, PositionRow, RiskAlert } from "@/shared/ui";
 import { EMPTY, formatMoney, formatPercent } from "@/shared/format/number";
 import { useReport, useGenerateReport } from "@/features/reports/composables/queries";
@@ -44,6 +45,16 @@ const modelSection = computed(
 const biasItems = computed(
   () => (content.value?.behavioral_bias as Array<Record<string, any>>) ?? []
 );
+// 市场环境段（ADR-0014：研究上下文，缺数据不占段）
+const envSection = computed(
+  () => (content.value?.market_env as Record<string, any> | null) ?? null
+);
+const envCnIndices = computed(
+  () => (envSection.value?.cn_indices as Array<Record<string, any>>) ?? []
+);
+const envAsOf = computed(() =>
+  envCnIndices.value.length ? String(envCnIndices.value[0].market_time) : null
+);
 const BIAS_NAMES: Record<string, string> = {
   disposal_effect: "处置效应（卖盈持亏）",
   chasing: "追涨（买在近期高位）",
@@ -64,6 +75,24 @@ const FLAG_NAMES: Record<string, string> = {
   documents_unavailable: "公告数据缺失",
   model_unavailable: "模型不可用（降级）",
 };
+
+/** 涨跌色调用（A股红涨绿跌由 class 决定；负号判定用 Decimal 不经浮点）。 */
+function pctTone(v: unknown): "up" | "down" {
+  try {
+    return new Decimal(String(v ?? "0")).isNegative() ? "down" : "up";
+  } catch {
+    return "up";
+  }
+}
+/** 元 → 亿元字符串（成交额/主力净额，展示层换算）。 */
+function formatYi(v: unknown): string {
+  if (v === null || v === undefined || v === "") return EMPTY;
+  try {
+    return `${formatMoney(new Decimal(String(v)).div(1e8).toFixed(0), 2)}亿`;
+  } catch {
+    return EMPTY;
+  }
+}
 
 // —— 生成 / 重新生成（轮询兜底）——
 const { generate } = useGenerateReport();
@@ -133,7 +162,9 @@ watch(
           class="rounded-md border border-gray-200 px-2 py-1 text-caption text-gray-600 hover:border-primary hover:text-primary dark:border-gray-600 dark:text-gray-300"
           data-testid="report-config"
           @click="router.push('/settings/risk')"
-        >配置策略</button>
+        >
+          配置策略
+        </button>
       </template>
     </PageHeader>
 
@@ -206,6 +237,106 @@ watch(
             label="集中度"
             :value="summarySection.concentration ?? EMPTY"
           />
+        </div>
+      </section>
+
+      <!-- 市场环境（ADR-0014：研究上下文；涨跌色仅 data-context=quote） -->
+      <section
+        v-if="envSection"
+        class="space-y-2"
+      >
+        <h2 class="text-h3 font-semibold">
+          市场环境
+        </h2>
+        <div class="rounded-2xl bg-white p-3 shadow-sm dark:bg-gray-800">
+          <div
+            v-if="envSection.market_turnover"
+            class="text-body"
+          >
+            两市成交额
+            <span class="ml-1 font-semibold num">{{ formatYi(envSection.market_turnover) }}</span>
+          </div>
+          <div
+            v-if="envCnIndices.length"
+            class="mt-2 flex flex-wrap gap-1.5"
+          >
+            <span
+              v-for="i in envCnIndices"
+              :key="String(i.code)"
+              class="rounded bg-gray-50 px-1.5 py-0.5 text-caption dark:bg-gray-700"
+            >
+              {{ i.name }}
+              <span
+                class="num"
+                data-context="quote"
+                :class="pctTone(i.change_pct) === 'down' ? 'text-market-down' : 'text-market-up'"
+              >{{ formatPercent(String(i.change_pct ?? "")) }}</span>
+            </span>
+          </div>
+          <div
+            v-if="(envSection.active_sectors as Array<Record<string, any>> | undefined)?.length"
+            class="mt-2 text-caption text-gray-500 dark:text-gray-400"
+          >
+            活跃板块：
+            <template
+              v-for="(s, idx) in envSection.active_sectors"
+              :key="String(s.board_code)"
+            >
+              {{ idx > 0 ? "／" : "" }}{{ s.board_name }}
+              <span
+                class="num"
+                data-context="quote"
+                :class="pctTone(s.change_pct) === 'down' ? 'text-market-down' : 'text-market-up'"
+              >{{ formatPercent(String(s.change_pct ?? "")) }}</span>
+            </template>
+          </div>
+          <div
+            v-if="(envSection.net_inflow_top as Array<Record<string, any>> | undefined)?.length"
+            class="mt-1 text-caption text-gray-500 dark:text-gray-400"
+          >
+            主力净流入：
+            <template
+              v-for="(s, idx) in envSection.net_inflow_top"
+              :key="String(s.board_code)"
+            >
+              {{ idx > 0 ? "／" : "" }}{{ s.board_name }} {{ formatYi(s.net_main_inflow) }}
+            </template>
+          </div>
+          <div
+            v-if="(envSection.net_outflow_top as Array<Record<string, any>> | undefined)?.length"
+            class="mt-1 text-caption text-gray-500 dark:text-gray-400"
+          >
+            主力净流出：
+            <template
+              v-for="(s, idx) in envSection.net_outflow_top"
+              :key="String(s.board_code)"
+            >
+              {{ idx > 0 ? "／" : "" }}{{ s.board_name }} {{ formatYi(s.net_main_inflow) }}
+            </template>
+          </div>
+          <div
+            v-if="(envSection.overseas as Array<Record<string, any>> | undefined)?.length || (envSection.futures as Array<Record<string, any>> | undefined)?.length"
+            class="mt-2 flex flex-wrap gap-1.5"
+          >
+            <span
+              v-for="o in [...(envSection.overseas ?? []), ...(envSection.futures ?? [])]"
+              :key="String(o.code)"
+              class="rounded bg-gray-50 px-1.5 py-0.5 text-caption dark:bg-gray-700"
+            >
+              {{ o.name }}
+              <span
+                class="num"
+                data-context="quote"
+                :class="pctTone(o.change_pct) === 'down' ? 'text-market-down' : 'text-market-up'"
+              >{{ formatPercent(String(o.change_pct ?? "")) }}</span>
+            </span>
+          </div>
+          <p
+            v-if="envAsOf"
+            class="mt-2 text-caption text-gray-400 dark:text-gray-500"
+          >
+            截至 {{ envAsOf }}（研究上下文，不构成投资建议依据）
+          </p>
         </div>
       </section>
 

@@ -2,8 +2,12 @@
 
 Phase 0 注册 pre_market(08:30)/post_market(16:00) cron trigger，handler 只 enqueue 一个
 stub job_run，证明"APScheduler 只入队"边界。真实 job handler 在 Phase 1+ 接报告流水线。
+市场环境三任务（ADR-0014 / 5_DATA §13.5）：盘中每 5 分钟（scope_key=HH:MM——
+uq_job_runs_idem 以 (job_type, business_date, scope_key) 为幂等键，盘中多次入队
+必须以时间槽区分 scope_key，否则全天只会执行第一次）、15:25 日K、08:10 外围。
 """
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from apscheduler.schedulers.background import BackgroundScheduler  # type: ignore[import-untyped]
@@ -29,6 +33,19 @@ def _enqueue_stub(job_type: JobType, engine: "Engine", settings: Settings) -> No
             job_type=job_type,
             business_date=business_date().isoformat(),
             scope_key="default",
+        )
+
+
+def _enqueue_market_env_intraday(engine: "Engine", settings: Settings) -> None:
+    """盘中任务：scope_key=HH:MM 时间槽（同日多次入队互不冲突，见模块 docstring）。"""
+    factory = make_session_factory(engine)
+    with factory() as db:
+        jobs_service.enqueue(
+            db,
+            settings,
+            job_type=JobType.MARKET_ENV_INTRADAY,
+            business_date=business_date().isoformat(),
+            scope_key=datetime.now(SHANGHAI).strftime("%H:%M"),
         )
 
 
@@ -78,5 +95,36 @@ def create_scheduler(engine: "Engine", settings: Settings) -> BackgroundSchedule
         _review_scan,
         CronTrigger(hour=16, minute=30, timezone=SHANGHAI),
         id="review",
+    )
+    # —— 市场环境（ADR-0014 / 5_DATA §13.5；非交易日在执行器侧过滤） ——
+    def _market_env_intraday() -> None:
+        _enqueue_market_env_intraday(engine, settings)
+
+    def _market_env_eod() -> None:
+        _enqueue_stub(JobType.MARKET_ENV_EOD, engine, settings)
+
+    def _overseas_morning() -> None:
+        _enqueue_stub(JobType.OVERSEAS_MORNING, engine, settings)
+
+    scheduler.add_job(
+        _market_env_intraday,
+        CronTrigger(day_of_week="mon-fri", hour="9-14", minute="*/5", timezone=SHANGHAI),
+        id="market_env_intraday",
+    )
+    # 15:00 收盘时点单独入队（与 9-14 点的 */5 覆盖衔接）
+    scheduler.add_job(
+        _market_env_intraday,
+        CronTrigger(day_of_week="mon-fri", hour=15, minute=0, timezone=SHANGHAI),
+        id="market_env_intraday_close",
+    )
+    scheduler.add_job(
+        _market_env_eod,
+        CronTrigger(day_of_week="mon-fri", hour=15, minute=25, timezone=SHANGHAI),
+        id="market_env_eod",
+    )
+    scheduler.add_job(
+        _overseas_morning,
+        CronTrigger(day_of_week="mon-fri", hour=8, minute=10, timezone=SHANGHAI),
+        id="overseas_morning",
     )
     return scheduler

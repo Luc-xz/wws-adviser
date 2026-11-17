@@ -8,7 +8,10 @@ from enum import StrEnum
 
 
 class Category(StrEnum):
-    """采集数据类别（source_health / ingest_items 共用；类别级，非物理源级）。"""
+    """采集数据类别（source_health / ingest_items 共用；类别级，非物理源级）。
+
+    index_quote/index_bar/sector_flow 为市场环境数据域三类别（ADR-0014 / 5_DATA §13.3）。
+    """
 
     QUOTE = "quote"
     BAR = "bar"
@@ -16,6 +19,9 @@ class Category(StrEnum):
     CALENDAR = "calendar"
     DOCUMENT = "document"
     NEWS = "news"
+    INDEX_QUOTE = "index_quote"
+    INDEX_BAR = "index_bar"
+    SECTOR_FLOW = "sector_flow"
 
 
 class ItemStatus(StrEnum):

@@ -1,9 +1,9 @@
 # 5. 数据采集与质量（端口、流水线、新鲜度、多源冲突、契约测试）
 
-> 文档版本：v1.1  
+> 文档版本：v1.2  
 > 文档状态：开发基线  
-> 更新日期：2026-11-13（v1.1 增补 §12 采集可观测性；v1.0 2026-07-18）  
-> 关联：技术架构 §8 §16 · PRD §8.2 §9.4 §9.5 · 索引：[0_DEVELOPMENT_GUIDE_INDEX.md](./0_DEVELOPMENT_GUIDE_INDEX.md)
+> 更新日期：2026-11-16（v1.2 增补 §13 市场环境采集；v1.1 2026-11-13 §12 采集可观测性；v1.0 2026-07-18）  
+> 关联：技术架构 §8 §16 · PRD §8.2 §9.4 §9.5 · [ADR-0014](../adr/0014-market-environment-data-domain.md) · 索引：[0_DEVELOPMENT_GUIDE_INDEX.md](./0_DEVELOPMENT_GUIDE_INDEX.md)
 
 ## 1. 目的
 
@@ -217,7 +217,7 @@ fresh = age <= INTRADAY_FRESHNESS_THRESHOLD        # 默认 90s（命名常量�
 
 | 字段 | 说明 |
 | --- | --- |
-| `category` PK | `quote / bar / nav / calendar / document / news`（类别级，非物理源级） |
+| `category` PK | `quote / bar / nav / calendar / document / news`（类别级，非物理源级；市场环境域新增三类别见 §13.3） |
 | `last_success_at / last_failure_at` | 最近成功/失败时间 |
 | `consecutive_failures` | 连续失败计数（成功清零） |
 | `last_error_code / last_error_message` | 最近错误（异常类型名 + 截断消息） |
@@ -271,3 +271,93 @@ fresh = age <= INTRADAY_FRESHNESS_THRESHOLD        # 默认 90s（命名常量�
 - 不做 per-fetch 网络日志表、Prometheus（技术架构 §16.3 明言不部署）、真实熔断状态机。
 - 任务级自动重试（`RETRY_WAIT`/`max_attempts` 实际生效）与采集失败通知（技术架构 §16.4）
   为独立工作项，不随本节交付。
+
+## 13. 市场环境采集（指数 / 板块资金流 / 外围市场，v1.2 2026-11-16 增补）
+
+> 决策依据：[ADR-0014](../adr/0014-market-environment-data-domain.md)。市场环境是**研究
+> 上下文数据域**（整体市场环境研究：A 股大盘指数、活跃板块、板块主力净流入/流出、两市
+> 成交量、美股指数（含盘前/盘后参考）、日韩港股指数），独立于投资标的域——不进
+> instruments/portfolio，不参与凯利/建议计算，其质量状态不触发 PAUSE_ADVICE。
+
+### 13.1 端口定义（ports/market_env.py）
+
+```python
+class IndexQuoteProvider(Protocol):
+    async def fetch_index_quotes(self, refs: list[IndexRef]) -> list[RawIndexQuote]: ...
+    # RawIndexQuote 含 pre_market_price/change、post_market_price/change（美股专用，
+    # A股/亚市指数置空）；amount/volume 支撑两市成交量汇总
+
+class IndexBarProvider(Protocol):
+    async def fetch_index_bars(self, ref: IndexRef, start: date, end: date) -> RawDataset: ...
+
+class SectorFlowProvider(Protocol):
+    async def fetch_sector_flows(self, kind: SectorKind) -> list[RawSectorFlow]: ...
+    # RawSectorFlow: board_code/name/kind/change_pct/turnover/net_main_inflow/
+    # leader —— 板块涨幅榜（活跃板块）与主力净流入/流出榜同源覆盖
+```
+
+适配器落 `infrastructure/market_env/`：`tencent_index_quote.py`（主源，批量）、
+`sina_index_quote.py`（全球指数兜底 + 美股期货）、`eastmoney_index_bar.py`（指数日 K）、
+`eastmoney_sector_flow.py`（行业 `m:90+t:2` + 概念 `m:90+t:3` 板榜，2 请求/轮）。
+源选型沿用 config 模式：`market_env_index_source` / `market_env_sector_source`
+（`stub` 默认 | 直连实现）。端点均经 niuone 项目生产验证（ADR-0014 上下文）。
+
+### 13.2 数据源与降级链
+
+| 端口 | 主源 | 兜底 | 说明 |
+| --- | --- | --- | --- |
+| 指数快照（A股+美股+亚市） | 腾讯 `qt.gtimg.cn` 批量（1 请求全代码） | 新浪 `hq.sinajs.cn`（需固定 Referer） | 兜底仅主源失败时启用；v1 不做双源并发比对；腾讯行内**字段位序不稳定**（同一响应 86/88 字段并存），时间与成交额按模式定位（见 `tencent_index_quote.py`） |
+| 指数日 K | 东财 `push2his` kline（多域名轮换） | 腾讯 `ifzq.gtimg.cn` | 历史一次性回补 2–3 年 |
+| 板块资金流 | 东财 `push2delay clist`（延时源，如实标 `DELAYED`） | —— | 行业+概念各取主力净额**升降序两页**（4 请求/轮，双向榜单全覆盖）；板块代码漂移由 `sector_boards` upsert 吸收 |
+| 美股盘前参考 | 新浪全球期货（ES/NQ 代理）+ 东财/腾讯美股盘前字段 | —— | 见 §13.6 开放点 |
+
+反爬基线（同 §4）：每源固定 UA/Referer、限频、有界重试；东财多域名轮换
+（push2 / push2delay / 82.push2 + http 降级）为适配器公共模式。
+
+### 13.3 类别与可观测性
+
+- `Category` 枚举新增：`index_quote` / `index_bar` / `sector_flow`；`source_health`
+  与 `ingest_items` 直接复用（§12），DATA-01 采集面板类别驱动自动覆盖。
+- 采集条目 `target_ref` 口径：`index:{code}`（单指数）/ `index:batch`（整批快照）/
+  `sector:{kind}`；`data_ref`：`index-quotes:{date}` / `index-bars:{code}:{from}-{to}` /
+  `sector-flows:{kind}:{date}`。
+- `quality_status` 六态照用（§7）。
+
+### 13.4 新鲜度阈值（研究级，宽于盘中行情）
+
+| 数据 | 阈值常量 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| 指数快照 | `INDEX_QUOTE_FRESHNESS_THRESHOLD` | 900 秒 | 盘中 5 分钟采样，容一轮失败 |
+| 板块资金流 | `SECTOR_FLOW_FRESHNESS_THRESHOLD` | 3600 秒 | 盘中 30 分钟采样 |
+| 指数日 K | `DAILY_COMPLETE`（同 §5 表） | 最近已结束交易日 | — |
+| 外围指数 | 按当地交易日历判定 market_time | — | 美股时段随冬/夏令时漂移，用 TZ 数据库算，不硬编码时差 |
+
+### 13.5 调度（APScheduler 只入队不变）
+
+| JobType | cron | 内容 |
+| --- | --- | --- |
+| `market_env_intraday` | 交易日 09:15–15:00 每 5 分钟 | 指数快照 + 板块资金流（执行器查 `trading_calendar` 过滤非交易日） |
+| `market_env_eod` | 15:25 | 指数日 K + 板块终态快照 |
+| `overseas_morning` | 08:10 | 隔夜美股（含盘前/盘后）+ 亚市指数 + 美股期货 |
+
+日请求量约 70–100 次（研究型频率，防风控优先，见 ADR-0014 备选方案 D 的放弃理由）。
+
+### 13.6 边界与开放点（v1 不做 / 待实测）
+
+- **批次 A 线上实录事实（2026-11-16，开发机）**：腾讯 `qt.gtimg.cn` 与新浪
+  `hq.sinajs.cn` 直连可实录（cassette 为真实响应）；东财 `push2his` 可用但**风控为
+  分钟级滚动**（同会话先成功后被重置）；`push2*/clist` 在开发机网络全域名连接层重置
+  （HTTP 000，含 http/数字镜像）——板块资金流适配器按 niuone 生产格式钉住，
+  **VPS 线上验证为遗留项**。
+- 美股「盘前/盘后」字段口径：实现期先录 cassette 实测东财/腾讯美股响应字段（盘前价/
+  盘前涨跌幅/盘后价），确认后再定 `RawIndexQuote` 字段映射；呈现按「指数期货（盘前
+  参考）+ 指数收盘与盘后」双轨，不承诺个股级盘前盘后。
+- **双轨实测结论（2026-11-16，批次 B）**：① 东财 push2 美股指数 `f276/f277`（盘前/
+  盘后位）对指数恒为 `"-"`——指数无盘前盘后撮合，字段保留但不采信；② 新浪 `hf_ES/
+  hf_NQ/hf_YM` 美股指数期货可用（cassette `sina_futures_ok.json` 实录，涨跌幅以
+  最新/昨结自算）——**盘前参考以期货为准**，注册表新增 `futures_us` 组三项；
+  「盘后」= 收盘后指数快照本身（overseas_morning 任务隔夜采集）。
+- 不做：板块成分股映射、指数分钟线量能 profile（晨报需要「量能对比昨日」时作端口扩展）、
+  双源并发比对写 `data_conflicts`（留扩展）。
+- 契约测试沿用 §9 方法（cassette 三场景：happy / schema 突变→`PARSE_FAILED` / 降级路径）。
+

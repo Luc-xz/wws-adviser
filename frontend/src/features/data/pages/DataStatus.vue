@@ -123,6 +123,9 @@ const CATEGORY_NAMES: Record<string, string> = {
   calendar: "交易日历",
   document: "公告",
   news: "新闻",
+  index_quote: "指数快照",
+  index_bar: "指数日K",
+  sector_flow: "板块资金流",
 };
 
 const JOB_TYPE_NAMES: Record<string, string> = {
@@ -133,6 +136,9 @@ const JOB_TYPE_NAMES: Record<string, string> = {
   advice_review: "建议评价",
   ingest_manual: "手动补采",
   backup: "备份",
+  market_env_intraday: "市场环境采集（盘中）",
+  market_env_eod: "市场环境采集（日终）",
+  overseas_morning: "外围市场采集（晨间）",
 };
 
 const JOB_STATUS_NAMES: Record<string, string> = {

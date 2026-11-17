@@ -98,6 +98,7 @@
 | `n_eff` 门禁 | <30 拒绝；30≤n<100 半折扣 | 4_ANALYTICS_AND_RISK |
 | 部署形态 | **云端 VPS**（单容器，原 NAS+Tailscale） | 8_SECURITY_AND_DEPLOYMENT |
 | 反向代理 / HTTPS | **Nginx** + 证书（原待定） | 8_SECURITY_AND_DEPLOYMENT |
+| 市场环境数据域 | 指数/板块资金流/外围市场独立建域（**不进标的范围**），公开接口多源直连（腾讯/东财/新浪），研究上下文不参与建议计算 | [ADR-0014](../adr/0014-market-environment-data-domain.md) / 5_DATA §13 |
 | 登录方案 | 密码 → P1 加 Passkey | 8 |
 | 数据保留 | 交易/报告永久；intraday parquet 90 天可配；日志 30 天 | 2 |
 | CSS 方案 | UnoCSS | 7_FRONTEND_AND_PWA |

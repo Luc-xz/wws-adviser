@@ -40,6 +40,7 @@ def db_session(tmp_path):
     from wws_adviser.modules.instruments import models as _instruments_models  # noqa: F401
     from wws_adviser.modules.jobs import models as _jobs_models  # noqa: F401
     from wws_adviser.modules.market_data import models as _market_data_models  # noqa: F401
+    from wws_adviser.modules.market_env import models as _market_env_models  # noqa: F401
     from wws_adviser.modules.model_gateway import models as _model_gateway_models  # noqa: F401
     from wws_adviser.modules.notifications import models as _notifications_models  # noqa: F401
     from wws_adviser.modules.portfolio import models as _portfolio_models  # noqa: F401
@@ -82,6 +83,7 @@ def migrated_client(tmp_path) -> Iterator[TestClient]:
     from wws_adviser.modules.instruments import models as _i  # noqa: F401
     from wws_adviser.modules.jobs import models as _j  # noqa: F401
     from wws_adviser.modules.market_data import models as _md  # noqa: F401
+    from wws_adviser.modules.market_env import models as _me  # noqa: F401
     from wws_adviser.modules.model_gateway import models as _mg  # noqa: F401
     from wws_adviser.modules.notifications import models as _nt  # noqa: F401
     from wws_adviser.modules.portfolio import models as _p  # noqa: F401

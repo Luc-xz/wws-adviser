@@ -118,9 +118,13 @@ def build_research_context(
     current_price: Decimal | None,
     depth: str,
     time_span: str | None,
+    market_env: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """证据 + 确定性数据 → 模型上下文（不包含用户持仓等私有数据）。"""
-    return {
+    """证据 + 确定性数据 → 模型上下文（不包含用户持仓等私有数据）。
+
+    market_env（ADR-0014）：市场环境研究上下文（指数/板块/外围/期货摘要），可选注入。
+    """
+    ctx: dict[str, Any] = {
         "report_kind": report_kind,
         "subject": subject,
         "depth": depth,
@@ -159,6 +163,9 @@ def build_research_context(
             ],
         },
     }
+    if market_env is not None:
+        ctx["market_env"] = market_env
+    return ctx
 
 
 # —— 模型输出 → 报告段落 ——
@@ -423,10 +430,17 @@ async def _run_research(
     research_service.update_progress(db, task, 40)
 
     # 3) 模型生成（model_gateway：白名单校验 + 受控修复 + 审计）
+    # 市场环境研究上下文（ADR-0014 决策 5）：有数据才注入，缺数据不阻塞研究
+    from wws_adviser.modules.market_env import service as market_env_service
+
+    try:
+        env_ctx = market_env_service.build_report_section(db)
+    except Exception:  # noqa: BLE001 — 市场环境不可用不影响研究主链路
+        env_ctx = None
     context = build_research_context(
         report_kind=report_kind, subject=subject_name, plan=plan, evidence=evidence,
         metric_rows=metric_rows, current_price=inputs.current_price,
-        depth=task.depth, time_span=task.time_span,
+        depth=task.depth, time_span=task.time_span, market_env=env_ctx,
     )
     research_service.update_progress(db, task, 60)
     task_type = (
