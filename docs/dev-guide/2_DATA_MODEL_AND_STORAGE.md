@@ -1,6 +1,6 @@
 # 2. 领域模型与数据库 / 存储设计
 
-> 关联：技术架构 §7 §9 · PRD §11 | 索引：[0_DEVELOPMENT_GUIDE_INDEX.md](./0_DEVELOPMENT_GUIDE_INDEX.md)
+> 2026-11-16 增补 §6.8 market_env 表骨架（ADR-0014） | 关联：技术架构 §7 §9 · PRD §11 · [ADR-0014](../adr/0014-market-environment-data-domain.md) | 索引：[0_DEVELOPMENT_GUIDE_INDEX.md](./0_DEVELOPMENT_GUIDE_INDEX.md)
 
 ## 1. 目的
 
@@ -215,6 +215,36 @@ data_conflicts(id PK, instrument_id FK, field, source_a, source_b, value_a, valu
 - `audit_events` 敏感值存**摘要/脱敏差异**，不存明文。
 - `runtime_stats` 用于状态页（任务成功率、源新鲜度、模型费用等）。
 
+### 6.8 market_env（市场环境数据域，ADR-0014 / [5_DATA §13](./5_DATA_INGESTION_AND_QUALITY.md)）
+
+> 研究上下文数据域：指数/板块**不注册**为 instruments（投资标的注册表），不进
+> portfolio/建议链路；与持仓域物理隔离。指数/板块点位与比例按 §5 精度规则存字符串。
+
+```text
+market_env_indices(code PK, name, market_group, symbol_map_json, has_pre_post, ...)
+  -- code 为规范代码（如 cn_sh000001 / us_dji / jp_n225 / hk_hsi / fut_es）
+  -- market_group: cn_broad | cn_style | overseas_us | overseas_ap | futures_us（美股指数期货，盘前参考）
+  -- symbol_map_json: 各源 symbol 映射 {tencent, sina, eastmoney}
+index_quotes(id PK, index_code FK, market_time, fetched_at, price, change_pct,
+             volume, amount, pre_market_price, pre_market_change_pct,
+             post_market_price, post_market_change_pct, source,
+             source_delay_class, quality_status, ...)
+  UNIQUE(index_code, market_time, source)   INDEX(index_code, market_time DESC)
+index_bars(id PK, index_code FK, business_date, open, high, low, close, volume,
+           amount, source, quality_status, content_hash, ...)
+  UNIQUE(index_code, business_date, source)   INDEX(index_code, business_date DESC)
+sector_boards(board_code PK, name, kind, updated_at, ...)
+  -- kind: industry | concept；每次采集 upsert（东财板块代码漂移由本表吸收）
+sector_flow_snapshots(id PK, board_code FK, kind, snapshot_at, change_pct,
+                      turnover, net_main_inflow, leader_code, leader_name,
+                      source, quality_status, ...)
+  UNIQUE(board_code, snapshot_at, kind)   INDEX(kind, snapshot_at DESC)
+```
+
+- 两市成交量不单独建表：由 `index_quotes.amount`（上证综指 + 深证综指）读取侧汇总。
+- `index_quotes` 盘中快照保留 90 天（对齐 §12 盘中细粒度口径）；`index_bars` 长期保留
+  （量小，SQLite 直存即可，不引 Parquet——量级 ~20 指数 × 交易日，见 §12 注）。
+
 ## 7. 索引设计原则
 
 - 高频查询路径必须有索引：`business_date DESC`、`(account_id, business_date)`、`status+lease`（任务领取）。
@@ -294,6 +324,8 @@ data/locks/scheduler.lock            # 单调度实例
 - 交易、持仓快照、建议、报告元数据、审计：长期保留，除非用户显式清理。
 - 日线/净值：长期保留。
 - 盘中细粒度（intraday parquet）：默认保留 90 天，可配置；清理任务记审计。
+- 市场环境（§6.8）：`index_quotes`/`sector_flow_snapshots` 盘中快照默认保留 90 天
+  （随 data_maintenance 清理）；`index_bars` 长期保留。
 - 日志：默认 30 天轮转。
 - 新闻正文：按容量与授权清理，**元数据与引用哈希保留**（保证 evidence 可定位）。
 

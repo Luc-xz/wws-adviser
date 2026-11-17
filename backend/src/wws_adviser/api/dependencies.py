@@ -16,6 +16,11 @@ from wws_adviser.modules.identity.domain import AuthenticationError
 from wws_adviser.modules.identity.models import User
 from wws_adviser.ports.document_source import DocumentProvider
 from wws_adviser.ports.market_data import BarProvider, NAVProvider, QuoteProvider
+from wws_adviser.ports.market_env import (
+    IndexBarProvider,
+    IndexQuoteProvider,
+    SectorFlowProvider,
+)
 from wws_adviser.ports.object_store import ObjectStore
 
 
@@ -59,3 +64,15 @@ def get_document_provider(request: Request) -> DocumentProvider:
 
 def get_object_store(request: Request) -> ObjectStore:
     return cast(ObjectStore, request.app.state.object_store)
+
+
+def get_index_quote_provider(request: Request) -> IndexQuoteProvider:
+    return cast(IndexQuoteProvider, request.app.state.index_quote_provider)
+
+
+def get_index_bar_provider(request: Request) -> IndexBarProvider:
+    return cast(IndexBarProvider, request.app.state.index_bar_provider)
+
+
+def get_sector_flow_provider(request: Request) -> SectorFlowProvider:
+    return cast(SectorFlowProvider, request.app.state.sector_flow_provider)

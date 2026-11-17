@@ -15,6 +15,7 @@ from wws_adviser.core.time import now_utc_iso
 from wws_adviser.modules.collections.models import IngestItem, SourceHealth
 from wws_adviser.modules.documents.models import Document
 from wws_adviser.modules.market_data.models import MarketRecord, NavRecord, TradingCalendar
+from wws_adviser.modules.market_env.models import IndexBar, IndexQuote, SectorFlowSnapshot
 
 _ERROR_MESSAGE_MAX = 200
 
@@ -169,6 +170,21 @@ def dataset_coverage(db: DBSession) -> dict[str, dict[str, object]]:
     doc_7d = db.scalar(
         select(func.count()).select_from(Document).where(Document.created_at >= week_ago_ts)
     )
+    # 市场环境三类别（ADR-0014 / 5_DATA §12.3 同口径：最新业务时间 + 近 7 天行数）
+    iq_latest = db.scalar(select(func.max(IndexQuote.market_time)))
+    iq_7d = db.scalar(
+        select(func.count()).select_from(IndexQuote).where(IndexQuote.market_time >= week_ago_ts)
+    )
+    ibar_latest = db.scalar(select(func.max(IndexBar.business_date)))
+    ibar_7d = db.scalar(
+        select(func.count()).select_from(IndexBar).where(IndexBar.business_date >= week_ago_date)
+    )
+    sf_latest = db.scalar(select(func.max(SectorFlowSnapshot.snapshot_at)))
+    sf_7d = db.scalar(
+        select(func.count())
+        .select_from(SectorFlowSnapshot)
+        .where(SectorFlowSnapshot.snapshot_at >= week_ago_ts)
+    )
     return {
         "bar": {"latest_business_date": bar_latest, "rows_7d": int(bar_7d or 0)},
         "nav": {"latest_business_date": nav_latest, "rows_7d": int(nav_7d or 0)},
@@ -178,6 +194,9 @@ def dataset_coverage(db: DBSession) -> dict[str, dict[str, object]]:
             "latest_published_at": doc_latest_published,
             "rows_7d": int(doc_7d or 0),
         },
+        "index_quote": {"latest_business_date": iq_latest, "rows_7d": int(iq_7d or 0)},
+        "index_bar": {"latest_business_date": ibar_latest, "rows_7d": int(ibar_7d or 0)},
+        "sector_flow": {"latest_business_date": sf_latest, "rows_7d": int(sf_7d or 0)},
     }
 
 

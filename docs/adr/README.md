@@ -42,6 +42,7 @@
 | [0011](./0011-ports-and-stubs-defaults.md) | Ports / Stub 适配器实现默认决策 | Accepted | [5_DATA §2/§9](../dev-guide/5_DATA_INGESTION_AND_QUALITY.md) · [6_MODEL §3](../dev-guide/6_MODEL_AND_REPORT_PIPELINE.md) · 技术架构 §7.5/§8.1 · [1_REPO §6](../dev-guide/1_REPO_STRUCTURE.md) | 本文 |
 | [0012](./0012-frontend-pwa-defaults.md) | Frontend / PWA 工程默认决策 | Accepted | [7_FRONTEND](../dev-guide/7_FRONTEND_AND_PWA.md) · [ENFORCEMENT_CONTRACT](../design-review/ENFORCEMENT_CONTRACT.md) · UI §5/§7/§10.1 · 技术架构 §14 | 本文 |
 | [0013](./0013-cloudflare-tunnel-exposure.md) | 公网暴露采用 Cloudflare Tunnel（替代原定 Nginx + 443） | Accepted | [8_SECURITY §11](../dev-guide/8_SECURITY_AND_DEPLOYMENT.md) · [10_MILESTONE §7](../dev-guide/10_MILESTONE_PLAN.md) | 本文 |
+| [0014](./0014-market-environment-data-domain.md) | 市场环境数据域（指数/板块资金流/外围市场）独立建域 + 公开接口多源直连 | Accepted | [5_DATA §13](../dev-guide/5_DATA_INGESTION_AND_QUALITY.md) · [2_DATA §6.8](../dev-guide/2_DATA_MODEL_AND_STORAGE.md) · [3_API §3.18](../dev-guide/3_API_CONTRACT.md) | 本文 |
 
 ## 4. 维护约定
 

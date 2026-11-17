@@ -29,6 +29,12 @@ class Settings(BaseModel):
     # 波2 行情采集运行配置（5_DATA_INGESTION_AND_QUALITY.md §5/§13）
     market_data_source: str = "stub"  # stub | akshare（akshare 需装 optional extra）
     document_source: str = "stub"  # stub | akshare（公告/新闻，同 market_data 选源模式）
+    # 市场环境数据域选源（ADR-0014 / 5_DATA §13.1）：直连 = 腾讯+新浪（快照）/东财（日K+板块）
+    market_env_index_source: str = "stub"  # stub | direct
+    market_env_sector_source: str = "stub"  # stub | direct
+    # 市场环境新鲜度阈值（研究级，5_DATA §13.4；仅作展示判定，不触发 PAUSE_ADVICE）
+    index_quote_freshness_threshold_seconds: int = 900
+    sector_flow_freshness_threshold_seconds: int = 3600
     # 波4 风险硬上限默认（PRD FR-ANL-002；/settings/risk 持久化 + PATCH 留后续小波次）
     risk_single_cap: float = 0.30  # 单标的最大仓位
     risk_industry_cap: float = 0.40  # 单行业最大仓位
@@ -147,6 +153,14 @@ def load_settings(
         job_max_attempts=int(os.environ.get("WWSE_JOB_MAX_ATTEMPTS", "3")),
         market_data_source=os.environ.get("WWSE_MARKET_DATA_SOURCE", "stub"),
         document_source=os.environ.get("WWSE_DOCUMENT_SOURCE", "stub"),
+        market_env_index_source=os.environ.get("WWSE_MARKET_ENV_INDEX_SOURCE", "stub"),
+        market_env_sector_source=os.environ.get("WWSE_MARKET_ENV_SECTOR_SOURCE", "stub"),
+        index_quote_freshness_threshold_seconds=int(
+            os.environ.get("WWSE_INDEX_QUOTE_FRESHNESS_SEC", "900")
+        ),
+        sector_flow_freshness_threshold_seconds=int(
+            os.environ.get("WWSE_SECTOR_FLOW_FRESHNESS_SEC", "3600")
+        ),
         risk_single_cap=float(os.environ.get("WWSE_RISK_SINGLE_CAP", "0.30")),
         risk_industry_cap=float(os.environ.get("WWSE_RISK_INDUSTRY_CAP", "0.40")),
         risk_cash_floor=float(os.environ.get("WWSE_RISK_CASH_FLOOR", "0.10")),

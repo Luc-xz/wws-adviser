@@ -43,6 +43,13 @@ def _build_document_provider(settings: Settings) -> object:
     return StubDocumentProvider(env=settings.env)
 
 
+def _build_market_env_providers(settings: Settings) -> tuple[object, object, object]:
+    """市场环境选源（ADR-0014 / 5_DATA §13.1）：direct 或 stub（工厂在 infrastructure）。"""
+    from wws_adviser.infrastructure.market_env import build_market_env_providers
+
+    return build_market_env_providers(settings)
+
+
 def _build_model_port(settings: Settings) -> object:
     """模型选源：openai-compatible（httpx，凭据经 env 引用）或 stub。"""
     if settings.model_source == "openai" and settings.model_base_url:
@@ -199,6 +206,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.bar_provider = StubBarProvider(env=settings.env)
         app.state.nav_provider = StubNAVProvider(env=settings.env)
     app.state.document_provider = _build_document_provider(settings)
+    (
+        app.state.index_quote_provider,
+        app.state.index_bar_provider,
+        app.state.sector_flow_provider,
+    ) = _build_market_env_providers(settings)
     app.state.model_port = _build_model_port(settings)
     app.state.notifier = _build_notifier(settings)
     app.state.object_store = LocalObjectStore(settings.data_dir)

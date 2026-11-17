@@ -175,6 +175,10 @@ async def generate_report(
     attribution = analytics_service.attribution(db, user_id)
     # 行为偏差分析（Phase 2 波5 口径；只陈述模式不道德化，FR 第 6 节复盘）
     bias_findings = _behavioral_bias(db, user_id, settings)
+    # 市场环境段（ADR-0014 决策 5：研究上下文，缺数据不占段、不加降级标记）
+    from wws_adviser.modules.market_env import service as market_env_service
+
+    env_section = market_env_service.build_report_section(db)
 
     # —— 降级判定（AC-02/AC-04）——
     flags: list[str] = []
@@ -218,6 +222,7 @@ async def generate_report(
                 for p in held
             ],
             snapshot_refs={"trade_cutoff_at": snap.trade_cutoff_at, "frozen_at": snap.frozen_at},
+            market_env=env_section,
         )
         det_summary = {
             "pnl_total": _dec(summary.pnl_total),
@@ -311,6 +316,8 @@ async def generate_report(
             "cash": _dec(attribution.cash),
         },
     }
+    if env_section is not None:
+        report_json["market_env"] = env_section
     if model_section is not None:
         report_json["model"] = model_section
     if bias_findings:

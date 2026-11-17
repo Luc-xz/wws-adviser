@@ -26,6 +26,13 @@ _logger = logging.getLogger(__name__)
 
 _REPORT_JOBS = {JobType.PRE_MARKET.value, JobType.POST_MARKET.value}
 
+# 市场环境数据域三任务（ADR-0014 / 5_DATA §13.5）
+_MARKET_ENV_JOBS = {
+    JobType.MARKET_ENV_INTRADAY.value,
+    JobType.MARKET_ENV_EOD.value,
+    JobType.OVERSEAS_MORNING.value,
+}
+
 
 def _user_id_for_job(db: DBSession) -> str:
     """MVP 单用户：取第一个用户（多用户随后续波次按 scope_key 路由）。"""
@@ -73,6 +80,14 @@ async def run_due_jobs(
         if job is None:
             break
         executed += 1
+        if job.job_type in _MARKET_ENV_JOBS:
+            try:
+                result_ref = await _run_market_env_job(db, settings, job)
+                jobs_service.complete(db, job.id, result_ref=result_ref)
+            except Exception as exc:  # noqa: BLE001 — 执行器边界：失败记 error_code
+                _logger.warning("市场环境任务失败 job=%s: %s", job.id, exc)
+                jobs_service.fail(db, job.id, error_code=type(exc).__name__)
+            continue
         if job.job_type not in _REPORT_JOBS:
             if job.job_type == JobType.ADVICE_REVIEW.value:
                 try:
@@ -157,6 +172,74 @@ def _run_calibration_scan(db: DBSession, settings: Settings) -> dict[str, object
     from wws_adviser.modules.analytics import calibration_service
 
     return calibration_service.run_calibration_scan(db, settings)
+
+
+async def _run_market_env_job(db: DBSession, settings: Settings, job: JobRun) -> str:
+    """市场环境任务体（ADR-0014 / 5_DATA §13.5）：非交易日跳过，三任务共 provider 工厂。
+
+    - intraday：指数快照 + 行业/概念资金流（每 5 分钟）
+    - eod：指数快照 + CN 指数日 K（30 天滚动窗口，UNIQUE 幂等重采安全）
+    - overseas：指数快照（隔夜美股 + 亚市 + 美股期货盘前参考）
+    """
+    from datetime import date as _date
+    from datetime import timedelta as _td
+
+    from wws_adviser.core.time import business_date as _bd
+    from wws_adviser.infrastructure.market_env import build_market_env_providers
+    from wws_adviser.modules.market_data import repository as md_repository
+    from wws_adviser.modules.market_data.domain import weekday_trading_fallback
+    from wws_adviser.modules.market_env import service as env_service
+    from wws_adviser.modules.market_env.domain import INDEX_REGISTRY
+    from wws_adviser.ports.market_env import SectorKind
+
+    # 非交易日过滤（有日历记录以记录为准，weekday 兜底——同 generate_report 口径）
+    cal = md_repository.get_calendar(db, job.business_date)
+    trading = (
+        cal.is_trading_day
+        if cal is not None
+        else weekday_trading_fallback(_date.fromisoformat(job.business_date))
+    )
+    if not trading:
+        return f"skipped://non_trading_day:{job.business_date}"
+
+    quote_provider, bar_provider, sector_provider = build_market_env_providers(settings)
+    if job.job_type == JobType.OVERSEAS_MORNING.value:
+        r = await env_service.ingest_index_quotes(
+            db, provider=quote_provider, run_id=job.id
+        )
+        return f"env://quotes/{r.ingested}"
+
+    if job.job_type == JobType.MARKET_ENV_EOD.value:
+        qr = await env_service.ingest_index_quotes(
+            db, provider=quote_provider, run_id=job.id
+        )
+        end = _bd()
+        start = end - _td(days=30)
+        bars_ok = bars_fail = 0
+        for ref in INDEX_REGISTRY:
+            if not ref.market_group.startswith("cn_"):
+                continue  # 指数日 K v1 仅 CN（ADR-0014）
+            try:
+                br = await env_service.ingest_index_bars(
+                    db, provider=bar_provider, code=ref.code,
+                    start=start, end=end, run_id=job.id,
+                )
+                bars_ok += 1 if br.ingested else 0
+                bars_fail += 0 if br.ingested else 1
+            except Exception as exc:  # noqa: BLE001 — 单指数失败不中断批次
+                _logger.warning("指数日K失败 %s: %s", ref.code, exc)
+                bars_fail += 1
+        return f"env://quotes/{qr.ingested}/bars/{bars_ok}ok/{bars_fail}fail"
+
+    # MARKET_ENV_INTRADAY
+    qr = await env_service.ingest_index_quotes(db, provider=quote_provider, run_id=job.id)
+    ir = await env_service.ingest_sector_flows(
+        db, provider=sector_provider, kind=SectorKind.INDUSTRY, run_id=job.id
+    )
+    cr = await env_service.ingest_sector_flows(
+        db, provider=sector_provider, kind=SectorKind.CONCEPT, run_id=job.id
+    )
+    return f"env://q/{qr.ingested}/i/{ir.ingested}/c/{cr.ingested}"
 
 async def _run_data_maintenance(
     db: DBSession, settings: Settings, *, run_id: str | None = None

@@ -64,6 +64,9 @@ const JOB_TYPE_NAMES: Record<string, string> = {
   advice_review: "建议评价",
   ingest_manual: "手动补采",
   backup: "备份",
+  market_env_intraday: "市场环境采集（盘中）",
+  market_env_eod: "市场环境采集（日终）",
+  overseas_morning: "外围市场采集（晨间）",
 };
 </script>
 

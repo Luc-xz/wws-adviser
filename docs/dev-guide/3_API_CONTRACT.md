@@ -1,6 +1,6 @@
 # 3. API 契约设计
 
-> 关联：技术架构 §13 · PRD §8 | 索引：[0_DEVELOPMENT_GUIDE_INDEX.md](./0_DEVELOPMENT_GUIDE_INDEX.md)
+> 2026-11-16 增补 §3.18 market-env 端点组（ADR-0014） | 关联：技术架构 §13 · PRD §8 · [ADR-0014](../adr/0014-market-environment-data-domain.md) | 索引：[0_DEVELOPMENT_GUIDE_INDEX.md](./0_DEVELOPMENT_GUIDE_INDEX.md)
 
 ## 1. 目的
 
@@ -172,8 +172,21 @@
 
 | 方法 路径 | 用途 |
 | --- | --- |
-| `GET /collections/health` | 六类别源健康（`ok/degraded/unavailable/no_data` + 最近成功/连续失败/最近错误，5_DATA §12.1）+ 各数据集最新业务日期与近 7 天行数；DATA-01「采集运行」与 SET-02 共用 |
+| `GET /collections/health` | 九类别源健康（quote/bar/nav/calendar/document/news + index_quote/index_bar/sector_flow，`ok/degraded/unavailable/no_data` + 最近成功/连续失败/最近错误，5_DATA §12.1/§13.3）+ 各数据集最新业务日期与近 7 天行数；DATA-01「采集运行」与 SET-02 共用 |
 | `GET /collections/items` | 跨批次采集条目检索：`category/status/date_from/date_to/q`（display_name 模糊）；游标分页，`created_at DESC, id DESC` |
+
+### 3.18 market-env（市场环境，ADR-0014 / 5_DATA §13，需登录）
+
+研究上下文数据：不参与凯利/建议计算；数据缺失/陈旧如实体现在 `freshness` 与空集合，
+不触发 PAUSE_ADVICE / 降级错误语义（ADR-0014 决策 5）。美股期货（盘前参考）已落地：
+新浪 `hf_ES/hf_NQ/hf_YM` 实测（2026-11-16，5_DATA §13.6）。
+
+| 方法 路径 | 用途 | 关键字段 |
+| --- | --- | --- |
+| `GET /market-env/overview` | 晨报「市场环境」段一次聚合 | `cn_indices[]（code,name,price,change_pct,amount）`、`market_turnover（两市合计）`、`active_sectors[]（涨幅榜 Top5）`、`net_inflow_top[] / net_outflow_top[]（各 Top5）`、`overseas[]（us/jp/kr/hk 指数）`、`futures[]（美股期货，group=futures_us）`、`freshness（cn_quote/sector_flow 的 age_seconds + fresh）` |
+| `GET /market-env/indices` | 指数列表 + 最新快照（`group` 过滤） | 同 overview 单项结构 |
+| `GET /market-env/indices/:code/bars` | 指数日 K（v1 仅 CN 指数） | query: `start,end`（YYYY-MM-DD） |
+| `GET /market-env/sectors/flows` | 板块资金流榜单（最新一轮） | query: `kind=industry\|concept,top`；`board_code,board_name,change_pct,turnover,net_main_inflow,leader_name,snapshot_at`（多日 window 聚合留后续） |
 
 ## 4. 分页与游标规范
 

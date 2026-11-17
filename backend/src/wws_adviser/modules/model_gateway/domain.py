@@ -190,9 +190,14 @@ def build_masked_context(
     risk: list[dict[str, str | None]],
     positions: list[dict[str, str | None]],
     snapshot_refs: dict[str, Any],
+    market_env: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """确定性结果 → 模型上下文。含比例/盈亏方向与风险条目，不含现金绝对金额。"""
-    return {
+    """确定性结果 → 模型上下文。含比例/盈亏方向与风险条目，不含现金绝对金额。
+
+    market_env（ADR-0014）：市场环境研究上下文（指数/板块/外围/期货摘要），
+    可选注入；仅作叙述背景，不改变任何确定性结论。
+    """
+    ctx: dict[str, Any] = {
         "report_type": report_type,
         "business_date": business_date,
         "portfolio": {
@@ -214,6 +219,9 @@ def build_masked_context(
             "frozen_at": snapshot_refs.get("frozen_at"),
         },
     }
+    if market_env is not None:
+        ctx["market_env"] = market_env
+    return ctx
 
 
 # —— 后置校验（确定性防线，模型输出永不覆盖确定性字段）——

@@ -21,6 +21,10 @@ class JobType(StrEnum):
     CALIBRATION_SCAN = "calibration_scan"
     ADVICE_REVIEW = "advice_review"
     INGEST_MANUAL = "ingest_manual"  # 手动补采批次（refresh 端点同步执行，5_DATA §12.2）
+    # 市场环境数据域（ADR-0014 / 5_DATA §13.5）
+    MARKET_ENV_INTRADAY = "market_env_intraday"  # 交易日 09:00-15:00 每 5 分钟（scope_key=HH:MM）
+    MARKET_ENV_EOD = "market_env_eod"  # 15:25 指数日K + 板块终态
+    OVERSEAS_MORNING = "overseas_morning"  # 08:10 隔夜外围 + 美股期货（盘前参考）
     STUB = "stub"
 
 

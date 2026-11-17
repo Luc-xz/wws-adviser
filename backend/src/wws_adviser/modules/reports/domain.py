@@ -40,6 +40,15 @@ def can_transition(src: ReportStatus, dst: ReportStatus) -> bool:
     return dst in _TRANSITIONS.get(src, frozenset())
 
 
+def _yi(v: Any) -> str:
+    """元 → 亿元字符串（渲染层格式化；空/非数值原样返回）。"""
+    try:
+        d = float(str(v))
+    except (TypeError, ValueError):
+        return str(v) if v is not None else "-"
+    return f"{d / 1e8:.2f}亿"
+
+
 def render_markdown(report: dict[str, Any]) -> str:
     """report.json → report.md（确定性纯渲染，无模板引擎）。"""
     head = report.get("header", {})
@@ -67,6 +76,44 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines.append(f"- 累计盈亏: {summary.get('pnl_total')}")
     if summary.get("note"):
         lines.append(f"- 备注: {summary.get('note')}")
+
+    env = report.get("market_env")
+    if env:
+        lines.append("")
+        lines.append("## 市场环境")
+        if env.get("market_turnover"):
+            lines.append(f"- 两市成交额: {_yi(env['market_turnover'])}")
+        cn = env.get("cn_indices") or []
+        if cn:
+            idx = " · ".join(f"{i.get('name')} {i.get('change_pct')}%" for i in cn[:5])
+            lines.append(f"- A股指数: {idx}（截至 {cn[0].get('market_time')}）")
+        if env.get("active_sectors"):
+            act = " / ".join(
+                f"{s.get('board_name')} {s.get('change_pct')}%" for s in env["active_sectors"]
+            )
+            lines.append(f"- 活跃板块: {act}")
+        if env.get("net_inflow_top"):
+            inf = " / ".join(
+                f"{s.get('board_name')} {_yi(s.get('net_main_inflow'))}"
+                for s in env["net_inflow_top"]
+            )
+            lines.append(f"- 主力净流入: {inf}")
+        if env.get("net_outflow_top"):
+            out = " / ".join(
+                f"{s.get('board_name')} {_yi(s.get('net_main_inflow'))}"
+                for s in env["net_outflow_top"]
+            )
+            lines.append(f"- 主力净流出: {out}")
+        if env.get("overseas"):
+            ovs = " · ".join(
+                f"{o.get('name')} {o.get('change_pct')}%" for o in env["overseas"]
+            )
+            lines.append(f"- 外围市场: {ovs}")
+        if env.get("futures"):
+            fts = " · ".join(
+                f"{f.get('name')} {f.get('change_pct')}%" for f in env["futures"]
+            )
+            lines.append(f"- 美股期货(盘前参考): {fts}")
 
     positions = report.get("positions", [])
     if positions:

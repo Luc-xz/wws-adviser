@@ -311,3 +311,32 @@ HTTPStatusError（供应商侧：配额/endpoint/密钥之一），**待诊断�
 **遗留（按优先级）**：① 模型段修复（P0，供应商侧诊断后换 endpoint/调参/切模型）；
 ② §6-Q1 信号覆盖决策（复盘覆盖率解挂依赖它）；③ 真机残项 4 件（装机/Passkey/推送
 送达/360px 真机导航复核）；④ 建议评价回灌等「首条可操作建议」依赖项随 Q1 一并解挂。
+
+### 8.7 市场环境数据域批次（2026-11-16 立项；批次 A/B 同日交付）
+
+> 动机：用户提出整体市场环境研究——A 股大盘指数、活跃板块、板块主力净流入/流出、
+> 两市成交量，及外围市场（美股指数含盘前/盘后、日韩港股）。数据能力参照 niuone
+> 项目已验证端点吸收。决策快照见 [ADR-0014](../adr/0014-market-environment-data-domain.md)（Accepted）。
+
+- **批次 A（数据域落地，2026-11-16 交付）**：ADR-0014 + 5_DATA §13 / 2_DATA §6.8 /
+  3_API §3.18 增补；`ports/market_env` 三端口 + stub；五表迁移（0017）；直连适配器
+  ×4（腾讯指数快照+新浪兜底/东财指数日K+腾讯兜底/东财板块资金流多域名轮换）+ 契约
+  cassette ×4（三源线上实录 + 板块按 niuone 格式钉住，VPS 线上验证为遗留项）；
+  `modules/market_env` service 接入 `source_health`/`ingest_items`（Category 扩
+  `index_quote`/`index_bar`/`sector_flow`，DATA-01 类别驱动自动覆盖）。
+- **批次 B（调度与消费端，2026-11-16 交付）**：JobType ×3 + cron 入队（盘中每 5 分钟
+  scope_key=HH:MM 时间槽防幂等冲突 / 15:25 日K / 08:10 外围）+ 执行器 handler（非交易
+  日过滤，skipped 口径）；`GET /market-env/*` 四端点（overview/indices/bars/flows，
+  OpenAPI + 前端类型再生成）；晨报 `market_env` 段 + markdown 渲染 + 模型 masked
+  context 注入 + 研究上下文钩子；**美股期货盘前参考落地**（新浪 hf_ES/NQ/YM 实测，
+  注册表 `futures_us` 组，cassette `sina_futures_ok.json`）；东财指数盘前盘后字段
+  实测为空（以期货为盘前参考的双轨定案，5_DATA §13.6）。门禁：lint/mypy/513 测试。
+- **批次 B（调度与消费端，另立）**：`market_env_intraday`/`market_env_eod`/
+  `overseas_morning` 三 cron 入队；`GET /market-env/*` 查询面（overview 聚合）；
+  晨报「市场环境」段 + 研究模块上下文注入；DATA-01 类别自动覆盖确认；如新增独立
+  页面则基准卡先于代码（AGENTS §1.1）。
+- **门禁**：`make lint && make test && make migrate-check`；每适配器 cassette 三场景
+  （happy/schema 突变→PARSE_FAILED/降级）；手动破坏性验证（断主源→兜底接管 +
+  source_health 降级可见；非交易日→intraday 入队但执行器跳过）。
+- **边界（不随本批交付）**：板块成分股映射、指数分钟量能 profile、双源并发比对、
+  美股个股级盘前盘后（5_DATA §13.6 开放点——盘前/盘后字段口径以 cassette 实测为准）。
